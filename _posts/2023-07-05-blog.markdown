@@ -1,0 +1,7 @@
+---
+layout: post
+title: CSS 연습 링크
+date:   2023-07-05 21:05:49
+categories: 
+---
+https://codesandbox.io/p/sandbox/html-cssgico-rur0eq?file=%2Findex.html
