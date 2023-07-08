@@ -1,0 +1,42 @@
+---
+layout: post
+title: WSL2 설치 (Ubuntu)
+date:   2023-07-08
+categories: 
+---
+## 안적어도 될 것 같지만 혹시나 싶은 마음에 적어 놓습니다.
+
+Windows에서 리눅스 터미널을 사용하기 위해선 WSL2(Windows Subsystem for Linux 2)를 설치해야 합니다. 
+<br>WSL2는 Windows에서 리눅스 터미널을 실행할 수 있게 해주는 프로그램입니다. 다음은 WSL2를 설치하는 과정입니다.
+
+주의사항: 설치 방법을 정확히 따라야 합니다. 
+
+
+1. Windows 업데이트
+먼저 Windows를 최신 버전으로 업데이트합니다. 업데이트가 완료되면 다음 단계로 진행합니다.
+
+2. Windows Terminal 설치 및 설정
+> 1) Windows + s를 눌러 검색창을 열고, Microsoft Store를 엽니다. <br>
+> 2) Microsoft Store에서 Windows Terminal을 검색하여 다운로드합니다. <br>
+> 3) Windows Terminal을 우클릭하고 관리자 권한으로 실행합니다. <br>
+> 4) 명령어를 입력하고 실행합니다: <br>
+> dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart <br>
+> 5) 설정이 완료되었다면 컴퓨터를 재부팅합니다. <br>
+> 6) 리눅스 커널 업데이트 패키지를 다운로드하고 실행합니다.<br>
+> 7) 다음 명령어를 입력합니다:<br>
+> wsl --set-default-version 2
+
+3. 우분투 리눅스 설치 및 설정
+> 1) Microsoft Store에서 ubuntu lts를 검색하고 다운로드한 후 열기를 클릭합니다.<br>
+> 2) 사용자의 이름과 비밀번호를 입력합니다.<br>
+
+4. Windows Terminal에서 설치 확인
+> 1) Windows Terminal을 실행하고 다음 명령어를 입력하여 버전이 '2'로 나타나는지 확인합니다:<br>
+> 2) wsl -l -v - 만약 버전이 1이라면 다음 명령어를 입력하여 2로 변경합니다:<br>
+> 3) wsl --set-version Ubuntu 2 - 터미널을 종료하고 다시 실행한 후 리눅스를 선택하여 설치가 제대로 완료되었는지 확인합니다.<br>
+<br>
+설치가 완료되면 적갈색 화면이 나타납니다.<br>
+<br>
+<br>
+
+이제 Windows에서 리눅스 터미널을 실행할 수 있습니다.
