@@ -1,12 +1,11 @@
 ---
 layout: post
-title: 
+title: apt 패키지 매니저의 주요 명령어
 date:   2023-07-14
 categories: 
 ---
 ## Unix 기반 운영체제에서는 Ctrl + C 키는 작업을 취소하고, 터미널의 사용자 입력을 다시 되찾아오는 역할을 합니다.
 
-apt 패키지 매니저의 주요 명령어
 ```
 apt
 ```
