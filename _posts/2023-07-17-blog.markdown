@@ -1,0 +1,74 @@
+---
+layout: post
+title: Read, Write, Execute 권한 (권한 변경)
+date:   2023-07-17
+categories: 
+---
+```
+mkdir linux
+nano hello.java
+```
+파일과 폴더를 생성하고 (mkdir, touch 혹은 nano에디터 사용 중일 경우 nano)
+명령어 ls -l을 프롬프트에 입력하고 Enter를 누릅니다.
+
+
+
+파일 hello.java는 -rw-r--r--이라고 출력되었고, 폴더 linux는 drwxr-xr-x라고 출력되었습니다. 이 표현의 첫 시작인 -와 d는 각각 not directory와 directory를 나타냅니다. 즉, 폴더이면 d로, 파일이면 - 로 나타납니다.
+
+이어지는 r, w, x는 각각 read permission, write permission, execute permission으로 읽기 권한, 쓰기 권한, 실행 권한을 나타냅니다. 3번에 걸쳐 나타나는 이유는 사용자와 그룹, 나머지에 대한 권한을 표시하기 때문입니다.
+
+따라서 파일 hello.java의 권한 rw-r--r--은 소유자는 읽기와 쓰기가 가능하고, 다른 사용자 그룹은 읽기만 가능하다는 의미가 됩니다. 폴더 linux의 권한은 rwxr-xr-x으로, 소유자는 읽기와 쓰기, 실행이 가능하고, 다른 사용자 그룹은 읽기와 실행만 가능합니다.
+
+d/rwx/rwx/rwx
+d : directory
+첫번째 rwx: owner
+두번째 rwx: group
+세번째 rwx: other
+
+```
+chmod: 권한을 변경하는 명령어
+```
+
+1. Symbolic method
+<br>
+```
+chmod g-r filename # removes read permission from group
+chmod g+r filename # adds read permission to group
+chmod g-w filename # removes write permission from group
+chmod g+w filename # adds write permission to group
+chmod g-x filename # removes execute permission from group
+chmod g+x filename # adds execute permission to group
+chmod o-r filename # removes read permission from other
+chmod o+r filename # adds read permission to other
+chmod o-w filename # removes write permission from other
+chmod o+w filename # adds write permission to other
+chmod o-x filename # removes execute permission from other
+chmod o+x filename # adds execute permission to other
+chmod u+x filename # adds execute permission to user
+```
+<br>
+<br>
+
+2. Absolute form
+<br>
+Absolute form은 숫자 7까지 나타내는 3 bits의 합으로 표기합니다.
+
+|Permission | Number|
+|------|-------|
+|Read (r)	| 4|
+|Write (w)	| 2|
+|Execute (x)	| 1|
+
+<br>
+
+
+|#|	Sum|	rwx|	Permission|
+|------|-------|---------|
+|7|	4(r) + 2(w) + 1(x)|	rwx	|read, write, execute|
+|6|	4(r) + 2(w) + 0(-)|	rw-	|read, write|
+|5|	4(r) + 0(-) + 1(x)|	r-x	|read and execute|
+|4|	4(r) + 0(-) + 0(-)|	r—	|read only|
+|3|	0(-) + 2(w) + 1(x)|	|-wx	write, execute|
+|2|	0(-) + 2(w) + 0(-)|	-w-	|write only|
+|1|	0(-) + 0(-) + 1(x)|	—x	|execute only|
+|0|	0(-) + 0(-) + 0(-)|	—-	|none|
