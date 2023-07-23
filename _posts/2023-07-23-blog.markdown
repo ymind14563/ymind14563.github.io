@@ -1,0 +1,18 @@
+---
+layout: post
+title: Git 환경설정
+
+date:   2023-07-23
+categories: 
+---
+Git 설치는 구글검색하면 잘 나와있습니다.
+
+```
+$ git config --global user.name "나의 사용자 이름"
+$ git config --global user.email "내 이메일 주소"
+```
+
+$ git config --global user.name만 입력하면 지금 설정된 name을 알 수 있습니다.
+
+* 참고: 
+https://git-scm.com/book/ko/v2/%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-Git-%EC%B5%9C%EC%B4%88-%EC%84%A4%EC%A0%95
