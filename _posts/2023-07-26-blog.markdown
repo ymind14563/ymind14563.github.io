@@ -1,0 +1,40 @@
+---
+layout: post
+title: SSH 및 Github에 등록하는 방법
+date: 2023-07-26
+categories: 
+---
+SSH 키
+
+```
+ssh-keygen
+```
+ssh 키는 비대칭키로 구성되며, 두 개의 키가 서로 대칭이 되지 않는 형태로 존재합니다. <br>
+명령어를 프롬프트에 입력하고, ssh 키 페어(쌍)를 생성하세요. <br>
+명령어를 입력 후 Enter 키를 몇 번 입력하면, ssh 키 페어가 생성됩니다.<br>
+<br>
+ssh-keygen 명령어는 경로 ~/.ssh./ 에 두 파일 id_rsa와 id_rsa.pub를 생성합니다. 
+이 두 파일은 ssh 키 페어라고 하며, 
+- id_rsa.pub는 누구에게나 공개해도 되는 공개키(Public Key)라고 합니다. 
+- id_rsa는 공개되면 안 되고 나만 보관하고 있어야 하는 키라고 하여 개인키(Private Key) 또는 비밀키(Secret Key)라고 합니다.<br/><br/>
+
+
+
+
+
+
+Github에 공개키 등록
+```
+cat ~/.ssh/id_rsa.pub
+```
+다음의 명령어를 프롬프트에 입력하여, 공개키를 복사합니다.
+
+Github > Settings > SSH and GPG keys > SSH Keys 옆의 초록색 버튼 New SSH Key를 클릭 > 사용자 임의로 Title을 작성 >
+Key에는 복사해 둔 공개키 > Add SSH Key 버튼을 클릭<br/><br/>
+
+
+
+
+만약 안된다면 GitHub CLI 기능을 활용 할 수 있습니다.<br>
+참고:
+https://meaownworld.tistory.com/entry/Github-cli-%EC%84%A4%EC%B9%98-%EC%82%AC%EC%9A%A9%EB%B2%95
