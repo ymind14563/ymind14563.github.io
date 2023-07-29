@@ -1,0 +1,98 @@
+---
+layout: post
+title:  Git 기본 명령어
+date: 2023-07-29
+categories: Git
+---
+Git의 각 영역은 크게 온라인과 로컬로 나뉩니다.
+
+- 온라인 : Remote repository(원격 저장소)
+
+- 로컬 : Work space(작업 공간), Staging area(스테이징 영역), Local repository(지역 저장소)
+
+
+```
+git init : git 초기화
+git config --global init.defaultBranch main : 기본브렌치명 main으로 변경
+git branch -m main : 브렌치명 main으로 변경
+```
+<br/><br/>
+
+|Work space(작업 공간)| Staging area(스테이징 영역)| Local repository(지역 저장소)|
+
+Git은 Work space를 자동으로 스캔합니다. <br/><br/>
+
+## 1. 파일의 상태
+
+```
+git status
+```
+Untracked : 파일의 상태 중 하나입니다.
+
+what will be committed → 커밋될 것들이 모여있는 무언가 → Git의 영역 중 Staging area를 의미합니다.
+
+use git add to track → track 하기 위해서는 git add 명령어를 사용해야 합니다.
+
+- Untracked
+
+- Tracked
+
+> Unmodified : 파일의 수정이 Git에 의해 감지되지 않은 상태 <br>
+> Modified : 파일의 수정이 Git에 의해 감지된 상태<br>
+> Staged : 파일이 Staging area에 존재하는 상태<br> <br/><br/>
+
+## 2. Staging area
+```
+git add : Staging area로 파일을 이동시키기
+git add . : 현재 디렉토리 내의 모든 파일이 스테이징
+```
+Staging area란, Local repository에 저장할 파일들이 임시로 대기하는 영역을 의미합니다. <br> <br/><br/>
+
+
+
+
+## 3. 파일을 Local repository에 저장하고 버전을 기록하기 
+```
+git commit
+git commit -m "메세지 입력"
+```
+<br/><br/>
+
+
+## 4. Commit 내역 확인
+```
+git log
+```
+
+* 만약 git commit 을 하고 파일 내용을 수정하면 git status 에서 변화를 감지하고 알려줍니다.
+다시 git add 를 통해 track 하고 git commit -m "수정 메세지 입력" 을 해줍니다. <br/><br/>
+
+
+
+## 5. Remote repository로 업로드
+
+```
+git push origin main : main 브렌치로 푸쉬
+git push origin +main : main 브렌치로 강제 푸쉬 (강제푸쉬는 항상 유의할 것)
+```
+<br/><br/>
+
+
+## 6. Remote repository와 Local repository를 연결
+
+```
+git remote --v : 연결된 repository가 있는지 확인 (항상 확인 또 확인)
+git remote add origin (repository_URL) : repository 연결
+```
+<br/><br/>
+
+
+## 7. Remote Repository의 코드를 로컬로 복사
+
+```
+git clone (repository_URL)
+```
+
+
+
+
