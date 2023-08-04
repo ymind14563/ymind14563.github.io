@@ -1,0 +1,44 @@
+---
+layout: post
+title:  JVM과 JDK 그리고 JDK11
+date: 2023-08-04
+categories: 
+---
+### 1. JVM (Java Virtual Machine)
+
+자바는 컴파일러(Compiler)를 통해 기계어(Machine Language)로 변환되는 언어입니다. JVM은 자바 프로그램을 실행시키는 도구이며 바이트코드를 운영체제에 맞는 기계어로 변환해 줍니다.
+
+### 2. JDK (Java Development Kit)
+
+- **JRE (Java Runtime Environment)**: JVM + 표준 클래스 라이브러리
+  - "Runtime", 즉 실행과 관련된 무언가입니다.
+
+- **JDK (Java Development Kit)**: JRE + 개발에 필요한 도구
+  - "Development", 즉 개발과 관련된 무언가입니다.
+    - OracleJDK와 OpenJDK가 있습니다.
+
+### 3. JDK 8 vs 11 vs 17
+
+#### JDK 8
+- 람다식 및 메서드 참조 도입
+- 컬렉션에 Stream API 사용 가능
+- 인터페이스 내부에 default 메서드 선언 가능
+- Optional 클래스 도입 등
+
+#### JDK 11
+- String 클래스에 strip, isBlank, lines 메서드 추가
+- Files 메서드에 readString 메서드 추가
+- 람다식의 인수 선언 시 var 키워드 사용 가능
+- 소스 파일을 javac을 통한 컴파일 없이 스크립트로 실행 가능
+- 차세대 가비지 콜렉터 도입 등
+
+#### JDK 17
+- 텍스트 블록 추가
+- 의사 난수 생성기 기능 향상
+- switch 문 기능 향상
+- 봉인 클래스 추가 등
+
+
+### 4. JDK 11을 사용하는 이유
+-  8 버전이 사용자가 가장 많고, 상대적으로 오랜 시간 동안 사용되어 왔기 때문에 셋 중에서 제일 안정적인 버전이라고 할 수 있지만, 11 버전에서 추가된 유용한 기능들을 8 버전에서는 사용할 수 없습니다. 또한, 11 버전도 8 버전 다음으로 사용자가 많은 버전이라 충분히 안정적인 버전으로 볼 수 있기 때문에 8 버전 대신 11 버전을 많이 사용합니다.
+
