@@ -1,0 +1,77 @@
+---
+layout: post
+title: 변수와 상수
+date: 2023-08-07
+categories: JAVA
+---
+
+## 매서드
+```
+public class Main { … }
+```
+접근 허용 범위가 public인 Main이라는 이름의 클래스를 정의하겠다.
+
+```
+public static void main(String[] args) {
+}
+
+반환_타입 메서드_이름(매개변수_타입 매개변수_이름) {
+	메서드_바디
+}
+```
+<br/><br/>
+
+## 변수(Variable) : 값이 변할 수 있는 데이터를 임시로 저장하기 위한 수단
+변수명은 일반적으로 카멜 케이스(camelCase)를 사용합니다. 
+```
+class Main {
+	public static void main(String[] args) {
+		int num1 = 1;
+		int num2 = 2;
+		int num3 = 3;
+		...
+	}
+}
+```
+num1, num2, num3이 바로 변수입니다.
+변수란 값을 저장할 수 있는 메모리 공간을 확보하고, 사람이 식별할 수 있는 이름을 붙인 것입니다.
+
+### 변수 선언
+```
+class Main {
+	public static void main(String[] args) {
+		int num; // 변수 선언
+	}
+}
+```
+
+변수를 선언한다는 것은 어떤 값을 저장할 메모리 공간을 확보하고, 해당 메모리 공간을 식별할 수 있는 이름을 붙이는 것을 의미입니다.
+
+### 값 할당
+```
+class Main {
+	public static void main(String[] args) {
+		int num; // 변수 선언
+		num = 1; // 값 할당
+		int num = 1; // 선언과 동시에 초기화
+	}
+}
+```
+<br/><br/>
+
+
+## 상수(Constant) : 변하지 말아야 할 데이터를 임시로 저장하기 위한 수단
+
+상수는 재할당이 금지된 변수입니다.
+상수는 final이라는 키워드를 사용해 선언할 수 있으며, 관례로 대문자에 언더바(_)를 넣어 구분하는 SCREAMING_SNAKE_CASE를 사용합니다.
+
+```
+final double CALCULATOR_PI  = 3.14;
+```
+### 상수를 사용하는 이유
+
+> 프로그램이 실행되면서 값이 변하면 안 되는 경우
+
+> 코드 가독성을 높이고 싶은 경우
+
+> 코드 유지관리를 손쉽게 하고자 하는 경우
