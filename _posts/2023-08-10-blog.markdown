@@ -1,0 +1,67 @@
+---
+layout: post
+title: 타입과 리터럴
+date: 2023-08-10
+categories: JAVA
+---
+
+## 타입
+
+타입은 어떤 값의 유형 및 종류를 의미합니다.
+
+*  값이 차지하는 메모리 공간의 크기
+> 예를 들어, 정수형 타입의 데이터는 4byte, 문자형 타입의 데이터는 1byte입니다.
+
+*  값이 저장되는 방식
+> 타입은 저장하고자 하는 값을 그대로 저장하는 기본 타입과, 저장하고자 하는 값을 임의의 메모리 공간에 저장한 후, 그 메모리 공간의 주소를 저장하는 참조 타입으로 분류됩니다.
+
+## 타입의 종류
+
+### 기본 타입
+* 값을 저장할 때, 데이터의 실제 값이 저장됩니다.
+
+>정수 타입(byte, short, int, long), 실수 타입(float, double), 문자 타입(char), 논리 타입(boolean)
+
+### 참조 타입
+
+* 값을 저장할 때, 데이터가 저장된 곳을 나타내는 주소값이 저장됩니다.
+
+> 객체의 주소를 저장, 8개의 기본형을 제외한 나머지 타입
+
+```
+public class Main {
+    public static void main(String[] args) {
+        int primitive = 1; // 기본 타입
+        Object reference = new Object(); // 참조 타입
+
+        System.out.println(primitive);
+        System.out.println(reference);
+    }
+}
+```
+<br/><br/>
+
+## 리터럴
+
+리터럴이란 문자가 가리키는 값 그 자체를 의미합니다.
+```
+// 정수형 리터럴 20을 정수형 변수 currentAge에 할당
+int currentAge = 20;
+
+// 실수형 리터럴 3.14159를 실수형 변수 pi에 할당
+double pi = 3.14159;
+
+// 논리형 리터럴 true를 논리형 변수 boolean에 할당
+boolean isGenius = true;
+
+// 문자형 리터럴 'A'를 문자형 변수 firstAlphabet에 할당
+char firstAlphabet = 'A';
+
+float weight = 74.5f; // float 타입의 변수에 실수형 리터럴을 할당할 때, 리터럴 뒤에 접미사 f
+final long LIGHT_YEAR = 9460730472580L; // long 타입의 변수에 정수형 리터럴을 할당할 때, 리터럴 뒤에 접미사 L
+
+float = 9460730472580.0F;
+double = 9460730472580.0D; 
+```
+
+
