@@ -1,0 +1,58 @@
+---
+layout: post
+title: 논리타입과 문자타입 그리고 타입 변환
+date: 2023-08-14
+categories: JAVA
+---
+
+## 논리타입
+
+논리 타입의 종류는 boolean형 한 가지뿐입니다.
+
+```
+boolean isRainy = true;
+boolean isAdult = false;
+```
+<br/><br/>
+
+## 문자타입
+
+문자 타입은 2byte 크기의 char형 한 가지뿐입니다.
+
+```
+char letter1 = 'a';
+char letter2 = 'ab'; // 에러 : 단 하나의 문자만 할당할 수 있습니다. 
+char letter3 = "a"   // 에러 : 작은따옴표를 사용해야 합니다. 
+```
+
+자바는 유니코드로 문자를 저장합니다. 
+
+```
+char letter = 65;
+System.out.print(letter); // 출력 결과 : A
+```
+<br/><br/>
+
+## 타입 변환
+boolean을 제외한 기본 타입 7개는 서로 타입을 변환할 수 있습니다.
+
+### 자동 타입 변환
+
+> 바이트 크기가 작은 타입에서 큰 타입으로 변환할 때 (예 : byte → int)
+
+> 덜 정밀한 타입에서 더 정밀한 타입으로 변환할 때 (예 : 정수 → 실수)
+
+### 수동 타입 변환
+
+차지하는 메모리 용량이 더 큰 타입에서 작은 타입으로는 자동으로 타입이 변환되지 않습니다. <br>
+수동으로 타입을 변환해 주어야만 합니다. 이를 캐스팅(casting)이라고 합니다.
+
+```
+//int 타입으로 선언된 변수 intValue를 더 작은 단위인 byte로 변환합니다.
+int intValue = 128;
+byte byteValue = (byte)intValue;
+
+System.out.println(byteValue); // -128
+```
+byte형의 표현 범위는 -128 ~ 127이므로, 128을 byte형으로 변환하면 표현 범위를 벗어나게 되어 오버플로우가 발생합니다. 따라서 최종적으로 저장되는 값은 -128이 됩니다.
+
