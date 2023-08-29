@@ -1,0 +1,143 @@
+---
+layout: post
+title: 필드와 메서드
+date: 2023-08-29
+categories:
+---
+# 1. 필드
+
+* 자바에서 변수는 크게 클래스 변수(cv, class variable), 인스턴스 변수(iv, instance variable), 그리고 지역 변수(lv, local variable)로 구분됩니다. 
+* 필드는 클래스 변수와 인스턴스 변수이며, 이 둘은 다시 static 키워드의 유무로 구분할 수 있습니다.
+* static 키워드가 함께 선언된 것은 클래스 변수, 그렇지 않은 것은 인스턴스 변수입니다. 그리고 이 두 가지 변수 유형에 포함되지 않고 메서드 내에 포함된 모든 변수를 지역변수라 부릅니다.
+* 필드 변수와 지역 변수의 차이점은 초기값에 있습니다.
+직접 초기화하지 않으면 값을 출력할 때에 오류가 발생하는 지역변수와는 다르게, 필드 변수는 직접적으로 초기화를 실행하지 않더라도 강제로 초기화가 이뤄집니다.
+
+```
+class Example { // => 클래스 영역
+	int instanceVariable; // 인스턴스 변수
+	static int classVariable; // 클래스 변수(static 변수, 공유변수)
+
+	void method() { // => 메서드 영역
+		int localVariable = 0; // 지역 변수. {}블록 안에서만 유효
+	}
+}
+```
+> ## static
+* static은 클래스의 멤버(필드, 메서드, 이너 클래스)에 사용하는 키워드입니다.
+
+```
+public class StaticFieldTest {
+    public static void main(String[] args) {
+        StaticField staticField1 = new StaticField(); // 객체 생성
+        StaticField staticField2 = new StaticField();
+
+        staticField1.num1 = 100; 
+        staticField2.num1 = 1000;
+
+        System.out.println(staticField1.num1);
+        System.out.println(staticField2.num1);
+
+        staticField1.num2 = 150;
+        staticField2.num2 = 1500;
+        System.out.println(staticField1.num2);
+        System.out.println(staticField2.num2);
+
+    }
+}
+
+class StaticField {
+    int num1 = 10;
+    static int num2 = 15;
+}
+
+//출력값
+100
+1000
+1500
+1500
+```
+
+* 인스턴스 변수는 우리가 아는 일반적인 방법으로 객체 생성 후에 포인트 연산자를 사용하여 값을 불러왔고, 클래스 변수는 객체 생성 없이 클래스명을 사용하여 값을 불러왔습니다.
+* num2는 정적(static) 필드로 정의되어 있습니다. 정적 필드는 클래스에 속하며 클래스의 모든 객체들이 공유합니다. 따라서 한 번 값이 변경되면 모든 객체들이 동일한 값을 가지게 됩니다.
+* 주어진 코드에서 staticField1.num2와 staticField2.num2가 각각 150과 1500으로 변경되었지만, 모든 객체가 num2를 공유하기 때문에 마지막으로 변경된 값인 1500이 모든 객체에 반영됩니다.
+
+<br/><br/>
+
+# 2. 메서드
+```
+public static int add(int x, int y) { // 메서드 시그니처
+	int result = x + y; // 메서드 바디
+	return result;
+}
+```
+```
+void printHello() { // 반환타입이 void인 메서드, void 이기 때문에 반환값이 없음 hello!만 출력하고 끝
+	System.out.println("hello!");
+}
+
+int getNumSeven() { // 매개변수가 없는 메서드, 그냥 7만 반환하면 되기에 매개변수가 없음
+	return 7;
+}
+
+Double multiply(int x, double y) { // 매개변수 x와 y를 전달받아 반환 타입이 double인 result를 반환하는 매개변수가 있는 메서드
+	double result = x * y;
+	return result;
+}
+
+printHello(); // 위의 코드 예제 호출
+getNumSeven();
+multiply(4, 4.0);
+
+//출력값
+hello!
+7
+16.0
+```
+* 메서드 시그니처는 메서드명과 매개변수의 타입을 의미하는데, 각 메서드를 구분하는 용도로 사용합니다.
+* 괄호() 안에 넣어주는 입력 값을 우리는 ‘인자' 라고 합니다. 인자의 순서와 개수는 반드시 메서드에 선언된 매개변수와 일치해야합니다.
+
+<br>
+
+## 메서드 오버로딩
+* 메서드 오버로딩이란 하나의 클래스 안에 같은 이름의 메서드를 여러 개 정의하는 것을 의미합니다.
+* 메서드를 오버로딩하려면 메서드의 이름이 같아하고, 매개변수의 개수 또는 타입이 달라야 합니다. 지켜지지않으면 중복 정의로 인해 오류가 발생합니다.
+* 메서드 오버로딩의 장점은 하나의 메서드로 여러 경우의 수를 해결할 수 있다는 것입니다.
+
+```
+public class Overloading {
+    public static void main(String[] args) {
+        Shape s = new Shape(); // 객체 생성
+ 
+        s.area(); // 메서드 호출
+        s.area(5);
+        s.area(10,10);
+        s.area(6.0, 12.0);
+    }
+}
+
+class Shape {
+    public void area() { // 메서드 오버로딩. 같은 이름의 메서드 4개.
+        System.out.println("넓이");
+    }
+    public void area(int r) {
+        System.out.println("원 넓이 = " + 3.14 * r * r);
+    }
+
+    public void area(int w, int l) {
+        System.out.println("직사각형 넓이 = " + w * l);
+    }
+
+    public void area(double b, double h) {
+        System.out.println("삼각형 넓이 = " + 0.5 * b * h);
+    }
+}
+
+//출력값
+넓이
+원 넓이 = 78.5
+직사각형 넓이 = 100
+삼각형 넓이 = 36.0
+```
+
+
+
