@@ -1,0 +1,139 @@
+---
+layout: post
+title: 생성자
+date: 2023-09-01
+categories:
+---
+# 생성자
+* 객체를 생성하는 역할을 하는 클래스의 구성 요소로서, 인스턴스가 생성될 때 호출되는 인스턴스 초기화 메서드라 정리할 수 있습니다.
+
+* 생성자는 메서드와 비슷한 구조를 가지고 있지만 크게 두 가지 부분에서 큰 차이를 가집니다.
+
+> 1) 생성자의 이름은 반드시 클래스의 이름과 같아야 합니다. 
+>>만약 클래스 이름과 생성자의 이름이 다르다면 그 메서드는 더 이상 생성자로서의 기능을 수행할 수 없습니다.
+
+> 2) 생성자는 리턴 타입이 없습니다. 하지만 메서드에서 리턴 값이 없을 때 표시하는 void 키워드를 사용하지 않습니다. 
+>> 무언가를 ‘리턴하지 않는다’를 의미하는 void와는 다르게 생성자는 아예 리턴 타입 자체가 존재하지 않기 때문입니다.
+
+* 매개변수는 있을 수도 있고 없을 수도 있습니다.
+* 생성자도 오버로딩이 가능하므로 한 클래스 내에 여러 개의 생성자가 존재할 수 있습니다.
+
+<br/><br/>
+
+## 기본 생성자
+* 모든 클래스에는 반드시 하나 이상의 생성자가 존재해야 합니다.
+* 생성자를 따로 만들지 않아도 정상적으로 인스턴스를 만들 수 있었던 이유는 만약 생성자가 클래스 안에 포함되어 있지 않은 경우에는 자바 컴파일러가 기본 생성자를 자동으로 추가해 줬기 때문입니다.
+* 기본 생성자는 매개변수가 없는 생성자를 의미합니다.
+
+<br/>
+## 매개변수가 있는 생성자
+```
+public class ConstructorExample {
+    public static void main(String[] args) {
+        Car c = new Car("Model X", "빨간색", 250);
+        System.out.println("제 차는 " + c.getModelName() + "이고, 컬러는 " +  c.getColor() + "입니다.");
+    }
+}
+
+class Car {
+    private String modelName;
+    private String color;
+    private int maxSpeed;
+
+    public Car(String modelName, String color, int maxSpeed) {
+        this.modelName = modelName;
+        this.color = color;
+        this.maxSpeed = maxSpeed;
+    }
+
+    public String getModelName() {
+        return modelName;
+    }
+
+    public String getColor() {
+        return color;
+    }
+}
+
+//Output
+제 차는 Model X이고, 컬러는 빨간색입니다.
+```
+* Car 인스턴스를 생성 시 매개변수가 있는 생성자를 사용하게 되면 인스턴스를 만든 후에 인스턴스의 필드값을 일일이 설정해 줄 필요 없이 생성과 동시에 원하는 값으로 설정해 줄 수 있습니다.
+* 기본 생성자의 경우에는 매개변수가 없었기 때문에 원래 우리가 객체를 생성하던 방식으로 new 키워드와 생성자를 호출하면 되었지만, 매개변수가 있는 경우에는 그 개수와 타입에 알맞게 생성자를 호출해주어야 합니다.
+
+<br/><br/>
+
+## this()
+* 생성자도 상호 호출이 가능합니다.
+* this() 메서드는 자신이 속한 클래스에서 다른 생성자를 호출하는 경우에 사용합니다.
+* this() 메서드를 사용하기 위해서는 크게 두 가지의 문법요소를 충족시켜야 합니다.
+>첫째, this() 메서드는 반드시 생성자의 내부에서만 사용할 수 있습니다.<br>
+둘째, this() 메서드는 반드시 생성자의 첫 줄에 위치해야 합니다.
+
+```
+public class Test {
+    public static void main(String[] args) {
+        Example example = new Example();
+        Example example2 = new Example(5);
+    }
+}
+
+class Example  {
+    public Example() {
+        System.out.println("Example의 기본 생성자 호출!");
+    };
+
+    public Example(int x) {
+        this();
+        System.out.println("Example의 두 번째 생성자 호출!");
+    }
+}
+
+//Output
+Example의 기본 생성자 호출!
+Example의 기본 생성자 호출!
+Example의 두 번째 생성자 호출!
+```
+<br/><br/>
+
+
+## this
+
+* this 키워드는 주로 인스턴스의 필드명과 지역변수를 구분하기 위한 용도로 사용됩니다.
+
+```
+public class ConstructorExample {
+    public static void main(String[] args) {
+        Car car = new Car("Model X", "빨간색", 250);
+        System.out.println("제 차는 " + car.getModelName() + "이고, 컬러는 " +  car.getColor() + "입니다.");
+    }
+}
+
+class Car {
+    private String modelName;
+    private String color;
+    private int maxSpeed;
+
+    public Car(String modelName, String color, int maxSpeed) {
+        this.modelName = modelName;
+        this.color = color;
+        this.maxSpeed = maxSpeed;
+    }
+
+    public String getModelName() {
+        return modelName;
+    }
+
+    public String getColor() {
+        return color;
+    }
+}
+
+//Output
+제 차는 Model X이고, 컬러는 빨간색입니다.
+```
+* 인스턴스 변수로 modelName, color, 그리고 maxSpeed가 선언되어 있는데, 동시에 생성자의 매개변수로 modelName, color, maxSpeed가 정의되어 있습니다.
+* 이런 경우, 인스턴스 변수와 매개변수를 이름만으로는 구분하기가 어려워지는 문제가 발생하게 되는데, 이를 구분해 주기 위한 용도로 주로 사용되는 방법이 바로 this 입니다.
+* this는 인스턴스 자신을 가리키며, 우리가 참조변수를 통해 인스턴스의 멤버에 접근할 수 있는 것처럼 this를 통해서 인스턴스 자신의 변수에 접근할 수 있는 것입니다.
+* 애초에 이름이 서로 달랐다면 구분이 필요 없었겠지만, 자바에서 많은 경우 메서드의 지역 변수명이 필드명과 동일하게 구성되어 있기 때문에 꼭 알 필요가 있습니다.
+
