@@ -1,0 +1,150 @@
+---
+layout: post
+title: 내부 클래스
+date: 2023-09-02
+categories:
+---
+# 내부 클래스
+* 내부 클래스(Inner Class)는 클래스 내에 선언된 클래스로, 외부 클래스와 내부 클래스가 서로 연관되어 있을 때 사용합니다.
+* 객체지향의 중요한 핵심 원칙인 캡슐화(encapsulation)를 달성하는 데 유용합니다. 
+
+```
+class Outer { // 외부 클래스
+	
+	class Inner {
+		// 인스턴스 내부 클래스	
+	}
+	
+	static class StaticInner {
+		// 정적 내부 클래스
+	}
+
+	void run() {
+		class LocalInner {
+		// 지역 내부 클래스
+		}
+	}
+} 
+```
+
+<br/><br/>
+
+## 멤버 내부 클래스
+* 인스턴스 내부 클래스와 정적 내부클래스를 '멤버 내부 클래스' 라 합니다.
+
+<br>
+### 인스턴스 내부 클래스
+* 인스턴스 내부 클래스는 반드시 외부 클래스를 생성한 이후에 사용해야 합니다.
+* 그러므로 클래스의 생성과 상관없이 사용할 수 있는 정적 변수와 정적 메서드는 인스턴스 내부 클래스에서 선언할 수 없습니다.
+
+```
+class Outer { //외부 클래스
+    private int num = 1; //외부 클래스 인스턴스 변수
+    private static int sNum = 2; // 외부 클래스 정적 변수
+
+    private InClass inClass; // 내부 클래스 자료형 변수 선언
+
+    public Outer() {
+        inClass = new InClass(); //외부 클래스 생성자
+    }
+
+    class InClass { //인스턴스 내부 클래스
+        int inNum = 10; //내부 클래스의 인스턴스 변수
+
+        void Test() {
+            System.out.println("Outer num = " + num + "(외부 클래스의 인스턴스 변수)");
+            System.out.println("Outer sNum = " + sNum + "(외부 클래스의 정적 변수)");
+        }
+    }
+
+    public void testClass() {
+        inClass.Test();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Outer outer = new Outer();
+        System.out.println("외부 클래스 사용하여 내부 클래스 기능 호출");
+        outer.testClass(); // 내부 클래스 기능 호출
+    }
+}
+
+// 출력값
+
+외부 클래스 사용하여 내부 클래스 기능 호출
+Outer num = 1(외부 클래스의 인스턴스 변수)
+Outer sNum = 2(외부 클래스의 정적 변수)
+```
+
+<br/>
+
+### 정적 내부 클래스
+* 내부 클래스가 외부 클래스의 존재와 무관하게 정적 변수를 사용할 수 있게 하려면 정적 내부 클래스를 사용해야 합니다.
+
+```
+class Outer { // 외부 클래스
+    private int num = 3; // 외부 클래스의 인스턴스 변수
+    private static int sNum = 4;
+
+    void getPrint() {
+        System.out.println("인스턴스 메서드");
+    }
+
+    static void getPrintStatic() {
+        System.out.println("스태틱 메서드");
+    }
+
+    static class StaticInClass { // 정적 내부 클래스
+        void test() {
+            System.out.println("Outer sNum = " +sNum + "(외부 클래스의 정적 변수)");
+            getPrintStatic();
+            // num 과 getPrint() 는 정적 멤버가 아니라 사용 불가.
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Outer.StaticInClass a = new Outer.StaticInClass(); //정적 이너 클래스의 객체 생성
+        a.test();
+    }
+}
+
+//출력값
+Outer sNum = 4(외부 클래스의 정적 변수)
+스태틱 메서드
+```
+
+
+## 지역 내부 클래스
+* 지역 내부 클래스는 클래스의 멤버가 아닌 메서드 내에서 정의되는 클래스입니다.
+* 지역 내부 클래스도 지역 변수와 유사하게 메서드 내부에서만 사용가능하기 때문에 일반적으로 메서드 안에서 선언 후에 바로 객체를 생성해서 사용합니다.
+* 내부 클래스는 기본적으로 개발자의 편의를 위해 서로 연관 있는 클래스들을 연결시켜 준 것입니다.
+
+```
+class Outer { //외부 클래스
+    int num = 5;
+    void test() {
+        int num2 = 6;
+        class LocalInClass { //지역 내부 클래스
+            void getPrint() {
+                System.out.println(num);
+                System.out.println(num2);
+            }
+        }
+        LocalInClass localInClass = new LocalInClass();
+        localInClass.getPrint();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Outer outer = new Outer();
+        outer.test();
+    }
+}
+
+//출력값
+5
+6
+```
