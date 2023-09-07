@@ -1,0 +1,301 @@
+---
+layout: post
+title: 상속
+date: 2023-09-07
+categories:
+---
+
+# 상속
+
+* 상속이란 기존의 클래스를 재활용하여 새로운 클래스를 작성하는 자바의 문법 요소를 의미합니다.
+* 상위 클래스의 멤버(필드, 메서드, 내부 클래스)를 하위 클래스와 공유하는 것을 의미합니다.
+여기서 우리는 이 두 클래스를 서로 상속 관계에 있다고 하며, 하위 클래스는 상위 클래스가 가진 모든 멤버를 상속받게 됩니다.
+*  두 클래스 간 상속 관계를 설정할 때 사용하는 extends 키워드 자체가 "~클래스로부터 확장되었다"는 표현이 그 역할과 기능을 생각했을 때 더 적절한 표현입니다.
+
+* 코드를 재사용하여 보다 적은 양의 코드로 새로운 클래스를 작성할 수 있어 코드의 중복을 제거할 수 있습니다.
+* 상속은 다형적 표현이 가능합니다.
+
+* 자바의 객체지향 프로그래밍에서는 단일 상속(single inheritance)만을 허용한다는 것입니다. 다중 상속은 허용되지 않습니다.
+
+```
+class Person {
+    String name;
+    int age;
+
+    void learn(){
+        System.out.println("공부를 합니다.");
+    };
+    void walk(){
+        System.out.println("걷습니다.");
+    };
+    void eat(){
+        System.out.println("밥을 먹습니다.");
+    };
+}
+
+class Programmer extends Person { // Person 클래스로부터 상속. extends 키워드 사용 
+    String companyName;
+
+    void coding(){
+        System.out.println("코딩을 합니다.");
+    };
+}
+
+class Dancer extends Person { // Person 클래스로부터 상속
+    String groupName;
+
+    void dancing(){
+		    System.out.println("춤을 춥니다.");
+		};
+}
+
+class Singer extends Person { // Person 클래스로부터 상속
+    String bandName;
+
+    void singing(){
+		    System.out.println("노래합니다.");
+		};
+    void playGuitar(){
+		    System.out.println("기타를 칩니다.");
+		};
+}
+
+public class HelloJava {
+    public static void main(String[] args){
+
+        //Person 객체 생성
+        Person p = new Person();
+        p.name = "김코딩";
+        p.age = 24;
+        p.learn();
+        p.eat();
+        p.walk();
+        System.out.println(p.name);
+
+        //Programmer 객체 생성
+        Programmer pg = new Programmer();
+        pg.name = "박해커";
+        pg.age = 26;
+        pg.learn(); // Persons 클래스에서 상속받아 사용 가능
+        pg.coding(); // Programmer의 개별 기능
+        System.out.println(pg.name);
+
+    }
+}
+
+//출력값
+공부를 합니다.
+밥을 먹습니다.
+걷습니다.
+김코딩
+공부를 합니다.
+코딩을 합니다.
+박해커
+```
+
+<br/><br/>
+
+
+# 포함
+
+* 포함(composite)은 상속처럼 클래스를 재사용할 수 있는 방법으로, 클래스의 멤버로 다른 클래스 타입의 참조변수를 선언하는 것을 의미합니다.
+
+```
+public class Employee {
+    int id;
+    String name;
+    Address address;
+
+    public Employee(int id, String name, Address address) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+    }
+
+    void showInfo() {
+        System.out.println(id + " " + name);
+        System.out.println(address.city+ " " + address.country);
+    }
+
+    public static void main(String[] args) {
+        Address address1 = new Address("서울", "한국"); //Address 클래스 포함
+        Address address2 = new Address("도쿄", "일본");
+
+        Employee e = new Employee(1, "김코딩", address1);
+        Employee e2 = new Employee(2, "박해커", address2);
+
+        e.showInfo();
+        e2.showInfo();
+    }
+}
+
+class Address {
+    String city, country;
+
+    public Address(String city, String country) {
+        this.city = city;
+        this.country = country;
+    }
+}
+
+// 출력값
+1 김코딩
+서울 한국
+2 박해커
+도쿄 일본
+```
+
+* 상속과 포함 구분법
+> 클래스 간의 관계가 ‘~은 ~이다(IS-A)’ 관계인지 ~은 ~을 가지고 있다(HAS-A) 관계인지 문장을 만들어 생각해 보는 것입니다.
+
+> 위의 예시로 예를 들어보면, Employee는 Address이다.라는 문장은 성립하지 않는 반면, Employee는 Address를 가지고 있다.는 어색하지 않은 올바른 문장임을 알 수 있습니다. 따라서 이 경우에는 상속보다는 포함관계가 적합합니다.
+
+> 반면 Car 클래스와 SportCar라는 클래스가 있다고 할 때, SportsCars는 Car를 가지고 있다.라는 문장보다 SportsCar는 Car이다.라는 문장이 훨씬 더 자연스럽습니다. 따라서 이 경우에는 Car를 상위클래스로 하는 상속 관계를 맺어주는 것이 더 적합하다고 할 수 있습니다.
+
+<br/><br/>
+
+
+# 매서드 오버라이딩
+
+* 메서드 오버라이딩(Method Overriding)은 상위 클래스로부터 상속받은 메서드와 동일한 이름의 메서드를 재정의하는 것을 의미합니다.
+
+* 상위 클래스의 메서드를 오버라이딩하려면 다음의 세 가지 조건을 반드시 만족시켜야 합니다.
+
+> 1. 메서드의 선언부(메서드 이름, 매개 변수, 반환 타입)가 상위클래스의 그것과 완전히 일치해야 한다.
+2. 접근 제어자의 범위가 상위 클래스의 메서드보다 같거나 넓어야 한다.
+3. 예외는 상위 클래스의 메서드보다 많이 선언할 수 없다.
+
+```
+public class Main {
+    public static void main(String[] args) {
+        Bike bike = new Bike();
+        Car car = new Car();
+        MotorBike motorBike = new MotorBike();
+        
+        bike.run();
+        car.run();
+        motorBike.run();
+    }
+}
+
+class Vehicle { // run() 메서드가 정의
+    void run() {
+        System.out.println("Vehicle is running");
+    }
+}
+
+class Bike extends Vehicle { // run() 메서드를 재정의함으로써 Vehicle 클래스의 run() 메서드를 오버라이딩
+    void run() {
+        System.out.println("Bike is running");
+    }
+}
+
+class Car extends Vehicle { // run() 메서드를 재정의함으로써 Vehicle 클래스의 run() 메서드를 오버라이딩
+    void run() {
+        System.out.println("Car is running");
+    }
+}
+
+class MotorBike extends Vehicle { // run() 메서드를 재정의함으로써 Vehicle 클래스의 run() 메서드를 오버라이딩
+    void run() {
+        System.out.println("MotorBike is running");
+    }
+}
+
+// 출력값
+Bike is running
+Car is running
+MotorBike is running
+```
+
+<br/><br/>
+
+
+# super와 super()
+
+## super
+- 복습
+> this는 자기 객체를 가리키는 참조 변수명으로, 메서드 내에서 멤버 변수와 지역 변수의 이름이 같을 때 구분하기 위한 용도로 사용되며, 생략 시 컴파일러가 자동으로 추가해줍니다.
+반면 this() 메서드는 같은 클래스의 다른 생성자를 호출하는 데 사용되며, 생성자 내에서만 사용 가능하고, 항상 첫 줄에 위치해야 합니다.
+
+> 한마디로 정리하면 this는 자신의 객체, this() 메서드는 자신의 생성자 호출을 의미합니다.
+
+* super 키워드는 상위 클래스의 객체, super()는 상위 클래스의 생성자를 호출하는 것을 의미합니다.
+
+* 둘 다 상위 클래스의 존재를 상정하며 상속 관계를 전제로 합니다. 
+
+```
+public class Example {
+    public static void main(String[] args) {
+        SubClass subClassInstance = new SubClass();
+        subClassInstance.callNum();
+    }
+}
+
+class SuperClass {
+    int count = 20; // super.count
+}
+
+class SubClass extends SuperClass {
+    int count = 15; // this.count
+
+    void callNum() {
+        System.out.println("count = " + count);
+        System.out.println("this.count = " + this.count);
+        System.out.println("super.count = " + super.count); // 인스턴스 변수 count 이름이 같지만, super. 키워드로 이 둘을 구분함. 부모객체의 값을 가져옴.
+    }
+}
+
+
+// 출력값
+count = 15
+count = 15
+count = 20
+```
+
+<br/><br/>
+
+
+## super()
+* this() 와 비슷합니다.
+* 상위 클래스에 기본생성자가 없으면 에러가 발생하게 됩니다.
+
+```
+public class Test {
+    public static void main(String[] args) {
+        Student s = new Student();
+    }
+}
+
+class Human {
+    Human() {
+        System.out.println("휴먼 클래스 생성자");
+    }
+}
+
+class Student extends Human { // Human 클래스로부터 상속
+    Student() {    
+        super(); // Human 클래스의 생성자 호출
+        System.out.println("학생 클래스 생성자");
+    }
+}
+
+// 출력값
+휴먼 클래스 생성자
+학생 클래스 생성자
+```
+
+<br/><br/>
+
+## 클래스의 정점, Object 클래스
+* Object 클래스는 자바의 클래스 상속계층도에서 최상위에 위치한 상위클래스입니다.
+
+```
+class ParentEx {  //  컴파일러가 "extends Object" 자동 추가 
+
+}
+
+class ChildEx extends ParentEx {
+
+}
+```
