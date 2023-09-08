@@ -1,0 +1,143 @@
+---
+layout: post
+title: 캡슐화
+date: 2023-09-08
+categories:
+---
+
+# 캡슐화
+
+* 캡슐화란 특정 객체 안에 관련된 속성과 기능을 하나의 캡슐(capsule)로 만들어 데이터를 외부로부터 보호하는 것입니다.
+* 첫째는 데이터 보호의 목적이고, 둘째로 내부적으로만 사용되는 데이터에 대한 불필요한 외부 노출을 방지하기 위함입니다.
+* 외부로부터 객체의 속성과 기능이 함부로 변경되지 못하게 막고, 데이터가 변경되더라도 다른 객체에 영향을 주지 않기에 독립성을 확보할 수 있습니다.
+
+## 패키지
+* 패키지(package)란 특정한 목적을 공유하는 클래스와 인터페이스의 묶음을 의미합니다.
+* 패키지는 클래스들을 그룹 단위로 묶어 효과적으로 관리하기 위한 목적입니다.
+* 계층 구조 간 구분은 점(.)으로 표현됩니다.
+* 클래스의 충돌을 방지해 주는 기능을 합니다. 
+
+## Import 문
+* import 문은 다른 패키지 내의 클래스를 사용하기 위해 사용합니다.
+
+```
+
+package practicepack.test2; // import 문을 사용하는 경우
+
+import practicepack.test.ExampleImp // import 문 작성, (import 패키지 명.클래스 명; 또는 import 패키지 명.*;)
+
+public class PackageImp {
+		public static void main(String[] args) {
+			ExampleImp x = new ExampleImp(); // 이제 패키지 명을 생략 가능
+		}
+}
+```
+
+## 접근 제어자
+
+### 제어자(Modifier)
+
+* 제어자는 클래스, 필드, 메서드, 생성자 등에 부가적인 의미를 부여하는 키워드를 의미합니다.
+> 접근 제어자	public, protected, (default), private <br>
+> 기타 제어자	static, final, abstract, native, transient, synchronized 등
+
+### 접근 제어자(Access Modifier)
+* 접근 제어자를 사용하면 클래스 외부로의 불필요한 데이터 노출을 방지(data hiding)할 수 있고, 외부로부터 데이터가 임의로 변경되지 않도록 막을 수 있습니다. 이것은 데이터 보호의 측면에서 매우 중요하다고 할 수 있습니다.
+
+|접근 제어자 |	접근 제한 범위 |
+|---|---|
+|private	|동일 클래스에서만 접근 가능|
+|default	|동일 패키지 내에서만 접근 가능|
+|protected	|동일 패키지 + 다른 패키지의 하위 클래스에서 접근 가능|
+|public	|접근 제한 없음|
+
+* public(접근 제한 없음) > protected(동일 패키지 + 하위클래스) > default(동일 패키지) > private(동일 클래스) 순
+
+```
+package package2; // package2 
+
+//파일명 Test2.java
+import package1.Parent;
+
+class Child extends package1.Parent {  // package1으로부터 Parent 클래스를 상속
+    public void printEach() {
+        // System.out.println(a); // 에러 발생!
+        // System.out.println(b);
+        System.out.println(c); // 다른 패키지의 하위 클래스
+        System.out.println(d);
+    }
+}
+
+public class Test2 {
+    public static void main(String[] args) {
+        Parent p = new Parent();
+
+//        System.out.println(p.a); // public을 제외한 모든 호출 에러!
+//        System.out.println(p.b);
+//        System.out.println(p.c);
+        System.out.println(p.d);
+    }
+}
+```
+
+
+## getter와 setter 메서드
+
+* 객체지향의 캡슐화의 목적을 달성하면서도 데이터의 변경이 필요한 경우에 사용합니다.
+* 예를 들면 private 접근 제어자가 포함되어 있는 객체의 변수의 데이터 값을 추가하거나 수정하고 싶을 때 사용합니다.
+
+```
+public class GetterSetterTest {
+    public static void main(String[] args) {
+        Worker w = new Worker();
+        w.setName("김코딩");
+        w.setAge(30);
+        w.setId(5);
+
+        String name = w.getName();
+        System.out.println("근로자의 이름은 " + name);
+        int age = w.getAge();
+        System.out.println("근로자의 나이는 " + age);
+        int id = w.getId();
+        System.out.println("근로자의 ID는 " + id);
+    }
+}
+
+class Worker {
+    private String name; // 변수의 은닉화. 외부로부터 접근 불가
+    private int age;
+    private int id;
+
+    public String getName() { // 멤버변수의 값 
+        return name;
+    }
+
+    public void setName(String name) { // 멤버변수의 값 변경
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        if(age < 1) return;
+        this.age = age;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+}
+
+// 출력값
+근로자의 이름은 김코딩
+근로자의 나이는 30
+근로자의 ID는 5
+```
+
+
