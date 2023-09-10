@@ -1,0 +1,164 @@
+---
+layout: post
+title: 다향성
+date: 2023-09-10
+categories:
+---
+
+# 다향성
+
+* 하나의 객체가 여러 가지 형태를 가질 수 있는 성질을 의미합니다.
+* 다형성은 한 타입의 참조 변수를 통해 여러 타입의 객체를 참조할 수 있도록 만든 것을 의미합니다.
+* 상위 클래스 타입의 참조 변수를 통해서 하위 클래스의 객체를 참조할 수 있도록 허용한 것이라 할 수 있습니다.
+* 오버라이딩과 메서드 오버로딩 또한 다형성의 한 예시라 할 수 있습니다.
+
+```
+public class FriendTest {
+
+    public static void main(String[] args) {
+        Friend friend = new Friend(); // 객체 타입과 참조 변수 타입의 일치 -> 가능
+        BoyFriend boyfriend = new BoyFriend();
+        Friend girlfriend = new GirlFriend(); // 객체 타입과 참조 변수 타입의 불일치 -> 가능
+	//  GirlFriend friend1 = new Friend(); -> 하위클래스 타입으로 상위클래스 객체 참조 -> 불가능
+
+        friend.friendInfo();
+        boyfriend.friendInfo();
+        girlfriend.friendInfo();
+    }
+```
+
+## 참조 변수의 타입 변환
+
+* 타입 변환을 위해서는 다음의 세 가지 조건
+
+> 서로 상속 관계에 있는 상위 클래스 - 하위 클래스 사이에만 타입 변환이 가능합니다. <br>
+하위 클래스 타입에서 상위 클래스 타입으로의 타입 변환(업캐스팅)은 형 변환 연산자(괄호)를 생략할 수 있습니다. <br>
+반대로 상위 클래스에서 하위 클래스 타입으로 변환(다운캐스팅)은 형 변환 연산자(괄호)를 반드시 명시해야 합니다.  <br>
+또한, 다운 캐스팅은 업 캐스팅이 되어 있는 참조 변수에 한해서만 가능합니다.  <br>
+
+```
+public class VehicleTest {
+    public static void main(String[] args) {
+        Car car = new Car();
+        Vehicle vehicle = (Vehicle) car; // 상위 클래스 Vehicle 타입으로 변환(생략 가능)
+        Car car2 = (Car) vehicle; // 하위 클래스 Car타입으로 변환(생략 불가능)
+        MotorBike motorBike = (MotorBike) car; // 상속 관계가 아니므로 타입 변환 불가 -> 에러발생
+    }
+}
+
+class Vehicle {
+    String model;
+    String color;
+    int wheels;
+
+    void startEngine() {
+        System.out.println("시동 걸기");
+    }
+
+    void accelerate() {
+        System.out.println("속도 올리기");
+    }
+
+    void brake() {
+        System.out.println("브레이크!");
+    }
+}
+
+class Car extends Vehicle {
+    void giveRide() {
+        System.out.println("다른 사람 태우기");
+    }
+}
+
+class MotorBike extends Vehicle {
+    void performance() {
+        System.out.println("묘기 부리기");
+    }
+}
+```
+참조 변수의 타입 변환은 서로 상속 관계에 있는 관계에서는 양방향으로 수행될 수 있으나, 상위 클래스로의 타입 변환이냐(괄호 생략 가능) 아니면 하위 클래스로의 타입 변환이냐(괄호 생략 불가)에 따라서 약간의 차이가 있습니다.
+
+### instanceof 연산자
+* 캐스팅이 가능한지 여부를 boolean 타입으로 확인할 수 있습니다.
+* 참조_변수 instanceof 타입을 입력했을 때 리턴 값이 true가 나오면 참조 변수가 검사한 타입으로 타입 변환이 가능하며, 반대로 false가 나오는 경우에는 타입 변환이 불가능합니다.
+
+```
+public class InstanceOfExample {
+    public static void main(String[] args) {
+        Animal animal = new Animal();
+        System.out.println(animal instanceof Object); //true
+        System.out.println(animal instanceof Animal); //true
+        System.out.println(animal instanceof Bat); //false
+
+        Animal cat = new Cat();
+        System.out.println(cat instanceof Object); //true
+        System.out.println(cat instanceof Animal); //true
+        System.out.println(cat instanceof Cat); //true
+        System.out.println(cat instanceof Bat); //false
+    }
+}
+
+class Animal {};
+class Bat extends Animal{};
+class Cat extends Animal{};
+```
+
+# 다향성 예제
+
+```
+package package2;
+
+public class PolymorphismEx {
+  public static void main(String[] args) {
+    Customer customer = new Customer();
+    customer.buyCoffee(new Americano());
+    customer.buyCoffee(new CaffeLatte());
+
+    System.out.println("현재 잔액은 " + customer.money + "원 입니다.");
+  }
+}
+
+class Coffee {
+  int price;
+
+  public Coffee(int price) {
+    this.price = price;
+  }
+}
+
+class Americano extends Coffee {
+  public Americano() {
+    super(4000); // 상위 클래스 Coffee의 생성자를 호출
+  }
+
+  public String toString() {return "아메리카노";}; //Object클래스 toString()메서드 오버라이딩
+};
+
+class CaffeLatte extends Coffee {
+  public CaffeLatte() {
+    super(5000);
+  }
+
+  public String toString() {return "카페라떼";};
+};
+
+class Customer {
+  int money = 50000;
+
+  void buyCoffee(Coffee coffee) {
+    if (money < coffee.price) { // 물건 가격보다 돈이 없는 경우
+      System.out.println("잔액이 부족합니다.");
+      return;
+    }
+    money = money - coffee.price; // 가진 돈 - 커피 가격
+    System.out.println(coffee + "를 구입했습니다.");
+  }
+}
+
+// 출력값
+아메리카노를 구입했습니다.
+카페라떼를 구입했습니다.
+현재 잔액은 41000원 입니다.
+```
+
+
