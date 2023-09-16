@@ -1,0 +1,105 @@
+---
+layout: post
+title: 열거형(enum)
+date: 2023-09-16
+categories:
+---
+
+# Enum
+
+* 기존 방식
+
+```
+class Seasons {
+    public static final Seasons SPRING = new Seasons();
+    public static final Seasons SUMMER = new Seasons();
+    public static final Seasons FALL   = new Seasons();
+    public static final Seasons WINTER = new Seasons();
+}
+
+class Frameworks {
+    public static final Frameworks DJANGO  = new Frameworks();
+    public static final Frameworks SPRING  = new Frameworks();
+    public static final Frameworks NEST    = new Frameworks();
+    public static final Frameworks EXPRESS = new Frameworks();
+}
+```
+
+* 적용 후
+
+```
+enum Seasons { SPRING, SUMMER, FALL, WINTER }
+enum Frameworks { DJANGO, SPRING, NEST, EXPRESS }
+```
+
+<br/><br/>
+
+## Enum 활용 예제
+
+* 적용 전
+
+```
+class Seasons {
+    public static final Seasons SPRING = new Seasons();
+    public static final Seasons SUMMER = new Seasons();
+    public static final Seasons FALL   = new Seasons();
+    public static final Seasons WINTER = new Seasons();
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Seasons seasons = Seasons.SPRING;
+        switch (seasons) {
+            case Seasons.SPRING:
+                System.out.println("봄");
+                break;
+            case Seasons.SUMMER:
+                System.out.println("여름");
+                break;
+            case Seasons.FALL:
+                System.out.println("가을");
+                break;
+            case Seasons.WINTER:
+                System.out.println("겨울");
+                break;
+        }
+    }
+}
+
+/*
+출력값 
+java: incompatible types: Seasons cannot be converted to int
+*/
+
+// 오류 이유:  switch문의 조건은 char, byte, short, int, Character, Byte, Short, Integer, String, enum 타입만 가능하지만, 위의 seasons는 사용자 정의 타입이기 때문입니다.
+
+```
+
+* 적용 후
+
+```
+enum Seasons {SPRING, SUMMER, FALL, WINTER}
+
+public class Main {
+    public static void main(String[] args) {
+        Seasons seasons = Seasons.SPRING;
+        switch (seasons) {
+            case SPRING:
+                System.out.println("봄");
+                break;
+            case SUMMER:
+                System.out.println("여름");
+                break;
+            case FALL:
+                System.out.println("가을");
+                break;
+            case WINTER:
+                System.out.println("겨울");
+                break;
+        }
+    }
+}
+
+//출력값 
+봄
+```
