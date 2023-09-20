@@ -1,0 +1,83 @@
+---
+layout: post
+title: 예외처리
+date: 2023-09-20
+categories:
+---
+
+# 예외처리
+
+## 컴파일 에러
+
+* 주로 세미콜론 생략, 오탈자, 잘못된 자료형, 잘못된 포맷 등 문법적인 문제를 가리키는 신택스(syntax) 오류로부터 발생하기 때문에 신택스 에러(Syntax Errors)라고 부르기도 합니다.
+
+## 런타임 에러
+
+* 런타임 에러는 주로 개발자가 컴퓨터가 수행할 수 없는 특정한 작업을 요청할 때 발생합니다.
+
+## try - catch문
+* 예외 처리란 잠재적으로 발생할 수 있는 비정상 종료나 오류에 대비하여 정상 실행을 유지할 수 있도록 처리하는 코드 작성 과정을 의미합니다.
+
+```
+  public static void main(String[] args) {
+
+        try {
+            System.out.println("[소문자 알파벳을 대문자로 출력하는 프로그램]");
+            printMyName(null); // (1) 예외 발생
+            printMyName("abc"); // 이 코드는 실행되지 않고 catch 문으로 이동
+        } 
+        catch (ArithmeticException e) {
+            System.out.println("ArithmeticException 발생!"); // (2) 첫 번째 catch문
+        } 
+        catch (NullPointerException e) { // (3) 두 번째 catch문
+            System.out.println("NullPointerException 발생!"); 
+            System.out.println("e.getMessage: " + e.getMessage()); 
+            System.out.println("e.toString: " + e.toString()); 
+            e.printStackTrace();
+        } 
+        finally {
+            System.out.println("[프로그램 종료]"); // (3) finally문
+        }
+    }
+
+    static void printMyName(String str) {
+        String upperCaseAlphabet = str.toUpperCase();
+        System.out.println(upperCaseAlphabet);
+    }
+}
+
+// 출력값
+[소문자 알파벳을 대문자로 출력하는 프로그램]
+NullPointerException 발생!
+e.getMessage: null
+e.toString: java.lang.NullPointerException
+[프로그램 종료]
+java.lang.NullPointerException
+	at RuntimeExceptionTest.printMyName(RuntimeExceptionTest.java:20)
+	at RuntimeExceptionTest.main(RuntimeExceptionTest.java:7)
+```
+
+## 예외 전가
+
+* 메서드의 선언부 끝에 아래와 같이 throws 키워드와 발생할 수 있는 예외들을 쉼표로 구분하여서 나열합니다.
+
+```
+public class ThrowExceptionTest {
+
+    public static void main(String[] args) {
+        try {
+            throwException();
+        } catch (ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    static void throwException() throws ClassNotFoundException, NullPointerException {
+        Class.forName("java.lang.StringX");
+    }
+}
+
+//출력값
+java.lang.StringX
+```
+
