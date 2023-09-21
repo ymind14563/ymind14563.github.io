@@ -1,0 +1,345 @@
+---
+layout: post
+title: 컬렉션 프레임워크
+date: 2023-09-21
+categories:
+---
+
+# 컬렉션 프레임워크
+
+컬렉션 프레임워크는 특정 자료 구조에 데이터를 추가하고, 삭제하고, 수정하고, 검색하는 등의 동작을 수행하는 편리한 메서드들을 제공해 줍니다.
+
+<br/><br/>
+
+## 1. List
+> List는 데이터의 순서가 유지되며, 중복 저장이 가능한 컬렉션을 구현하는 데에 사용됩니다.<br>
+ArrayList, Vector, Stack, LinkedList 등이 List 인터페이스를 구현합니다.
+
+<br>
+
+
+> 1-1. ArrayList
+* ArrayList에 객체를 추가하면 객체가 인덱스로 관리된다는 점에서는 배열과 유사합니다. 그러나 배열은 생성될 때 크기가 고정되며, 크기를 변경할 수 없는 반면, ArrayList는 저장 용량을 초과하여 객체들이 추가되면, 자동으로 저장용량이 늘어나게 됩니다. 또한, 리스트 계열 자료구조의 특성을 이어받아 데이터가 연속적으로 존재합니다. 즉, 데이터의 순서를 유지합니다.
+
+```
+public class ArrayListExample {
+	public static void main(String[] args) {
+
+		// ArrayList를 생성하여 list에 할당
+		ArrayList<String> list = new ArrayList<String>();
+
+		// String 타입의 데이터를 ArrayList에 추가
+		list.add("Java");
+		list.add("egg");
+		list.add("tree");
+
+		// 저장된 총 객체 수 얻기
+		int size = list.size(); 
+
+		// 0번 인덱스의 객체 얻기
+		String skill = list.get(0);
+
+		// 저장된 총 객체 수 만큼 조회
+		for(int i = 0; i < list.size(); i++){
+			String str = list.get(i);
+			System.out.println(i + ":" + str);
+		}
+
+		// for-each문으로 순회 
+		for (String str: list) {
+			System.out.println(str);
+		}		
+
+		// 0번 인덱스 객체 삭제
+		list.remove(0);
+	}
+}
+````
+
+<br>
+
+
+> 1-2. LinkedList
+
+* LinkedList 컬렉션은 데이터를 효율적으로 추가, 삭제, 변경하기 위해 사용합니다. 배열에는 모든 데이터가 연속적으로 존재하지만, LinkedList에는 불연속적으로 존재하며, 이 데이터는 서로 연결(link)되어 있습니다.
+
+```
+public class LinkedListExample {
+	public static void main(String[] args) {
+		
+		// Linked List를 생성하여 list에 할당
+		LinkedList<String> list = new LinkedList<>();
+
+		// String 타입의 데이터를 LinkedList에 추가
+		list.add("Java");
+		list.add("egg");
+		list.add("tree");
+
+		// 저장된 총 객체 수 얻기
+		int size = list.size(); 
+
+		// 0번 인덱스의 객체 얻기
+		String skill = list.get(0);
+
+		// 저장된 총 객체 수 만큼 조회
+		for(int i = 0; i < list.size(); i++){
+			String str = list.get(i);
+			System.out.println(i + ":" + str);
+		}
+
+		// for-each문으로 순회
+		for (String str: list) {
+			System.out.println(str);
+		}		
+
+		// 0번 인덱스 객체 삭제
+		list.remove(0);
+	}
+}
+```
+
+<br>
+
+
+* ArrayList와 LinkedList 차이
+
+> ArrayList의 장점:<br>
+데이터를 순차적으로 추가하거나 삭제하는 경우: ArrayList는 순차적인 데이터 추가 및 삭제가 빠르며 효율적입니다. 새로운 요소를 배열의 끝에 추가하거나 삭제할 때는 해당 요소 이후의 요소들을 모두 이동할 필요가 없기 때문입니다.
+데이터를 불러오는 경우: ArrayList는 인덱스를 통해 바로 데이터에 접근할 수 있으므로 데이터를 불러오는 속도가 빠릅니다.
+
+> ArrayList의 단점:<br>
+중간에 데이터를 추가하거나 삭제하는 경우: ArrayList는 중간에 위치한 데이터를 추가하거나 삭제할 때 해당 요소 이후의 요소들을 모두 이동해야 하므로 비효율적입니다.
+데이터 검색 시 속도: 데이터를 검색할 때는 시작 인덱스에서부터 찾고자 하는 데이터까지 순차적으로 각 요소에 접근해야 하므로 데이터 검색에 있어서는 LinkedList보다 상대적으로 속도가 느립니다.
+
+> LinkedList의 장점:<br>
+중간에 위치하는 데이터를 추가하거나 삭제하는 경우: LinkedList는 데이터를 중간에 추가하거나 삭제할 때 이전 노드와 다음 노드의 주소값만 변경하면 되므로 다른 요소들을 이동시킬 필요가 없어 효율적입니다.
+
+> LinkedList의 단점:<br>
+데이터를 순차적으로 추가하거나 삭제하는 경우: LinkedList는 순차적인 데이터 추가 및 삭제가 비효율적입니다. 맨 끝에 요소를 추가하거나 삭제할 때는 ArrayList보다 느릴 수 있습니다.
+데이터 검색 시 속도: 데이터를 검색할 때는 시작 노드부터 순차적으로 다음 노드로 이동해야 하므로 ArrayList보다 상대적으로 속도가 느립니다.<br><br>
+따라서, 데이터의 잦은 변경이 예상되는 경우에는 LinkedList를, 데이터의 개수가 변하지 않고 데이터를 빈번하게 검색하는 경우에는 ArrayList를 사용하는 것이 좋습니다.
+
+<br/><br/>
+
+
+
+## 2. Set
+> Set은 데이터의 순서가 유지되지 않으며, 중복 저장이 불가능한 컬렉션을 구현하는 데에 사용됩니다.<br>
+HashSet, TreeSet 등이 Set 인터페이스를 구현합니다.
+
+<br>
+
+
+> 2-1. HashSet
+* Set 인터페이스의 특성을 그대로 물려받으므로 중복된 값을 허용하지 않으며, 저장 순서를 유지하지 않습니다.
+
+```
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+
+				// HashSet 생성
+        HashSet<String > languages = new HashSet<String>();
+
+				// HashSet에 객체 추가
+        languages.add("Python"); 
+        languages.add("Java");
+        languages.add("Javascript");
+        languages.add("C++");
+        languages.add("Kotlin");
+        languages.add("Ruby");
+        languages.add("Java"); // 중복
+
+				// 반복자 생성하여 it에 할당
+        Iterator it = languages.iterator();
+
+				// 반복자를 통해 HashSet을 순회하며 각 요소들을 출력
+        while(it.hasNext()) {
+            System.out.println(it.next());
+        }
+    }
+}
+/*
+Java
+C++
+Javascript
+Ruby
+Python
+Kotlin
+*/
+```
+
+* 참고: Java 가 먼저 나오는 이유
+> HashSet의 내부 해시 함수가 사용되는 해시 테이블에서 자바 문자열이 해시 충돌이 적게 발생하여 더 빨리 인덱스에 배치될 수 있습니다.
+Java의 해시 코드가 다른 문자열에 비해 더 작거나 혹은 해시 테이블의 해시 함수 구현에 의해 더 빨리 해시 충돌을 피할 수 있습니다.
+자바 문자열이 해시 테이블의 버킷에 더 적게 충돌을 유발할 수 있습니다. 
+
+<br>
+
+
+> 2-2. TreeSet
+
+```
+import java.util.TreeSet;
+
+public class TreeSetExample {
+    public static void main(String[] args) {
+
+				// TreeSet 생성
+        TreeSet<String> workers = new TreeSet<>();
+
+				// TreeSet에 요소 추가
+        workers.add("Lee Java");
+        workers.add("Park Hacker");
+        workers.add("Kim Coding");
+
+        System.out.println(workers);
+        System.out.println(workers.first());
+        System.out.println(workers.last());
+        System.out.println(workers.higher("Lee"));
+        System.out.println(workers.subSet("Kim", "Park"));
+    }
+}
+```
+
+<br/><br/>
+
+
+## 3. Map
+> Map은 키(key)와 값(value)의 쌍으로 데이터를 저장하는 컬렉션을 구현하는 데에 사용됩니다. <br>
+데이터의 순서가 유지되지 않으며, 키는 값을 식별하기 위해 사용되므로 중복 저장이 불가능하지만, 값은 중복 저장이 가능합니다. <br>
+HashMap, HashTable, TreeMap, Properties 등
+
+<br>
+
+
+> 3-1. HashMap
+
+* HashMap은 해시 함수를 통해 '키'와 '값'이 저장되는 위치를 결정하므로, 사용자는 그 위치를 알 수 없고, 삽입되는 순서와 위치 또한 관계가 없습니다.
+* HashMap은 이름 그대로 해싱(Hashing)을 사용하기 때문에 많은 양의 데이터를 검색하는 데 있어서 뛰어난 성능을 보입니다.
+
+```
+import java.util.*;
+
+public class HashMapExample {
+    public static void main(String[] args) {
+
+	    // HashMap 생성
+        HashMap<String, Integer> map = new HashMap<>();
+
+        // Entry 객체 저장
+        map.put("피카츄", 85);
+        map.put("꼬부기", 95);
+        map.put("야도란", 75);
+        map.put("파이리", 65);
+        map.put("피존투", 15);
+
+        // 저장된 총 Entry 수 얻기
+        System.out.println("총 entry 수: " + map.size());
+
+        // 객체 찾기
+        System.out.println("파이리 : " + map.get("파이리"));
+				
+        // key를 요소로 가지는 Set을 생성 -> 아래에서 순회하기 위해 필요합니다. 
+        Set<String> keySet = map.keySet();
+
+        // keySet을 순회하면서 value를 읽어옵니다. 
+        Iterator<String> keyIterator = keySet.iterator();
+        while(keyIterator.hasNext()) {
+            String key = keyIterator.next();
+            Integer value = map.get(key);
+            System.out.println(key + " : " + value);
+        }
+
+        // 객체 삭제
+        map.remove("피존투");
+
+        System.out.println("총 entry 수: " + map.size());
+
+        // Entry 객체를 요소로 가지는 Set을 생성 -> 아래에서 순회하기 위해 필요합니다. 
+        Set<Map.Entry<String, Integer>> entrySet = map.entrySet();
+
+        // entrySet을 순회하면서 value를 읽어옵니다. 
+        Iterator<Map.Entry<String, Integer>> entryIterator = entrySet.iterator();
+        while(entryIterator.hasNext()) {
+            Map.Entry<String, Integer> entry = entryIterator.next();
+            String key = entry.getKey(); // Map.Entry 인터페이스의 메서드
+            Integer value = entry.getValue(); // Map.Entry 인터페이스의 메서드
+            System.out.println(key + " : " + value);
+        }
+
+        // 객체 전체 삭제
+        map.clear();
+    }
+}
+```
+
+<br>
+
+> 3-2. Hashtable
+
+```
+import java.util.*;
+
+public class HashtableExample {
+    public static void main(String[] args){
+
+        Hashtable<String, String> map = new Hashtable<String, String>();
+
+        map.put("Spring", "345");
+        map.put("Summer", "678");
+        map.put("Fall", "91011");
+        map.put("Winter", "1212");
+
+        System.out.println(map);
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("아이디와 비밀번호를 입력해 주세요");
+            System.out.println("아이디");
+            String id = scanner.nextLine();
+
+            System.out.println("비밀번호");
+            String password = scanner.nextLine();
+
+            if (map.containsKey(id)) {
+                if (map.get(id).equals(password)) {
+                    System.out.println("로그인 되었습니다.");
+                    break;
+                } 
+                else System.out.println("비밀번호가 일치하지 않습니다. ");
+            } 
+            else System.out.println("입력하신 아이디가 존재하지 않습니다.");
+        }
+    }
+}
+```
+
+<br/><br/>
+
+## 4. Iterator
+
+* Iterator는 직역하면 반복자라는 의미가 있으며, 컬렉션에 저장된 요소들을 순차적으로 읽어오는 역할을 합니다.
+
+```
+ArrayList<String> list = ...;
+Iterator<String> iterator = list.iterator();
+
+while(iterator.hasNext()){        // 다음 객체가 있다면
+	String str = iterator.next();   // 객체를 읽어오고,
+	if(str.equals("str과 같은 단어")){ // 조건에 부합한다면
+		iterator.remove();            // 해당 객체를 컬렉션에서 제거합니다. 
+	}
+}
+```
+<br/><br/>
+
+## * 컬렉션 클래스 정리
+
+![Hy72L5ZfkO8oT5ShU6zuK-1650171466371](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/30f412a8-0f9f-4b62-9354-79dfea15d314)
+
+출처: codestates
+
+
