@@ -1,0 +1,183 @@
+---
+layout: post
+title: 람다식과 스트림
+date: 2023-09-27
+categories:
+---
+
+# 1. 람다식
+
+* 람다식은 함수(메서드)를 좀 더 간단하고 편리하게 표현하기 위해 고안된 문법 요소입니다.
+
+
+```
+// 기존 방식
+void example1() {
+	System.out.println(5);
+}
+
+// 람다식
+() -> {System.out.println(5);}
+
+// 기존 방식
+void example3(String str) {
+	System.out.println(str);
+}
+
+// 람다식
+(String str) -> {	System.out.println(str);}
+
+// 기존 방식
+int sum(int num1, int num2) {
+	return num1 + num2;
+}
+
+// 람다식
+(int num1, int num2) -> {
+	num1 + num2
+}
+
+```
+
+# 2. 스트림
+
+> * 스트림 처리 과정은 생성, 중간 연산, 최종 연산 세 단계의 파이프라인으로 구성될 수 있다.
+* 스트림은 원본 데이터 소스를 변경하지 않는다(read-only).
+* 스트림은 일회용이다(onetime-only).
+* 스트림은 내부 반복자이다.
+
+* Iterator를 사용한 반복 처리
+
+```
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+public class PrintNumberOperator {
+    public static void main(String[] args) {
+        // 각 숫자를 배열화
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+
+        // Iterator 생성
+        Iterator<Integer> it = list.iterator();
+
+        // 리스트를 순회하며 값 출력
+        while (it.hasNext()) {
+            int num = it.next();
+            System.out.print(num);
+        }
+    }
+}
+
+//출력값
+12345
+```
+
+* 스트림을 사용한 반복 처리
+
+```
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class PrintNumberOperatorByStream {
+    public static void main(String[] args) {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+        Stream<Integer> stream = list.stream();
+        stream.forEach(System.out::print);
+    }
+}
+
+//출력값
+12345
+```
+
+* 명령형 프로그래밍 방식
+
+```
+import java.util.List;
+
+public class ImperativeProgramming {
+    public static void main(String[] args){
+        // List에 있는 숫자 중에서 4보다 큰 짝수의 합계 구하기
+        List<Integer> numbers = List.of(1, 3, 6, 7, 8, 11);
+        int sum = 0;
+
+        for(int number : numbers){
+            if(number > 4 && (number % 2 == 0)){
+                sum += number;
+            }
+        }
+
+        System.out.println("명령형 프로그래밍을 사용한 합계 : " + sum);
+    }
+}
+
+//출력값
+명령형 프로그래밍을 사용한 합계 : 14
+```
+
+* 선언형 프로그래밍 방식
+
+```
+import java.util.List;
+
+public class DeclarativePrograming {
+    public static void main(String[] args){
+        // List에 있는 숫자들 중에서 4보다 큰 짝수의 합계 구하기
+        List<Integer> numbers = List.of(1, 3, 6, 7, 8, 11);
+
+        int sum =
+                numbers.stream()
+                        .filter(number -> number > 4 && (number % 2 == 0))
+                        .mapToInt(number -> number)
+                        .sum();
+
+        System.out.println("선언형 프로그래밍을 사용한 합계 : " + sum);
+    }
+}
+
+//출력값
+선언형 프로그래밍을 사용한 합계 : 14
+```
+
+# 3. File
+
+```
+import java.io.*;
+
+public class FileExample {
+    public static void main(String args[]) throws IOException {
+            File file = new File("../ABC.txt");
+
+            System.out.println(file.getPath());
+            System.out.println(file.getParent());
+            System.out.println(file.getCanonicalPath());
+            System.out.println(file.canWrite());
+    }
+}
+```
+
+* 현재 디렉토리(.)에서 확장자가 .txt인 파일만을 대상으로, 파일명 앞에 “code”라는 문자열을 붙여주는 예제
+
+```
+import java.io.File;
+
+public class FileClassExample {
+    public static void main(String[] args) {
+
+        File parentDir = new File("./");
+        File[] list = parentDir.listFiles();
+
+        String prefix = "code";
+
+        for(int i =0; i <list.length; i++) {
+            String fileName = list[i].getName();
+
+						if(fileName.endsWith("txt") && !fileName.startsWith("code")) {
+                list[i].renameTo(new File(parentDir, prefix + fileName));
+            }
+        }
+    }
+}
+```
