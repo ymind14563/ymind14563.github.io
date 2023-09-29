@@ -1,0 +1,168 @@
+---
+layout: post
+title: Stack과 Queue
+
+date: 2023-09-29
+categories:
+---
+
+# 1. Stack
+
+* 자료 구조 Stack의 특징은 입력과 출력이 하나의 방향으로 이루어지는 제한적 접근에 있습니다.
+* LIFO(Last In First Out) 혹은 FILO(First In Last Out) 특징을 가지고 있습니다.
+* Stack에 데이터를 넣는 것을 'PUSH', 데이터를 꺼내는 것을 'POP'이라고 합니다.
+* 데이터는 하나씩 넣고 뺄 수 있습니다.
+* ex) 일렬 주차장
+
+### Stack 자료 구조의 장점
+
+* 스택은 후입선출(LIFO) 구조를 가지기 때문에, 스택에 저장된 데이터를 가져오는 속도가 매우 빠릅니다.
+
+### Stack 자료 구조의 단점
+
+* 크기 제한이 없다.
+* Stack 클래스는 Vector 클래스를 상속받아 구현되어 있어, 크기를 동적으로 조정하지 않습니다.
+
+## 예제 (괄호를 포함한 계산기)
+```
+import java.util.*;
+
+public class Calculator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("수식을 입력하세요: ");
+        String input = sc.nextLine();
+        double result = evaluate(input);
+        System.out.println("결과: " + result);
+    }
+
+    public static double evaluate(String expression) {
+        Stack<Double> numbers = new Stack<>();
+        Stack<Character> operators = new Stack<>();
+        int len = expression.length();
+        for (int i = 0; i < len; i++) {
+            char ch = expression.charAt(i);
+            if (Character.isDigit(ch)) {
+                double num = ch - '0';
+                while (i + 1 < len && Character.isDigit(expression.charAt(i + 1))) {
+                    num = num * 10 + (expression.charAt(i + 1) - '0');
+                    i++;
+                }
+                numbers.push(num);
+            } else if (ch == '(') {
+                operators.push(ch);
+            } else if (ch == ')') {
+                while (operators.peek() != '(') {
+                    double result = applyOperation(operators.pop(), numbers.pop(), numbers.pop());
+                    numbers.push(result);
+                }
+                operators.pop();
+            } else if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+                while (!operators.isEmpty() && hasPrecedence(ch, operators.peek())) {
+                    double result = applyOperation(operators.pop(), numbers.pop(), numbers.pop());
+                    numbers.push(result);
+                }
+                operators.push(ch);
+            }
+        }
+        while (!operators.isEmpty()) {
+            double result = applyOperation(operators.pop(), numbers.pop(), numbers.pop());
+            numbers.push(result);
+        }
+        return numbers.pop();
+    }
+
+    public static double applyOperation(char operator, double b, double a) {
+        switch (operator) {
+            case '+':
+                return a + b;
+            case '-':
+                return a - b;
+            case '*':
+                return a * b;
+            case '/':
+                if (b == 0) {
+                    throw new UnsupportedOperationException("Cannot divide by zero");
+                }
+                return a / b;
+        }
+        return 0;
+    }
+
+    public static boolean hasPrecedence(char op1, char op2) {
+        if (op2 == '(' || op2 == ')') {
+            return false;
+        }
+        if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-')) {
+            return false;
+        }
+        return true;
+    }
+}
+```
+# 2. Queue
+* Queue는 데이터(data)가 입력된 순서대로 처리할 때 주로 사용합니다.
+* FIFO (First In First Out) 특징을 가지고 있습니다.
+* 두 개의 입출력 방향을 가지고 있습니다.
+* 데이터는 하나씩 넣고 뺄 수 있습니다.
+* ex) 톨게이트, 줄서기
+
+### Queue 자료 구조의 장점
+
+* 자료를 먼저 넣은 순서대로 데이터를 꺼내서 처리할 수 있습니다.처리해야 할 작업이 여러 개 있을 경우, 효율적인 처리가 가능합니다.
+* Queue는 삽입과 삭제가 각각 양 끝에서 이루어지며 원소를 삭제하는 연산이 없으므로, 다른 자료 구조에 비해 상대적으로 빠른 속도를 보입니다.
+
+
+### Queue 자료 구조의 단점
+
+* 자료 구조의 가장 앞에서 데이터를 꺼내는 연산과 가장 뒤에서 데이터를 추가하는 연산만 가능하기 때문에, 중간에 있는 데이터를 조회하거나 수정하는 연산에는 적합하지 않습니다.
+* 크기 제한이 없어서 메모리의 낭비가 발생할 수 있습니다.
+* iterator() 메서드가 지원되지 않는다. ( peek() 메서드와 poll() 메서드를 사용하여 각각의 데이터를 차례대로 가져와야 합니다.)
+
+## 예제 (규칙에 따라 문자열 변경하기)
+
+```
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class StringTransformation {
+		public static void main(String[] args) {
+        // 사용자로부터 문자열을 입력받습니다.
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("문자열을 입력해 주세요 : ");
+        String input = scanner.nextLine();
+
+        // 변환된 문자열을 계산합니다.
+        String transformedString = transformString(input);
+
+        // 변환된 문자열을 출력합니다.
+        System.out.println("변경된 문자열입니다 : " + transformedString);
+    }
+
+    public static String transformString(String input) {
+        Queue<Character> queue = new LinkedList<>();
+        StringBuilder output = new StringBuilder();
+
+        // 문자열의 각 문자를 큐에 넣습니다.
+        for (char c : input.toCharArray()) {
+            queue.offer(c);
+        }
+
+        // 큐가 비어있지 않은 동안 규칙에 따라 문자를 변환합니다.
+        while (!queue.isEmpty()) {
+            output.append(queue.poll()); // 큐에서 문자를 하나 꺼내 출력
+
+            // 큐가 비어있지 않다면, 그다음 문자를 큐에서 꺼내서 큐의 뒤로 다시 넣습니다.
+            if (!queue.isEmpty()) {
+                queue.offer(queue.poll());
+            }
+        }
+
+        return output.toString();
+    }
+}
+```
+
+
+
