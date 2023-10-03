@@ -1,0 +1,187 @@
+---
+layout: post
+title: SQL
+date: 2023-10-02
+categories:
+---
+
+### SQL
+
+## 데이터베이스 명령어
+
+* 테이블 생성
+```
+CREATE DATABASE 데이터베이스_이름;
+```
+* 데이터베이스 사용
+```
+USE 데이터베이스_이름;
+```
+
+* 테이블 생성
+```
+CREATE TABLE user (
+  id int PRIMARY KEY AUTO_INCREMENT,
+  name varchar(255),
+  email varchar(255)
+);
+```
+
+* 테이블 정보확인
+```
+mysql> describe user;
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(255) | YES  |     | NULL    |                |
+| email | varchar(255) | YES  |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+```
+
+## SQL 명령어
+* SELECT
+```
+SELECT 'hello world'
+```
+* FROM: 테이블과 관련한 작업을 할 경우 반드시 입력해야 합니다. FROM 뒤에는 결과를 도출해 낼 데이터베이스 테이블을 명시합니다.
+```
+SELECT 특성_1
+FROM 테이블_이름
+```
+
+* WHERE: 필터 역할을 하는 쿼리문입니다. WHERE은 선택적으로 사용할 수 있습니다.
+```
+SELECT 특성_1, 특성_2
+FROM 테이블_이름
+WHERE 특성_1 = "특정 값" // 동일한 데이터 찾기
+WHERE 특성_2 <> "특정 값" // 제외한 값을 찾기
+WHERE 특성_2 LIKE "%특정 문자열%" // 비슷한 값들을 필터할 때에는 'LIKE'와 '\%' 혹은 '\*'를 사용
+WHERE 특성_2 IN ("특정값_1", "특정값_2") // 리스트의 값들과 일치하는 데이터를 필터할 때에는 'IN'
+WHERE 특성_1 IS NULL // NULL'을 찾을 때에는 'IS'
+WHERE 특성_1 IS NOT NULL // 값이 없는 경우를 제외할 때에는 'NOT'
+```
+
+* ORDER BY: 돌려받는 데이터 결과를 어떤 기준으로 정렬하여 출력할지 결정합니다.
+```
+SELECT *
+FROM 테이블_이름
+ORDER BY 특성_1 //기본: 오름차순
+ORDER BY 특성_1 DESC // 내림차순
+```
+
+* LIMIT
+```
+SELECT *
+FROM 테이블_이름
+LIMIT 200 // 200개만 출력
+```
+
+* DISTINCT
+```
+SELECT DISTINCT 특성_1 // 특성_1을 기준으로 유니크한 값들만 선택
+FROM 테이블_이름
+//
+SELECT
+  DISTINCT // 특성_1, 특성_2, 특성_3의 유니크한 '조합' 값들을 선택
+    특성_1
+    ,특성_2
+    ,특성_3
+FROM 테이블_이름
+```
+
+* OUTER JOIN
+```
+SELECT *
+FROM 테이블_1
+LEFT OUTER JOIN 테이블_2 ON 테이블_1.특성_A = 테이블_2.특성_B // 'LEFT OUTER JOIN'으로 LEFT INCLUSIVE을 실행
+RIGHT OUTER JOIN 테이블_2 ON 테이블_1.특성_A = 테이블_2.특성_B // 'RIGHT OUTER JOIN'으로 RIGHT INCLUSIVE을 실행
+```
+
+
+### SQL 명령어 예시
+
+-- 데이터베이스 생성
+```
+CREATE DATABASE my_database;
+```
+
+-- 테이블 생성
+```
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+-- 데이터 삽입
+```
+INSERT INTO users (username, email) VALUES ('john_doe', 'john@example.com');
+```
+
+-- 데이터 조회
+```
+SELECT * FROM users;
+```
+
+-- 조건부 데이터 조회
+```
+SELECT * FROM users WHERE id = 1;
+```
+
+-- 데이터 업데이트
+```
+UPDATE users SET email = 'john_new@example.com' WHERE id = 1;
+```
+
+-- 데이터 삭제
+```
+DELETE FROM users WHERE id = 1;
+```
+<br/><br/>
+
+# SQL vs. NoSQL 데이터베이스
+
+## 차이점
+
+### 데이터 저장 (Storage)
+
+- **SQL**: 테이블 형태로 구조화된 데이터 저장.
+- **NoSQL**: 다양한 방식(key-value, document, wide-column, graph)으로 데이터 저장.
+
+### 스키마 (Schema)
+
+- **SQL**: 고정된 형식의 스키마 필요. 수정 시 전체 데이터베이스 수정 필요.
+- **NoSQL**: 동적으로 스키마 관리 가능. 새로운 열 추가 시 즉시 가능.
+
+### 쿼리 (Querying)
+
+- **SQL**: SQL을 사용하여 구조화된 쿼리 언어로 데이터 요청.
+- **NoSQL**: 비구조화된 쿼리 언어로 데이터 그룹 조회.
+
+### 확장성 (Scalability)
+
+- **SQL**: 주로 수직적 확장으로 높은 비용 소요.
+- **NoSQL**: 주로 수평적 확장으로 비용 저렴.
+
+## 사용 케이스
+
+### SQL 데이터베이스
+
+- **ACID 성질 필요한 경우**: 금융 서비스 등.
+- **구조화된 데이터 사용**: 데이터 일관성이 필요한 경우.
+
+### NoSQL 데이터베이스
+
+- **구조화되지 않은 대용량 데이터 저장**: 블로그, SNS 등.
+- **비용 효율적 확장이 필요한 경우**: 클라우드 서비스 활용.
+- **빠르게 서비스를 구축하고 데이터 구조를 자주 업데이트**: 프로토타입, 개발 초기 단계.
+
+## 결론
+
+어떤 데이터베이스를 선택할지는 사용 사례에 따라 다릅니다. <br>
+보통은 ACID 성질이 필요한 경우에는 SQL, 대용량 및 빠른 확장이 필요한 경우에는 NoSQL을 사용합니다. <br>
+종종 두 가지를 혼합하여 사용하여 최상의 결과를 얻습니다.
