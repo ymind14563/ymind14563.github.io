@@ -1,0 +1,86 @@
+---
+layout: post
+title: MVC
+date: 2023-11-04
+categories: SPRING
+---
+
+# MVC
+
+* Model
+
+Spring MVC 기반의 웹 애플리케이션이 클라이언트의 요청을 전달받으면 요청 사항을 처리하기 위한 작업을 합니다.
+
+이렇게 처리한 작업의 결과 데이터를 클라이언트에게 응답으로 돌려줘야 하는데, 이때 클라이언트에게 응답으로 돌려주는 작업의 처리 결과 데이터를 Model이라고 합니다.
+
+* View
+
+Model 데이터를 이용해서 웹브라우저 같은 클라이언트 애플리케이션의 화면에 보이는 리소스(Resource)를 제공하는 역할을 합니다.
+
+```
+public class JsonExample {
+    public static void main(String[] args) {
+        Coffee coffee = new Coffee("아메리카노", "Americano", 3000);
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(coffee);
+
+        System.out.println(jsonString);
+   }
+}
+
+/*코드 실행 결과
+{"korName":"아메리카노","engName":"Americano","price":3000}
+*/
+```
+
+* Controller
+
+클라이언트 측의 요청을 직접적으로 전달받는 엔드포인트(Endpoint)로써 Model과 View의 중간에서 상호 작용을 해주는 역할을 합니다.
+
+```
+@RestController
+@RequestMapping(path = "/v1/coffee")
+public class CoffeeController {                 
+    private final CoffeeService coffeeService;
+
+    CoffeeController(CoffeeService coffeeService) {
+        this.coffeeService = coffeeService;
+    }
+
+    @GetMapping("/{coffee-id}")  // (1) @GetMapping 애노테이션을 통해 클라이언트 측의 요청을 수신
+    public Coffee getCoffee(@PathVariable("coffee-id") long coffeeId) {
+        return coffeeService.findCoffee(coffeeId); // (2) CoffeeService 클래스의 findCoffee() 메서드를 호출해서 비즈니스 로직을 처리
+    }
+}
+```
+
+## Spring MVC의 동작 방식과 구성 요소
+![mOBBYB4R6JbDjgJ32DNif-1655088735317](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/c82f6ce5-94e0-4dc4-ab00-4316966a0fa5)
+
+
+1. 클라이언트의 요청은 DispatcherServlet 클래스로 전달됩니다.
+
+2. DispatcherServlet은 HandlerMapping 인터페이스를 통해 요청을 처리할 Controller를 검색합니다.
+
+3. HandlerMapping은 해당 요청에 맞는 핸들러 객체를 DispatcherServlet에 반환합니다. 핸들러 객체는 Controller의 Handler 메서드 정보를 포함합니다.
+
+4. DispatcherServlet은 HandlerAdapter를 통해 실제 핸들러 메서드를 호출합니다.
+
+5. HandlerAdapter는 Controller의 Handler 메서드를 호출합니다.
+
+6. Handler 메서드는 비즈니스 로직을 처리하고 Model 데이터를 반환합니다.
+
+7. HandlerAdapter는 Model 데이터와 View 정보를 DispatcherServlet에 반환합니다.
+
+8. DispatcherServlet은 ViewResolver를 통해 View를 검색합니다.
+
+9. ViewResolver는 View를 찾아서 반환합니다.
+
+10. DispatcherServlet은 View를 통해 Model 데이터를 전달하여 응답 데이터를 생성합니다.
+
+11. View는 응답 데이터를 생성하여 DispatcherServlet에 반환합니다.
+
+12. DispatcherServlet은 응답 데이터를 클라이언트에게 전달합니다.
+
+
+출처: codestates
