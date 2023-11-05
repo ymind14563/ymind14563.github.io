@@ -1,0 +1,128 @@
+---
+layout: post
+title: Controller
+date: 2023-11-05
+categories: SPRING
+---
+
+# Controller
+## 1. 클래스 설계 및 구조 생성
+
+```
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController // (1)
+@RequestMapping("/v1/coffees") // (2)
+public class CoffeeController {
+}
+```
+(1) @RestController
+
+- Spring MVC에서는 특정 클래스에 @RestController를 추가하면 해당 클래스가 REST API의 리소스(자원, Resource)를 처리하기 위한 API 엔드포인트로 동작함을 정의합니다.
+- 또한 @RestController가 추가된 클래스는 애플리케이션 로딩 시, Spring Bean으로 등록해 줍니다.
+
+(2) @RequestMapping
+
+- @RequestMapping은 클라이언트의 요청과 클라이언트 요청을 처리하는 핸들러 메서드(Handler Method)를 매핑해 주는 역할을 합니다.
+
+## 2. 핸들러 메서드(Handler Method)
+
+```
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(value = "/v1/members", produces = {MediaType.APPLICATION_JSON_VALUE})
+public class MemberController {
+    @PostMapping // 클라이언트의 요청 데이터(request body)를 서버에 생성할 때 사용하는 애너테이션
+    public String postMember( // 회원 정보를 등록해 주는 핸들러 메서드
+			     @RequestParam("email") String email, // 클라이언트 쪽에서 전송하는 요청 데이터를 서버 쪽에서 전달받을 때 사용하는 애너테이션
+                             @RequestParam("name") String name,
+                             @RequestParam("phone") String phone) {
+        System.out.println("# email: " + email);
+        System.out.println("# name: " + name);
+        System.out.println("# phone: " + phone);
+        
+        String response =
+                "{\"" + 
+                   "email\":\""+email+"\"," + 
+                   "\"name\":\""+name+"\",\"" + 
+                   "phone\":\"" + phone+ 
+                "\"}";
+        return response; // postMember() 핸들러 메서드의 리턴 타입은 현재는 String입니다.
+
+    }
+
+    @GetMapping("/{member-id}") // 클라이언트가 서버에 리소스를 조회할 때 사용하는 애너테이션
+    public String getMember(@PathVariable("member-id")long memberId) { // @PathVariable의 괄호 안에 입력한 문자열 값은 @GetMapping("/{member-id}")처럼 중괄호({ }) 안의 문자열과 동일
+        System.out.println("# memberId: " + memberId);
+
+        // not implementation
+        return null;
+    }
+
+    @GetMapping
+    public String getMembers() { // 회원 목록을 클라이언트에게 제공하는 핸들러 메서드
+        System.out.println("# get Members");
+
+        // not implementation
+        return null;
+    }
+}
+```
+![hjL4xDrLRcm34cXfka3qO-1655087288749](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/916a06e7-99dc-40bb-844d-690e91ef72ee)
+
+출처: codestates
+
+
+## 3. 응답 데이터에 ResponseEntity 적용
+
+```
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/v1/members") // (1) produces 설정 제거됨
+public class MemberController {
+    @PostMapping
+    public ResponseEntity postMember(@RequestParam("email") String email,
+                                     @RequestParam("name") String name,
+                                     @RequestParam("phone") String phone) {
+        // (2) JSON 문자열 수작업을 Map 객체로 대체
+        Map<String, String> map = new HashMap<>();
+        map.put("email", email);
+        map.put("name", name);
+        map.put("phone", phone);
+
+        // (3) 리턴 값을 ResponseEntity 객체로 변경
+        return new ResponseEntity<>(map, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{member-id}")
+    public ResponseEntity getMember(@PathVariable("member-id") long memberId) {
+        System.out.println("# memberId: " + memberId);
+
+        // not implementation
+
+        // (4) 리턴 값을 ResponseEntity 객체로 변경
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getMembers() {
+        System.out.println("# get Members");
+
+        // not implementation
+
+        // (5) 리턴 값을 ResponseEntity 객체로 변경
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+}
+```
+
+
