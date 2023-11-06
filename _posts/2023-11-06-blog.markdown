@@ -1,0 +1,302 @@
+---
+layout: post
+title: DTO
+date: 2023-11-06
+categories: SPRING
+---
+
+# DTO(Data Transfer Object)
+
+* 클라이언트의 요청 데이터를 하나의 객체로 모두 전달받을 수 있어 코드가 간결해지고 유지보수가 편해집니다.
+* DTO 클래스가 바로 요청 데이터를 하나의 객체로 전달받는 역할을 해줍니다.
+
+## DTO 적용 전 후 차이
+```
+@RestController
+@RequestMapping("/v1/members")
+public class MemberController {
+    @PostMapping
+    public ResponseEntity postMember(@RequestParam("email") String email,
+                                     @RequestParam("name") String name,
+                                     @RequestParam("phone") String phone) {
+        Map<String, String> map = new HashMap<>();
+        map.put("email", email);
+        map.put("name", name);
+        map.put("phone", phone);
+
+        return new ResponseEntity<Map>(map, HttpStatus.CREATED);
+    }
+
+		...
+		...
+}
+```
+
+*DTO 적용 후
+```
+@RestController
+@RequestMapping("/v1/members")
+public class MemberController {
+    @PostMapping
+    public ResponseEntity postMember(MemberDto memberDto) {
+        return new ResponseEntity<MemberDto>(memberDto, HttpStatus.CREATED);
+    }
+
+		...
+		...
+}
+```
+
+<br/><br/>
+
+## DTO 적용 예시
+```
+public class MemberPostDto {
+    private String email;
+    private String name;
+    private String phone;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+}
+```
+
+```
+public class MemberPatchDto {
+    private long memberId;
+    private String name;
+    private String phone;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public long getMemberId() {
+        return memberId;
+    }
+
+    public void setMemberId(long memberId) {
+        this.memberId = memberId;
+    }
+}
+```
+
+* 
+
+```
+
+import com.codestates.member.MemberPatchDto;
+import com.codestates.member.MemberPostDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/v1/members")
+public class MemberController {
+    // 회원 정보 등록
+    @PostMapping
+    public ResponseEntity postMember(@RequestBody MemberPostDto memberPostDto) {
+        return new ResponseEntity<>(memberPostDto, HttpStatus.CREATED);
+    }
+
+    // 회원 정보 수정
+    @PatchMapping("/{member-id}")
+    public ResponseEntity patchMember(@PathVariable("member-id") long memberId,
+                                      @RequestBody MemberPatchDto memberPatchDto) {      // (1)
+        memberPatchDto.setMemberId(memberId);
+        memberPatchDto.setName("홍길동");
+
+        // No need Business logic
+
+        return new ResponseEntity<>(memberPatchDto, HttpStatus.OK);
+    }
+
+    // 한명의 회원 정보 조회
+    @GetMapping("/{member-id}")
+    public ResponseEntity getMember(@PathVariable("member-id") long memberId) {
+        System.out.println("# memberId: " + memberId);
+
+        // not implementation
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // 모든 회원 정보 조회
+    @GetMapping
+    public ResponseEntity getMembers() {
+        System.out.println("# get Members");
+
+        // not implementation
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // 회원 정보 삭제
+    @DeleteMapping("/{member-id}")
+    public ResponseEntity deleteMember(@PathVariable("member-id") long memberId) {
+        // No need business logic
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+}
+```
+* @RequestParam을 사용하는 대신에 DTO 클래스를 사용해서 postMember()에서는 MemberPostDto, patchMember()에서는 MemberPatchDto 클래스의 객체를 통해서 Request Body를 한 번에 전달받을 수 있도록 수정했습니다.
+
+
+> (1) @RequestBody 애너테이션
+MemberPostDto 클래스 앞에 붙은 @RequestBody 애너테이션은 JSON 형식의 Request Body를 MemberPostDto 클래스의 객체로 변환을 시켜주는 역할을 합니다.
+
+<br/><br/>
+
+
+## DTO 유효성 검증(Validation)
+
+DTO 클래스에 유효성 검증을 적용하기 위해서는 Spring Boot에서 지원하는 Starter가 필요합니다.
+build.gradle 파일의 dependencies 항목에 'org.springframework.boot:spring-boot-starter-validation’을 추가합니다.
+
+```
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	...
+}
+```
+
+```
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
+public class MemberPostDto {
+    @NotBlank
+    @Email
+    private String email;
+
+    @NotBlank(message = "이름은 공백이 아니어야 합니다.")
+    private String name;
+
+    @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", //참고: 정규 표현식
+            message = "휴대폰 번호는 010으로 시작하는 11자리 숫자와 '-'로 구성되어야 합니다.")
+    private String phone;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+}
+```
+```
+@RestController
+@RequestMapping("/v1/members")
+public class MemberController {
+    @PostMapping
+    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberDto) {
+        return new ResponseEntity<>(memberDto, HttpStatus.CREATED);
+    }
+		...
+		...
+}
+```
+유효성 검증 애너테이션이 추가된 DTO 클래스에서 유효성 검증 로직이 실행되게 하기 위해서는 [코드 3-34]의 postMember()와 같이 DTO 클래스에 @Valid 애너테이션을 추가해야 합니다.
+
+* 유효하지 않은 데이터를 핸들러 메서드로 전송
+![jjyhAQgufwsGKEDwtgHXt-1655085674751](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/2e921ec9-b38a-45dc-894d-43badfa72e52)
+
+* 응답 결과는 Response Satus가 400인 ‘Bad Request’를 전달받았습니다.
+
+* IntelliJ IDE에서 확인
+
+```
+2022-05-09 19:30:11.684  WARN 23164 --- [nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved
+[org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public
+org.springframework.http.ResponseEntity
+com.codestates.chapter.d_dto.member.DtoValidationMemberController.postMember(com.codestates.chapter.d_dto.member.dto_vali
+//              바로 아래의 3 errors
+dation.ValidationMemberPostDto) with 3 errors: [Field error in object 'validationMemberPostDto' on field 'name': rejected value []; 
+codes [NotBlank.validationMemberPostDto.name,NotBlank.name,NotBlank.java.lang.String,NotBlank]; arguments 
+[org.springframework.context.support.DefaultMessageSourceResolvable: codes [validationMemberPostDto.name,name]; arguments 
+[]; default message [name]]; default message [이름은 공백이 아니어야 합니다.]] [Field error in object 'validationMemberPostDto' on field 
+'email': rejected value [hgd@]; codes [Email.validationMemberPostDto.email,Email.email,Email.java.lang.String,Email]; arguments 
+[org.springframework.context.support.DefaultMessageSourceResolvable: codes [validationMemberPostDto.email,email]; arguments 
+[]; default message [email],[Ljavax.validation.constraints.Pattern$Flag;@2eb735aa,.*]; default message [올바른 형식의 이메일 주소여야 
+합니다]] [Field error in object 'validationMemberPostDto' on field 'phone': rejected value [010-1234-56781]; codes 
+[Pattern.validationMemberPostDto.phone,Pattern.phone,Pattern.java.lang.String,Pattern]; arguments 
+[org.springframework.context.support.DefaultMessageSourceResolvable: codes [validationMemberPostDto.phone,phone]; 
+arguments []; default message [phone],[Ljavax.validation.constraints.Pattern$Flag;@1375b56c,^\d{3}-\d{3,4}-\d{4}$]; default 
+message [휴대폰 번호는 010으로 시작하는 11자리 숫자와 '-'로 구성되어야 합니다.]] ]
+```
+
+<br/><br/>
+
+
+
+### 참고: 정규 표현식
+* name 멤버 변수에 사용한 “^\\S+(\\s?\\S+)*$” 정규 표현식에서
+
+- ‘^’은 문자열의 시작을 의미합니다.
+- ‘$’는 문자열의 끝을 의미합니다.
+- ‘*’는 ‘*’ 앞에 평가할 대상이 0개 또는 1개 이상인지를 평가합니다.
+- ‘\s’는 공백 문자열을 의미합니다.
+- ‘\S’ 공백 문자열이 아닌 나머지 문자열을 의미합니다.
+- ‘?’는 ‘?’ 앞에 평가할 대상이 0개 또는 1개인지를 의미합니다.
+- ‘+’는 ‘+’ 앞에 평가할 대상이 1개인지를 의미합니다.
+- “^\\S+(\\s?\\S+)*$”를 정규 표현식으로 추가하면 아래 예시의 문자열은 유효성 검증에 실패합니다.
+
+* 유효성 검증 실패 예)
+
+- ”” → 공백 문자만 있으므로 검증 실패
+- ” 홍길동” → 시작 문자가 공백이므로 검증 실패
+- ”홍길동 “ → 끝 문자가 공백이므로 검증 실패
+- “홍 길동” → 문자와 문자 사이의 공백이 1개를 초과하므로 검증 실패
