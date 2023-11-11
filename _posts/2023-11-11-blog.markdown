@@ -1,0 +1,271 @@
+---
+layout: post
+title: Service (DI)
+date: 2023-11-11
+categories: SPRING
+---
+
+# MemberController(MemberService 작성 전)
+
+```
+@RestController
+@RequestMapping("/v1/members")
+@Validated
+public class MemberController {
+    @PostMapping
+    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberDto) {
+        return new ResponseEntity<>(memberDto, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{member-id}")
+    public ResponseEntity patchMember(
+            @PathVariable("member-id") @Positive long memberId,
+            @Valid @RequestBody MemberPatchDto memberPatchDto) {
+        memberPatchDto.setMemberId(memberId);
+
+        // No need Business logic
+
+        return new ResponseEntity<>(memberPatchDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/{member-id}")
+    public ResponseEntity getMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        System.out.println("# memberId: " + memberId);
+
+        // not implementation
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getMembers() {
+        System.out.println("# get Members");
+
+        // not implementation
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{member-id}")
+    public ResponseEntity deleteMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        System.out.println("# memberId: " + memberId);
+        // No need business logic
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+}
+```
+
+# MemberService 기본 구조
+```
+import java.util.List;
+
+public class MemberService {
+    public Member createMember(Member member) {
+        return null;
+    }
+
+    public Member updateMember(Member member) {
+        return null;
+    }
+
+    public Member findMember(long memberId) {
+        return null;
+    }
+
+    public List<Member> findMembers() {
+        return null;
+    }
+
+    public void deleteMember(long memberId) {
+
+    }
+}
+```
+
+# Member 클래스 구현 (Entity 작성)
+
+```
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Member {
+    private long memberId;
+    private String email;
+    private String name;
+    private String phone;
+}
+```
+* @Getter, @Setter 애너테이션은 lombok이라는 라이브러리에서 제공하는 애너테이션으로서 우리가 DTO 클래스를 작성하면서 각 멤버 변수에 해당하는 getter/setter 메서드를 자동으로 작성해줍니다. <br>
+* @AllArgsConstructor 애너테이션은 현재 Member 클래스에 추가된 모든 멤버 변수를 파라미터로 갖는 Member 생성자를 자동으로 생성해 줍니다. <br>
+* @NoArgsConstructor는 파라미터가 없는 기본 생성자를 자동으로 생성해 줍니다.  <br>
+
+# MemberService 클래스 구현
+
+```
+public class MemberService {
+    public Member createMember(Member member) {
+        // TODO should business logic
+
+        // TODO member 객체는 나중에 DB에 저장 후, 되돌려 받는 것으로 변경 필요.
+        Member createdMember = member;
+        return createdMember;
+    }
+
+    public Member updateMember(Member member) {
+        // TODO should business logic
+
+        // member 객체는 나중에 DB에 업데이트 후, 되돌려 받는 것으로 변경 필요.
+        Member updatedMember = member;
+        return updatedMember;
+    }
+
+    public Member findMember(long memberId) {
+        // TODO should business logic
+
+        // TODO member 객체는 나중에 DB에서 조회 하는 것으로 변경 필요.
+        Member member = 
+                new Member(memberId, "hgd@gmail.com", "홍길동", "010-1234-5678");
+        return member;
+    }
+
+    public List<Member> findMembers() {
+        // TODO should business logic
+
+        // TODO member 객체는 나중에 DB에서 조회하는 것으로 변경 필요.
+        List<Member> members = List.of(
+                new Member(1, "hgd@gmail.com", "홍길동", "010-1234-5678"),
+                new Member(2, "lml@gmail.com", "이몽룡", "010-1111-2222")
+        );
+        return members;
+    }
+
+    public void deleteMember(long memberId) {
+        // TODO should business logic
+    }
+}
+```
+
+# DI(Dependency Injection)없이 비즈니스 계층과 API 계층 연동
+```
+@RestController
+@RequestMapping("/v2/members")
+@Validated
+public class MemberController {
+    private final MemberService memberService;
+
+    public MemberController() {
+        this.memberService = new MemberService(); // (1)
+    }
+
+    @PostMapping
+    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberDto) {
+        // (2)
+        Member member = new Member();
+        member.setEmail(memberDto.getEmail());
+        member.setName(memberDto.getName());
+        member.setPhone(memberDto.getPhone());
+
+        // (3)
+        Member response = memberService.createMember(member);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{member-id}")
+    public ResponseEntity patchMember(
+            @PathVariable("member-id") @Positive long memberId,
+            @Valid @RequestBody MemberPatchDto memberPatchDto) {
+        memberPatchDto.setMemberId(memberId);
+
+        // (4)
+        Member member = new Member();
+        member.setMemberId(memberPatchDto.getMemberId());
+        member.setName(memberPatchDto.getName());
+        member.setPhone(memberPatchDto.getPhone());
+
+        // (5)
+        Member response = memberService.updateMember(member);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{member-id}")
+    public ResponseEntity getMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        // (6)
+        Member response = memberService.findMember(memberId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getMembers() {
+        // (7)
+        List<Member> response = memberService.findMembers();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{member-id}")
+    public ResponseEntity deleteMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        System.out.println("# delete member");
+
+        // (8)
+        memberService.deleteMember(memberId);
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+}
+```
+(1)은 MemberService 클래스를 사용하기 위해 MemberService 클래스의 객체를 생성하고 있습니다. 객체 생성은 new 키워드를 사용합니다.
+
+(2)는 클라이언트에서 전달받은 DTO 클래스의 정보를 MemberService의 createMember() 메서드의 파라미터로 전달하기 위해 MemberPostDto 클래스의 정보를 Member 클래스에 채워 넣고 있습니다. 단순히 MemberPostDto 객체를 서비스 계층에 전달하는 것이 더 깔끔할 수 있습니다. 이 부분은 아래의 [매퍼(Mapper)를 이용한 DTO 객체 ↔ 엔티티(Entity) 객체 매핑] 챕터에서 자세히 설명하겠습니다.
+
+(3)은 회원 정보 등록을 위해 MemberService 클래스의 createMember() 메서드를 호출합니다. 이는 서비스 계층과의 연결 지점입니다.
+
+(4)는 클라이언트에서 전달받은 DTO 클래스의 정보를 MemberService의 updateMember() 메서드의 파라미터로 전달하기 위해 MemberPatchDto 클래스의 정보를 Member 클래스에 채워 넣고 있습니다.
+
+(5)는 회원 정보 수정을 위해 MemberService 클래스의 updateMember() 메서드를 호출합니다. 이 역시 서비스 계층과의 연결 지점입니다.
+
+(6)은 한 명의 회원 정보 조회를 위해 MemberService 클래스의 findMember() 메서드를 호출합니다. 특정 회원의 정보를 조회하는 기준인 memberId를 파라미터로 넘겨줍니다. 또한, 이 역시 서비스 계층과의 연결 지점입니다.
+
+(7)은 모든 회원의 정보를 조회하기 위해 MemberService 클래스의 findMembers() 메서드를 호출합니다.
+
+(8)은 한 명의 회원 정보를 삭제하기 위해 MemberService 클래스의 deleteMember() 메서드를 호출합니다. 특정 회원의 정보를 삭제하는 기준인 memberId를 파라미터로 넘겨줍니다.
+
+# DI를 적용한 비즈니스 계층과 API 계층 연동
+
+```
+@RestController
+@RequestMapping("/v3/members")
+@Validated
+public class MemberController {
+    private final MemberService memberService;
+
+		// (1) MemberController의 변경 포인트
+    public MemberController(MemberService memberService) {
+        this.memberService = memberService;
+    }
+		
+		...
+		...
+}
+```
+* Spring에서 DI를 통해서 어떤 객체를 주입받기 위해서는 주입을 받는 클래스와 주입 대상 클래스 모두 Spring Bean이어야 합니다.
+* MemberController의 경우, @RestController 애너테이션이 추가되어 있으므로 Spring Bean입니다.
+
+```
+@Service
+public class MemberService {
+		// 내부 코드는 [코드 3-45]와 동일.
+    ...
+		...
+}
+```
+* @Service 애너테이션을 추가함으로써 MemberService 클래스는 Spring Bean이 됩니다.
+
+* 참고: 
+일반적으로 생성자가 하나일 경우에는 @Autowired 애너테이션을 붙이지 않아도 Spring이 알아서 DI를 적용합니다.
+하지만, 생성자가 하나 이상일 경우, DI를 적용하기 위한 생성자에 반드시 @Autowired 애너테이션을 붙여야 한다는 사실을 기억하기 바랍니다.
