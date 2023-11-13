@@ -1,0 +1,272 @@
+---
+layout: post
+title: Mapper
+date: 2023-11-13
+categories: SPRING
+---
+
+# Mapper
+
+## 이전 Service 에서의 문제점
+* MemberController의 핸들러 메서드가 DTO 클래스를 엔티티(Entity) 클래스로 변환하는 작업까지 도맡아서 하고 있다.
+* 엔티티(Entity) 클래스의 객체를 클라이언트의 응답으로 전송함으로써 계층 간의 역할 분리가 이루어지지 않았다.
+
+> -> 해결방안
+* DTO 클래스를 엔티티 클래스로 변환하는 작업을 핸들러 메서드가 하지 않고, 다른 클래스에게 변환해 달라고 요청하면 됩니다.
+* 클라이언트의 응답으로 엔티티 클래스를 전송하지 말고, 이 엔티티 클래스의 객체를 DTO 클래스의 객체로 다시 바꿔주면 됩니다.
+
+> **결국 DTO 클래스와 엔티티(Entity) 클래스를 서로 변환해 주는 매퍼(Mapper)가 필요합니다.**
+
+# Mapper 구현
+
+```
+@Component  // (1)
+public class MemberMapper {
+		// (2) MemberPostDto를 Member로 변환
+    public Member memberPostDtoToMember(MemberPostDto memberPostDto) {
+        return new Member(0L,
+                memberPostDto.getEmail(), 
+                memberPostDto.getName(), 
+                memberPostDto.getPhone());
+    }
+
+		// (3) MemberPatchDto를 Member로 변환
+    public Member memberPatchDtoToMember(MemberPatchDto memberPatchDto) {
+        return new Member(memberPatchDto.getMemberId(),
+                null, 
+                memberPatchDto.getName(), 
+                memberPatchDto.getPhone());
+    }
+
+    // (4) Member를 MemberResponseDto로 변환
+    public MemberResponseDto memberToMemberResponseDto(Member member) {
+        return new MemberResponseDto(member.getMemberId(),
+                member.getEmail(), 
+                member.getName(), 
+                member.getPhone());
+    }
+}
+```
+(1)은 MemberMapper를 Spring의 Bean으로 등록하기 위해서 @Component 애너테이션을 추가했습니다. 등록된 Bean은 MemberController에서 사용됩니다.
+(2)는 MemberPostDto 클래스를 Member 클래스로 변환해 주는 메서드입니다.
+(3)은 MemberPatchDto 클래스를 Member 클래스로 변환해 주는 메서드입니다.
+(4)는 Member 클래스를 MemberResponseDto 클래스로 변환해 주는 메서드입니다.
+
+# MemberResponseDto 클래스 생성
+
+```
+@Getter
+@AllArgsConstructor
+public class MemberResponseDto {
+    private long memberId;
+
+    private String email;
+
+    private String name;
+
+    private String phone;
+}
+```
+# MemberController의 핸들러 메서드에 매퍼(Mapper) 클래스 적용
+
+```
+@RestController
+@RequestMapping("/v4/members")
+@Validated
+public class MemberController {
+    private final MemberService memberService;
+    private final MemberMapper mapper;
+
+		// (1) MemberMapper DI
+    public MemberController(MemberService memberService, MemberMapper mapper) {
+        this.memberService = memberService;
+        this.mapper = mapper;
+    }
+
+    @PostMapping
+    public ResponseEntity postMember(@Valid @RequestBody MemberPostDto memberDto) {
+				// (2) 매퍼를 이용해서 MemberPostDto를 Member로 변환
+        Member member = mapper.memberPostDtoToMember(memberDto);
+
+        Member response = memberService.createMember(member);
+
+				// (3) 매퍼를 이용해서 Member를 MemberResponseDto로 변환
+        return new ResponseEntity<>(mapper.memberToMemberResponseDto(response), 
+                HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{member-id}")
+    public ResponseEntity patchMember(
+            @PathVariable("member-id") @Positive long memberId,
+            @Valid @RequestBody MemberPatchDto memberPatchDto) {
+        memberPatchDto.setMemberId(memberId);
+
+				// (4) 매퍼를 이용해서 MemberPatchDto를 Member로 변환
+        Member response = 
+              memberService.updateMember(mapper.memberPatchDtoToMember(memberPatchDto));
+
+        // (5) 매퍼를 이용해서 Member를 MemberResponseDto로 변환
+        return new ResponseEntity<>(mapper.memberToMemberResponseDto(response), 
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/{member-id}")
+    public ResponseEntity getMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        Member response = memberService.findMember(memberId);
+
+				// (6) 매퍼를 이용해서 Member를 MemberResponseDto로 변환
+        return new ResponseEntity<>(mapper.memberToMemberResponseDto(response), 
+                HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getMembers() {
+        List<Member> members = memberService.findMembers();
+
+				// (7) 매퍼를 이용해서 List<Member>를 MemberResponseDto로 변환
+        List<MemberResponseDto> response =
+                members.stream()
+                        .map(member -> mapper.memberToMemberResponseDto(member))
+                        .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{member-id}")
+    public ResponseEntity deleteMember(
+            @PathVariable("member-id") @Positive long memberId) {
+        System.out.println("# delete member");
+        memberService.deleteMember(memberId);
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+}
+```
+(1)에서는 Spring Bean에 등록된 MemberMapper 객체를 MemberController에서 사용하기 위해 DI로 주입받고 있습니다. <br>
+(2)에서는 MemberMapper 클래스를 이용해서 MemberPostDto를 Member로 변환하고 있습니다. <br>
+(3)에서는 MemberMapper 클래스를 이용해서 Member를 MemberResponseDto로 변환하고 있습니다. <br>
+(4)에서는 MemberMapper 클래스를 이용해서 MemberPatchDto를 Member로 변환하고 있습니다. <br>
+(5), (6)에서는 MemberMapper 클래스를 이용해서 Member를 MemberResponseDto로 변환하고 있습니다. <br>
+(7)의 경우, memberService.findMembers()를 통해 리턴되는 값이 List 이므로 List 안의 Member 객체들을 하나씩 꺼내어서 MemberResponseDto 객체로 변환해주어야 하는데, 이 작업은 Java의 Stream이 해주고 있습니다.
+
+# MapStruct를 이용한 Mapper 자동 생성
+* 도메인 업무 기능이 늘어날 때마다 개발자가 일일이 수작업으로 매퍼(Mapper) 클래스를 만드는 것은 비효율적입니다.
+
+* MapStruct 관련 의존 라이브러리를 Gradle의 build.gradle 파일에 아래와 같이 추가해야 합니다.
+
+```
+dependencies {
+	...
+	...
+	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+}
+```
+
+build.gradle 파일에 의존 라이브러리를 추가한 후에는 아래와 같이 Gradle 프로젝트를 reload해야 합니다.
+1. IntelliJ IDE 우측의 [Gradle] 탭을 클릭한다.
+2. IntelliJ 프로젝트명 위에서 마우스 우클릭
+3. 컨텍스트 메뉴에서 [Reload Gradle Project] 또는 [Refresh Gradle Dependencies]를 클릭해서 프로젝트 또는 의존 라이브러리를 갱신합니다.
+
+# MapStruct 기반의 매퍼(Mapper) 인터페이스 정의
+
+```
+package com.codestates.member.mapstruct.mapper;
+
+import com.codestates.member.dto.MemberPatchDto;
+import com.codestates.member.dto.MemberPostDto;
+import com.codestates.member.dto.MemberResponseDto;
+import com.codestates.member.entity.Member;
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")  // (1)
+public interface MemberMapper {
+    Member memberPostDtoToMember(MemberPostDto memberPostDto);
+    Member memberPatchDtoToMember(MemberPatchDto memberPatchDto);
+    MemberResponseDto memberToMemberResponseDto(Member member);
+}
+```
+* @Mapper 애너테이션을 추가함으로써 해당 인터페이스는 MapStruct의 매퍼 인터페이스로 정의가 되는 것입니다.
+* @Mapper 애너테이션의 애트리뷰트로 componentModel = "spring"을 지정해 주면 Spring의 Bean으로 등록됩니다.
+
+
+# 자동 생성된 Mapper 인터페이스 구현 클래스 확인
+* MapStruct가 자동으로 생성해 준 MemberMapper 인터페이스의 구현 클래스는 Gradle의 build task를 실행하면 자동으로 생성됩니다.
+```
+@Component
+public class MemberMapperImpl implements MemberMapper {
+    public MemberMapperImpl() {
+    }
+
+    public Member memberPostDtoToMember(MemberPostDto memberPostDto) {
+        if (memberPostDto == null) {
+            return null;
+        } else {
+            Member member = new Member();
+            member.setEmail(memberPostDto.getEmail());
+            member.setName(memberPostDto.getName());
+            member.setPhone(memberPostDto.getPhone());
+            return member;
+        }
+    }
+
+    public Member memberPatchDtoToMember(MemberPatchDto memberPatchDto) {
+        if (memberPatchDto == null) {
+            return null;
+        } else {
+            Member member = new Member();
+            member.setMemberId(memberPatchDto.getMemberId());
+            member.setName(memberPatchDto.getName());
+            member.setPhone(memberPatchDto.getPhone());
+            return member;
+        }
+    }
+
+    public MemberResponseDto memberToMemberResponseDto(Member member) {
+        if (member == null) {
+            return null;
+        } else {
+            long memberId = 0L;
+            String email = null;
+            String name = null;
+            String phone = null;
+            memberId = member.getMemberId();
+            email = member.getEmail();
+            name = member.getName();
+            phone = member.getPhone();
+            MemberResponseDto memberResponseDto = new MemberResponseDto(memberId, email, name, phone);
+            return memberResponseDto;
+        }
+    }
+}
+```
+
+* MemberMapperImpl 클래스IntelliJ IDE의 오른쪽 상단의 [Gradle] 탭을 클릭한 후, [프로젝트 명 > Tasks 디렉토리 > build 디렉토리 > build task]를 더블 클릭하면 MapStruct로 정의된 인터페이스의 구현 클래스가 생성됩니다.
+* MemberMapperImpl 클래스는IntelliJ IDE의 좌측에서 [Project 탭 > 프로젝트명 > build] 디렉토리 내의 MemberMapper 인터페이스가 위치한 패키지 안에 생성됩니다.
+
+# MemberController의 핸들러 메서드에서 MapStruct 적용
+
+```
+//import com.codestates.member.mapper.MemberMapper;
+import com.codestates.member.mapstruct.mapper.MemberMapper; // (1) 패키지 변경
+
+/**
+ * - DI 적용
+ * - Mapstruct Mapper 적용
+ */
+@RestController
+@RequestMapping("/v5/members") // (2) URI 버전 변경
+@Validated
+public class MemberController {
+    ...
+		...
+		...
+}
+```
+
+# DTO 클래스와 엔티티 클래스의 역할 분리가 필요한 이유
+
+* 계층별 관심사의 분리
+* 코드 구성의 단순화
+* REST API 스펙의 독립성 확보
