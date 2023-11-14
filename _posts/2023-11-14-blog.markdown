@@ -1,0 +1,147 @@
+---
+layout: post
+title: JDBC 개요 및 초기설정
+date: 2023-11-14
+categories: SPRING
+---
+
+# JDBC
+
+* JDBC는 "Java Database Connectivity"의 약자로, 자바 언어를 사용하여 데이터베이스에 접속하고 상호 작용하기 위한 자바 API입니다. JDBC는 데이터베이스에 대한 연결, 쿼리 실행, 결과 검색 및 업데이트와 같은 데이터베이스 작업을 수행할 수 있는 기능을 제공합니다.
+* JDBC를 사용하면 자바 애플리케이션을 다양한 데이터베이스 시스템과 통합할 수 있습니다. 이를 통해 데이터베이스에 대한 표준화된 방법으로 접근할 수 있으므로, 어떤 데이터베이스 시스템을 사용하더라도 동일한 JDBC 코드를 유지보수하고 재사용할 수 있습니다.
+
+
+## Spring Boot Starter 추가
+```
+dependencies {
+	...
+	...
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	runtimeOnly 'com.h2database:h2'
+}
+```
+
+##  application.yml 에 추가
+```
+spring:
+  h2:
+    console:
+      enabled: true
+```
+
+## H2 데이터베이스에 접속
+![5pP_Lz4J09mX5kivPa2j8-1655279472111](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/2ea76ef5-15d5-4d36-a2a3-6102096883f2)
+* 웹 브라우저에 주소를(localhost:8080/h2-console)를 입력합니다.
+* 로그에 출력된 ‘jdbc:h2:mem:26d0d5d3-dcef-47f8-8e6b-67898bdcfbd0’ 을 [JDBC URL]이라는 항목에 복사/붙여넣기 한 후, [Connect] 버튼을 클릭합니다.
+* 화면이 보인다면 H2 DB에 정상적으로 접속한 것입니다.
+![S-jZxDC4Ez8rqS_GeE3tV-1655279531785](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/ffb6c9df-8592-4bf3-8e29-e36c2f57f790)
+
+출처: codestates
+
+## 문제점 및 해결방안
+
+* H2 DB는 애플리케이션을 재시작할 때마다 애플리케이션 로그에 출력되는 JDBC URL이 매번 랜덤하게 바뀌기 때문에 상당히 불편합니다.
+* application.yml 파일에 H2에 대한 추가 설정을 함으로써 해결할 수 있습니다.
+
+```
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2     # (1) Context path 변경: URL Context path를 조금 더 간결하게 ‘/h2’로 설정
+  datasource:
+    url: jdbc:h2:mem:test     # (2) JDBC URL 변경:  JDBC URL이 매번 랜덤하게 바뀌지 않도록 ‘jdbc:h2:mem:test’로 설정
+
+```
+
+## H2 DB에 테이블 생성
+
+* ‘schema.sql’ 파일은 ‘src/main/resources/db/h2’ 디렉토리 내에 위치해 있습니다.
+```
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2     
+  datasource:
+    url: jdbc:h2:mem:test
+  sql:
+    init:
+      schema-locations: classpath*:db/h2/schema.sql   // (1) 테이블 생성 파일 경로
+```
+
+* src/main/resources/db/h2/schema.sql
+
+> MESSAGE 테이블의 식별자(Primary key)인 ‘message_id’ 열에 AUTO_INCREMENT 설정이 되어 있으므로 ‘message_id’ 열에 값을 입력하지 않더라도 데이터가 저장될 때마다 자동으로 포함됩니다.
+
+```
+CREATE TABLE IF NOT EXISTS MESSAGE (
+    message_id bigint NOT NULL AUTO_INCREMENT, //  
+    message varchar(100) NOT NULL,
+    PRIMARY KEY (message_id)
+);
+```
+
+## 적용
+
+* Service (Repository)
+
+```
+@Service
+public class MessageService {
+    // (1) MessageService 클래스에서 DI를 통해 주입
+    private final MessageRepository messageRepository;
+
+    public MessageService(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
+
+    public Message createMessage(Message message) {
+        return messageRepository.save(message);  // (2)  Message 엔티티 클래스에 포함된 데이터를 데이터베이스에 저장
+    }
+}
+```
+
+* Entity
+
+```
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+
+@Getter
+@Setter
+public class Message {  // (1)
+    @Id    // (2)
+    private long messageId;
+    private String message;
+}
+```
+
+# 순서 및 정리
+
+1. build.gradle에 사용할 데이터베이스를 위한 의존 라이브러리를 추가합니다.
+
+2. application.yml 파일에 사용할 데이터베이스에 대한 설정을 합니다.
+
+3. 'schema.sql' 파일에 필요한 테이블 스크립트를 작성합니다.
+
+4. application.yml 파일에서 'schema.sql' 파일을 읽어서 테이블을 생성할 수 있도록 초기화 설정을 추가합니다.
+
+5. 데이터베이스의 테이블과 매핑할 엔티티(Entity) 클래스를 작성합니다.
+
+6. 작성한 엔티티 클래스를 기반으로 데이터베이스의 작업을 처리할 Repository 인터페이스를 작성합니다.
+
+7. 작성된 Repository 인터페이스를 서비스 클래스에서 사용할 수 있도록 DI 합니다.
+
+8. DI 된 Repository의 메서드를 사용해서 서비스 클래스에서 데이터베이스에 CRUD 작업을 수행합니다.
+
+
+
+
+
+
+
+
+
+
