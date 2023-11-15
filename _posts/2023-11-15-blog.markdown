@@ -1,0 +1,895 @@
+---
+layout: post
+title: JDBC를 통한 구현
+date: 2023-11-15
+categories: SPRING
+---
+
+# 들어가기 전 용어 정리
+## DDD(Domain Driven Design)
+ 도메인 주도 설계, 의미 그대로 도메인 위주의 설계 기법을 의미합니다.
+
+## 도메인(Domain):
+ 비즈니스 영역을 나타내는 클래스나 객체를 의미합니다. 주로 데이터베이스와의 상호작용이나 비즈니스 로직을 담당하며, 애플리케이션의 핵심 부분을 형성합니다. 이러한 도메인 객체들은 주로 엔터티(Entities)로 표현되며, 애플리케이션의 비즈니스 요구사항을 표현하고 데이터를 저장하고 처리하는 역할을 수행합니다.
+
+## 애그리거트(Aggregate): 비슷한 업무 도메인들의 묶음입니다.
+## 애그리거트 루트(Aggregate Root): 애그리거트에는 해당 애그리거트를 대표하는 도메인입니다.
+
+<br/><br/>
+
+# 구현 (Entity)
+
+![KatbLqAoYYzxN_HBCbhDx-1655284904232](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/cf6c7996-69b1-4e25-8ee8-003d5b179987)
+![ccJH21GBQzyr0TuCSLaj_-1655284999369](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/0ecede54-a905-481d-b628-4701b879a7bd)
+
+* Member 클래스
+``` 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+
+@Getter
+@Setter
+public class Member {
+		// (1) memberId 멤버 변수에 @Id 애너테이션을 붙여 식별자로 지정
+    @Id
+    private Long memberId;
+
+    private String email;
+
+    private String name;
+
+    private String phone;
+}
+```
+
+* Order 클래스
+
+> ‘Order’라는 단어는 SQL 쿼리문에서 사용하는 예약어이기 때문에 (1)과 같이 @Table(”ORDERS”)와 같이 테이블 이름을 변경했습니다.
+
+```
+...
+import com.codestates.member.entity.Member;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+...
+...
+
+@Getter
+@Setter
+@Table("ORDERS")  // (1) @Table 애너테이션을 추가하지 않으면 기본적으로 클래스명이 테이블의 이름과 매핑됩니다.
+public class Order {
+    // (2) 식별자로 지정, Order 클래스는 ORDERS 테이블과 매핑
+    @Id
+    private long orderId;
+
+    // (3) 테이블 외래키처럼 memberId를 추가해서 참조하도록 한다.
+    private long memberId;
+
+    ...
+		...
+}
+```
+
+* Coffee 클래스
+
+``` 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+
+@Getter
+@Setter
+public class Coffee {
+    // (1) 식별자로 지정
+    @Id
+    private long coffeeId;
+    private String korName;
+    private String engName;
+    private int price;
+    private String coffeeCode;  // (2) Coffee의 중복 등록을 체크
+}
+```
+
+* Order와 Coffee 클래스의 애그리거트 루트 매핑
+
+```
+package com.codestates.order.entity;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+@Getter
+@Setter
+@Table("ORDERS")
+public class Order {
+    @Id
+    private long orderId;
+
+    // 테이블 외래키처럼 memberId를 추가한다.
+    private long memberId;
+
+    // (1) Order 클래스와 Coffee 클래스가 N대 N 관계이기 때문에 N대 N 관계를 1대 N, N대1 관계로 풀어줄 엔티티가 중간에 하나 필요
+    @MappedCollection(idColumn = "ORDER_ID")
+    private Set<OrderCoffee> orderCoffees = new LinkedHashSet<>();
+		
+		...
+		...
+}
+```
+
+참고: @MappedCollection(idColumn = "ORDER_ID", keyColumn = "ORDER_COFFEE_ID") 은 엔티티 클래스 간에 연관 관계를 맺어주는 정보를 의미합니다.
+```
+@MappedCollection(idColumn = "ORDER_ID", keyColumn = "ORDER_COFFEE_ID")
+private Set<OrderCoffee> orderCoffees = new LinkedHashSet<>();
+```
+
+* OrderCoffee 클래스
+
+```
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Getter
+@Builder
+@Table("ORDER_COFFEE") // (1)
+public class OrderCoffee {
+    @Id
+    private long orderCoffeeId;
+    private long coffeeId; // (2)
+    private int quantity; // (3)
+}
+```
+
+* Order 클래스의 멤버 변수 추가
+
+```
+import com.codestates.member.entity.Member;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+@Getter
+@Setter
+@Table("ORDERS")
+public class Order {
+    @Id
+    private long orderId;
+
+    // 테이블 외래키처럼 memberId를 추가한다.
+    private long memberId;
+
+    @MappedCollection(idColumn = "ORDER_ID")
+    private Set<OrderCoffee> orderCoffees = new LinkedHashSet<>();
+
+    // (1)
+    private OrderStatus orderStatus = OrderStatus.ORDER_REQUEST;
+    
+    // (2)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // (3)
+    public enum OrderStatus {
+        ORDER_REQUEST(1, "주문 요청"),
+        ORDER_CONFIRM(2, "주문 확정"),
+        ORDER_COMPLETE(3, "주문 완료"),
+        ORDER_CANCEL(4, "주문 취소");
+
+        @Getter
+        private int stepNumber;
+
+        @Getter
+        private String stepDescription;
+
+        OrderStatus(int stepNumber, String stepDescription) {
+            this.stepNumber = stepNumber;
+            this.stepDescription = stepDescription;
+        }
+    }
+}
+```
+
+* 테이블 생성 스크립트 추가: src/main/resources/db/h2/schema.sql
+
+```
+CREATE TABLE IF NOT EXISTS MEMBER (
+    MEMBER_ID bigint NOT NULL AUTO_INCREMENT,
+    EMAIL varchar(100) NOT NULL UNIQUE,
+    NAME varchar(100) NOT NULL,
+    PHONE varchar(100) NOT NULL,
+    PRIMARY KEY (MEMBER_ID)
+);
+
+CREATE TABLE IF NOT EXISTS COFFEE (
+    COFFEE_ID bigint NOT NULL AUTO_INCREMENT,
+    KOR_NAME varchar(100) NOT NULL,
+    ENG_NAME varchar(100) NOT NULL,
+    PRICE int NOT NULL,
+    COFFEE_CODE char(3) NOT NULL,
+    PRIMARY KEY (COFFEE_ID)
+);
+
+CREATE TABLE IF NOT EXISTS ORDERS (
+    ORDER_ID bigint NOT NULL AUTO_INCREMENT,
+    MEMBER_ID bigint NOT NULL,
+    ORDER_STATUS varchar(20) NOT NULL,
+    CREATED_AT datetime NOT NULL,
+    PRIMARY KEY (ORDER_ID),
+    FOREIGN KEY (MEMBER_ID) REFERENCES MEMBER(MEMBER_ID)
+);
+
+CREATE TABLE IF NOT EXISTS ORDER_COFFEE (
+    ORDER_COFFEE_ID bigint NOT NULL AUTO_INCREMENT,
+    ORDER_ID bigint NOT NULL,
+    COFFEE_ID bigint NOT NULL,
+    QUANTITY int NOT NULL,
+    PRIMARY KEY (ORDER_COFFEE_ID),
+    FOREIGN KEY (ORDER_ID) REFERENCES ORDERS(ORDER_ID),
+    FOREIGN KEY (COFFEE_ID) REFERENCES COFFEE(COFFEE_ID)
+);
+```
+
+<br/><br/>
+
+# 구현 (Service, Repository)
+
+## Repository
+
+* MemberRepository
+
+```
+import com.codestates.member.entity.Member;
+import org.springframework.data.repository.CrudRepository;
+
+import java.util.Optional;
+
+public interface MemberRepository extends CrudRepository<Member, Long> {
+      Optional<Member> findByEmail(String email);
+}
+```
+
+* CoffeeRepository
+
+```
+import com.codestates.coffee.entity.Coffee;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.CrudRepository;
+
+import java.util.Optional;
+
+public interface CoffeeRepository extends CrudRepository<Coffee, Long> {
+    // (1)
+    Optional<Coffee> findByCoffeeCode(String coffeeCode);
+
+    // (2)
+    @Query("SELECT * FROM COFFEE WHERE COFFEE_ID = :coffeeId")
+    Optional<Coffee> findByCoffee(Long coffeeId);
+}
+```
+
+* OrderRepository
+
+```
+import com.codestates.order.entity.Order;
+import org.springframework.data.repository.CrudRepository;
+
+public interface OrderRepository extends CrudRepository<Order, Long> {
+}
+```
+
+
+## Service
+
+* MemberService 
+
+```
+@Service
+public class MemberService {
+    private MemberRepository memberRepository;
+
+    // (1) MemberRepository DI
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+
+    public Member createMember(Member member) {
+          // (2) 이미 등록된 이메일인지 검증
+        verifyExistsEmail(member.getEmail());
+
+	  // (3) 회원 정보 저장
+        return memberRepository.save(member);
+    }
+
+    public Member updateMember(Member member) {
+	  // (4) 존재하는 회원인지 검증
+        Member findMember = findVerifiedMember(member.getMemberId());
+
+	  // (5) 이름 정보와 휴대폰 번호 정보 업데이트
+        Optional.ofNullable(member.getName())
+                .ifPresent(name -> findMember.setName(name));
+        Optional.ofNullable(member.getPhone())
+                .ifPresent(phone -> findMember.setPhone(phone));
+
+	  // (6) 회원 정보 업데이트
+        return memberRepository.save(findMember);
+    }
+
+    // (7) 특정 회원 정보 조회
+    public Member findMember(long memberId) {
+        return findVerifiedMember(memberId);
+    }
+
+    public List<Member> findMembers() {
+	  // (8) 모든 회원 정보 조회
+        return (List<Member>) memberRepository.findAll();
+    }
+
+		
+    public void deleteMember(long memberId) {
+        Member findMember = findVerifiedMember(memberId);
+
+	// (9) 특정 회원 정보 삭제
+        memberRepository.delete(findMember);
+    }
+
+   // (10) 이미 존재하는 회원인지를 검증
+    public Member findVerifiedMember(long memberId) {
+        Optional<Member> optionalMember =
+                memberRepository.findById(memberId);
+        Member findMember =
+                optionalMember.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        return findMember;
+    }
+
+   // (11) 이미 등록된 이메일 주소인지 검증
+    private void verifyExistsEmail(String email) {
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if (member.isPresent())
+            throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);
+    }
+}
+
+```
+
+(1) 생성자를 통해 MemberRepository 인터페이스를 DI 받습니다. 이때, MemberRepository 인터페이스의 구현은 Spring Data JDBC에서 내부적으로 처리됩니다.
+
+(2) 회원 정보를 저장하기 전에 테이블에 이미 등록된 이메일인지 여부를 검증하기 위해 verifyExistsEmail(String email) 메서드를 사용합니다.
+
+(3) verifyExistsEmail(String email) 메서드에서는 MemberRepository에 정의된 findByEmail() 쿼리 메서드를 사용하여 이메일에 해당하는 회원이 있는지를 조회합니다. Optional의 isPresent()를 통해 결과 값이 존재한다면 예외를 던집니다.
+
+(4) 회원 정보를 저장합니다.
+
+(5) 회원 정보를 수정하기 전에 수정하려는 회원 정보가 테이블에 존재하는지 여부를 검증합니다.
+
+(6) 회원 정보가 존재하면 이름과 주소 정보를 변경합니다.
+
+(7) 특정 회원을 조회합니다.
+
+(8) 모든 회원의 정보를 조회합니다.
+
+(9) 특정 회원 정보를 삭제합니다.
+
+(10) 이미 존재하는 회원인지를 검증한 후, 검증된 회원 정보를 리턴합니다. optionalMember.orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));에서 orElseThorow()는 optionalMember 객체가 null 이 아니라면 해당 객체를 리턴하고 null이라면 예외를 던집니다.
+
+(11) 이미 등록된 이메일이 존재하는지를 검증합니다.
+
+
+* CoffeeService 
+
+```
+import com.codestates.coffee.CoffeeRepository;
+import com.codestates.coffee.entity.Coffee;
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
+import com.codestates.order.entity.Order;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class CoffeeService {
+    private CoffeeRepository coffeeRepository;
+
+    public CoffeeService(CoffeeRepository coffeeRepository) {
+        this.coffeeRepository = coffeeRepository;
+    }
+
+    public Coffee createCoffee(Coffee coffee) {
+        // (1) 커피 코드를 대문자로 변경
+        String coffeeCode = coffee.getCoffeeCode().toUpperCase();
+
+        // 이미 등록된 커피 코드인지 확인
+        verifyExistCoffee(coffeeCode);
+        coffee.setCoffeeCode(coffeeCode);
+
+        return coffeeRepository.save(coffee);
+    }
+
+    public Coffee updateCoffee(Coffee coffee) {
+        // 조회하려는 커피가 검증된 커피인지 확인(존재하는 커피인지 확인 등)
+        Coffee findCoffee = findVerifiedCoffee(coffee.getCoffeeId());
+
+        Optional.ofNullable(coffee.getKorName())
+                .ifPresent(korName -> findCoffee.setKorName(korName));
+        Optional.ofNullable(coffee.getEngName())
+                .ifPresent(engName -> findCoffee.setEngName(engName));
+        Optional.ofNullable(coffee.getPrice())
+                .ifPresent(price -> findCoffee.setPrice(price));
+
+        return coffeeRepository.save(findCoffee);
+    }
+
+    public Coffee findCoffee(long coffeeId) {
+        return findVerifiedCoffeeByQuery(coffeeId);
+    }
+
+		// (2) 주문에 해당하는 커피 정보 조회
+    public List<Coffee> findOrderedCoffees(Order order) {
+        return order.getOrderCoffees()
+                .stream()
+                .map(orderCoffee -> findCoffee(orderCoffee.getCoffeeId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Coffee> findCoffees() {
+        return (List<Coffee>) coffeeRepository.findAll();
+    }
+
+    public void deleteCoffee(long coffeeId) {
+        Coffee coffee = findVerifiedCoffee(coffeeId);
+        coffeeRepository.delete(coffee);
+    }
+
+    public Coffee findVerifiedCoffee(long coffeeId) {
+        Optional<Coffee> optionalCoffee = coffeeRepository.findById(coffeeId);
+        Coffee findCoffee =
+                optionalCoffee.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.COFFEE_NOT_FOUND));
+
+        return findCoffee;
+    }
+
+    private void verifyExistCoffee(String coffeeCode) {
+        Optional<Coffee> coffee = coffeeRepository.findByCoffeeCode(coffeeCode);
+        if(coffee.isPresent())
+            throw new BusinessLogicException(ExceptionCode.COFFEE_CODE_EXISTS);
+    }
+
+    private Coffee findVerifiedCoffeeByQuery(long coffeeId) {
+        Optional<Coffee> optionalCoffee = coffeeRepository.findByCoffee(coffeeId);
+        Coffee findCoffee =
+                optionalCoffee.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.COFFEE_NOT_FOUND));
+
+        return findCoffee;
+    }
+}
+```
+(1)에서는 영문으로 구성된 커피 코드(CoffeeCode)를 대문자로 변경하고 있습니다.
+
+커피 코드의 경우는 클라이언트 쪽에서 사용자가 대소문자를 가리지 않고 입력하더라도 (1)에서 일괄적으로 대문자로 변경하도록 했습니다.
+
+결과적으로 (1)은 사용자가 대소문자에 신경 쓰지 않고 입력할 수 있도록 사용자 편의성을 높여주는 기능을 합니다.
+
+(2)는 주문한 커피 정보를 조회하는 메서드입니다.
+
+Order 객체는, memberId와 orderStatus 값만 얻을 수 있지 실제 회원이 주문한 커피 정보는 얻을 수 없습니다. 따라서 getOrderCoffees()를 통해서 주문한 구체적인 커피 정보를 얻어와야 합니다.
+
+(2)의 findOrderedCoffees(Order order) 메서드의 리턴값은 OrderResponseDto 클래스에 포함되도록 수정하면 좋습니다.
+
+* OrderService 
+
+```
+import com.codestates.coffee.service.CoffeeService;
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
+import com.codestates.member.service.MemberService;
+import com.codestates.order.entity.Order;
+import com.codestates.order.repository.OrderRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class OrderService {
+    final private OrderRepository orderRepository;
+    final private MemberService memberService;
+    final private CoffeeService coffeeService;
+
+    public OrderService(OrderRepository orderRepository,
+                        MemberService memberService,
+                        CoffeeService coffeeService) {
+        this.orderRepository = orderRepository;
+        this.memberService = memberService;
+        this.coffeeService = coffeeService;
+    }
+
+    public Order createOrder(Order order) {
+        // (1) 회원이 존재하는지 확인
+        memberService.findVerifiedMember(order.getMemberId());
+
+        // (2) 커피가 존재하는지 조회해야 됨
+        order.getOrderCoffees()
+                .stream()
+                .forEach(orderCoffee -> {
+                    coffeeService.findVerifiedCoffee(orderCoffee.getCoffeeId());
+                });
+        return orderRepository.save(order);
+    }
+
+    public Order findOrder(long orderId) {
+        return findVerifiedOrder(orderId);
+    }
+
+    public List<Order> findOrders() {
+        return (List<Order>) orderRepository.findAll();
+    }
+
+		// (3)
+    public void cancelOrder(long orderId) {
+        Order findOrder = findVerifiedOrder(orderId);
+        int step = findOrder.getOrderStatus().getStepNumber();
+
+        // (4) OrderStatus의 step이 2미만일 경우(ORDER_CONFIRM)에만 주문취소가 되도록한다.
+        if (step >= 2) {
+            throw new BusinessLogicException(ExceptionCode.CANNOT_CHANGE_ORDER);
+        }
+
+				// (5)
+        findOrder.setOrderStatus(Order.OrderStatus.ORDER_CANCEL);
+        orderRepository.save(findOrder);
+    }
+
+    private Order findVerifiedOrder(long orderId) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        Order findOrder =
+                optionalOrder.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.ORDER_NOT_FOUND));
+        return findOrder;
+    }
+}
+```
+
+주문 정보가 저장되기 전에는 주문 정보에 포함된 회원이 존재하는 회원인지 (1)과 같이 검증할 필요가 있습니다. 또한 주문하려는 커피 정보 역시 테이블에 존재하는지 (2)와 같이 검증해 주어야 합니다.
+
+주문하려는 커피가 존재하는지 여부는 (2)와 같이 order.getOrderCoffees()를 통해서 Set<OrderCoffee>를 가져온 후, Java의 Stream으로 각각의 coffeeId를 얻은 후에 findVerifiedCoffee(orderCoffee.getCoffeeId()) 메서드를 통해 coffeeId에 해당하는 커피 정보가 유효한지 검증합니다.
+
+(3)에서는 주문 정보를 취소합니다. 일반적으로 커피 주문이 확정되면 커피 주문을 취소할 수 없어야 될 것입니다. 커피 주문 확정이라는 상태는 이미 커피를 만들고 있을 테니까요.
+
+따라서 (4)와 같이 OrderStatus가 주문 요청(ORDER_REQUEST) 단계를 넘어가면 주문 정보를 변경할 수 없도록 하며, 주문 요청(ORDER_REQUEST) 단계까지만 (5)와 같이 주문을 취소할 수 있도록 합니다.
+
+
+## DTO 및 Controller 수정
+
+* CoffeePostDto
+
+```
+@Getter
+public class CoffeePostDto {
+    @NotBlank
+    private String korName;
+
+    @NotBlank
+    @Pattern(regexp = "^([A-Za-z])(\\s?[A-Za-z])*$",
+            message = "커피명(영문)은 영문이어야 합니다(단어 사이 공백 한 칸 포함). 예) Cafe Latte")
+    private String engName;
+
+    @Range(min= 100, max= 50000)
+    private int price;
+
+    @NotBlank
+    @Pattern(regexp = "^([A-Za-z]){3}$",
+            message = "커피 코드는 3자리 영문이어야 합니다.")
+    private String coffeeCode;
+}
+```
+
+* OrderController
+
+```
+package com.codestates.order.controller;
+
+import com.codestates.coffee.service.CoffeeService;
+import com.codestates.order.dto.OrderPostDto;
+import com.codestates.order.dto.OrderResponseDto;
+import com.codestates.order.entity.Order;
+import com.codestates.order.mapper.OrderMapper;
+import com.codestates.order.service.OrderService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
+import static java.util.Comparator.comparing;
+
+@RestController
+@RequestMapping("/v10/orders")
+@Validated
+public class OrderController {
+    private final static String ORDER_DEFAULT_URL = "/v10/orders"; // (1) Default URL 경로
+    private final OrderService orderService;
+    private final OrderMapper mapper;
+    private final CoffeeService coffeeService;
+
+    public OrderController(OrderService orderService,
+                           OrderMapper mapper,
+                           CoffeeService coffeeService) {
+        this.orderService = orderService;
+        this.mapper = mapper;
+        this.coffeeService = coffeeService;
+    }
+
+    @PostMapping
+    public ResponseEntity postOrder(@Valid @RequestBody OrderPostDto orderPostDto) {
+        Order order = orderService.createOrder(mapper.orderPostDtoToOrder(orderPostDto));
+
+        // (2) 등록된 주문(Resource)에 해당하는 URI 객체
+        URI location =
+                UriComponentsBuilder
+                        .newInstance()
+                        .path(ORDER_DEFAULT_URL + "/{order-id}")
+                        .buildAndExpand(order.getOrderId())
+                        .toUri();               // "/v10/orders/{order-id}"
+
+        return ResponseEntity.created(location).build(); // (3) HTTP 201 Created status
+    }
+
+
+    @GetMapping("/{order-id}")
+    public ResponseEntity getOrder(@PathVariable("order-id") @Positive long orderId){
+        Order order = orderService.findOrder(orderId);
+
+        // (4) 주문한 커피 정보를 가져오도록 수정
+        return new ResponseEntity<>(
+											mapper.orderToOrderResponseDto(coffeeService, order),
+			                HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getOrders() {
+        List<Order> orders = orderService.findOrders();
+
+        // (5) 주문한 커피 정보를 가져오도록 수정
+        List<OrderResponseDto> response =
+                orders
+										.stream()
+                    .map(order -> mapper.orderToOrderResponseDto(coffeeService, order))
+                    .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{order-id}")
+    public ResponseEntity cancelOrder(@PathVariable("order-id") @Positive long orderId){
+        orderService.cancelOrder(orderId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}
+```
+
+* OrderPostDto
+
+```
+@Getter
+@AllArgsConstructor
+public class OrderPostDto {
+    @Positive
+    private long memberId;
+
+    // 여러 잔의 커피를 주문할 수 있도록 수정
+    @Valid // List안에 포함된 객체에 대한 유효성 검증
+    private List<OrderCoffeeDto> orderCoffees;
+}
+```
+
+* OrderCoffeeDto 클래스 추가: 여러 잔의 커피 정보를 주문하기 위해 추가된 DTO 클래스
+
+```
+@Getter
+@AllArgsConstructor
+public class OrderCoffeeDto {
+    @Positive
+    private long coffeeId;
+
+    @Positive
+    private int quantity;
+}
+```
+
+* OrderCoffeeResponseDto 코드 추가: 주문한 여러 잔의 커피 정보를 응답으로 제공하기 위해 추가된 DTO 클래스
+
+```
+@Getter
+@AllArgsConstructor
+public class OrderCoffeeResponseDto {
+    private long coffeeId;
+    private String korName;
+    private String engName;
+    private int price;
+    private int quantity;
+}
+```
+
+* OrderResponseDto
+
+주문한 여러 건의 커피 정보를 응답으로 전송할 수 있도록 변경
+주문 시간과 주문 상태를 응답으로 전송할 수 있도록 변경
+
+```
+import com.codestates.coffee.dto.CoffeeResponseDto;
+import com.codestates.order.entity.Order;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Setter
+public class OrderResponseDto {
+    private long orderId;
+    private long memberId;
+    private Order.OrderStatus orderStatus;
+    private List<OrderCoffeeResponseDto> orderCoffees;
+    private LocalDateTime createdAt;
+}
+```
+
+* OrderMapper 
+
+```
+import com.codestates.coffee.entity.Coffee;
+import com.codestates.coffee.entity.OrderCoffee;
+import com.codestates.coffee.service.CoffeeService;
+import com.codestates.order.dto.OrderCoffeeResponseDto;
+import com.codestates.order.entity.Order;
+import com.codestates.order.dto.OrderPostDto;
+import com.codestates.order.dto.OrderResponseDto;
+import org.mapstruct.Mapper;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring")
+public interface OrderMapper {
+    // 수정되었음.
+    default Order orderPostDtoToOrder(OrderPostDto orderPostDto) {
+        Order order = new Order();
+        // (1)
+        order.setMemberId(orderPostDto.getMemberId());
+
+        // (2)
+        Set<OrderCoffee> orderCoffees = orderPostDto.getOrderCoffees()
+                .stream()
+                .map(orderCoffeeDto ->
+                                // (2-1)
+                                OrderCoffee.builder()
+                                        .coffeeId(orderCoffeeDto.getCoffeeId())
+                                        .quantity(orderCoffeeDto.getQuantity())
+                                        .build())
+                .collect(Collectors.toSet());
+        order.setOrderCoffees(orderCoffees);
+
+        return order;
+    }
+
+    default OrderResponseDto orderToOrderResponseDto(CoffeeService coffeeService,
+                                                     Order order) {
+        // (3)
+        long memberId = order.getMemberId();
+
+        // (4)
+        List<OrderCoffeeResponseDto> orderCoffees =
+                orderCoffeesToOrderCoffeeResponseDtos(coffeeService, order.getOrderCoffees());
+
+        OrderResponseDto orderResponseDto = new OrderResponseDto();
+        orderResponseDto.setOrderCoffees(orderCoffees);
+        orderResponseDto.setMemberId(memberId);
+        orderResponseDto.setCreatedAt(order.getCreatedAt());
+        orderResponseDto.setOrderId(order.getOrderId());
+        orderResponseDto.setOrderStatus(order.getOrderStatus());
+
+        // TODO 주문에 대한 더 자세한 정보로의 변환은 요구 사항에 따라 다를 수 있습니다.
+
+        return orderResponseDto;
+    }
+
+    default List<OrderCoffeeResponseDto> orderCoffeesToOrderCoffeeResponseDtos(
+                                                        CoffeeService coffeeService,
+                                                        Set<OrderCoffee> orderCoffees) {
+        // (5)
+        return orderCoffees.stream()
+                .map(orderCoffee -> {
+                    // (5-1)
+                    Coffee coffee = coffeeService.findCoffee(orderCoffee.getCoffeeId());
+
+                    return new OrderCoffeeResponseDto(coffee.getCoffeeId(),
+                            coffee.getKorName(),
+                            coffee.getEngName(),
+                            coffee.getPrice(),
+                            orderCoffee.getQuantity());
+                }).collect(Collectors.toList());
+    }
+}
+```
+## OrderMapper 설명
+
+OrderMapper의 경우, DTO와 Entity 간의 매핑 작업이 복잡하기 때문에 우리가 서비스 계층에서 배웠던 Mapsturct의 매핑 방식 중에서 개발자가 직접 매핑 로직을 구현하는 직접 매핑 방식을 사용하고 있습니다.
+
+### orderPostDtoToOrder(OrderPostDto orderPostDto)
+
+orderPostDtoToOrder() 메서드는 등록하고자 하는 커피 주문 정보(OrderPostDto)를 Order 엔티티 클래스의 객체로 변환하는 역할을 합니다.
+
+- (1)에서는 orderPostDto에 포함된 memberId를 Order 클래스의 memberId에 할당해 줍니다.
+- (2)에서는 orderPostDto에 포함된 주문한 커피 정보인 List<OrderCoffeeDto> orderCoffees를 Java의 Stream을 이용해 Order 클래스의 Set<OrderCoffee> orderCoffees으로 변환하고 있습니다.
+  - (2-1)에서는 OrderCoffee 클래스에 @Builder 애너테이션이 적용되어 있으므로 lombok에서 지원하는 빌더 패턴을 사용할 수 있습니다. 따라서 빌더 패턴을 이용해 List<OrderCoffeeDto> orderCoffees에 포함된 주문한 커피 정보를 OrderCoffee의 필드에 추가하고 있습니다.
+
+### orderToOrderResponseDto(CoffeeService coffeeService, Order order)
+
+orderToOrderResponseDto()는 데이터베이스에서 조회한 Order 객체를 OrderResponseDto 객체로 변환해 주는 역할을 합니다.
+
+- (3)에서는 Order의 memberId 필드 값을 얻습니다.
+- (4)에서는 주문한 커피의 구체적인 정보를 조회하기 위해 orderToOrderCoffeeResponseDto(coffeeService, order.getOrderCoffees());를 호출합니다. order.getOrderCoffees()의 리턴 값은 Set<OrderCoffee> orderCoffees이고, 이 orderCoffees에는 커피명이나 가격 같은 구체적인 커피 정보가 포함된 것이 아니기 때문에 데이터베이스에서 구체적인 커피 정보를 조회하는 추가 작업을 수행해야 합니다.
+
+### orderCoffeesToOrderCoffeeResponseDtos(CoffeeService coffeeService, Set<OrderCoffee> orderCoffees)
+
+orderCoffeesToOrderCoffeeResponseDtos()는 데이터베이스에서 커피의 구체적인 정보를 조회한 후, OrderCoffeeResponseDto에 커피 정보를 채워 넣는 역할을 합니다.
+
+- (5)에서는 파라미터로 전달받은 orderCoffees를 Java의 Stream을 이용해 데이터베이스에서 구체적인 커피 정보를 조회한 후, OrderCoffeeResponseDto로 변환하는 작업을 하고 있습니다.
+  - (5-1)에서 파라미터로 전달받은 coffeeService 객체를 이용해 coffeeId에 해당하는 Coffee를 조회하고 있습니다.
+
+<br/><br/>
+
+* ExceptionCode 
+
+```
+public enum ExceptionCode {
+    MEMBER_NOT_FOUND(404, "Member not found"),
+    MEMBER_EXISTS(409, "Member exists"),
+    COFFEE_NOT_FOUND(404, "Coffee not found"),
+    COFFEE_CODE_EXISTS(409, "Coffee Code exists"),
+    ORDER_NOT_FOUND(404, "Order not found"),
+    CANNOT_CHANGE_ORDER(403, "Order can not change"),
+    NOT_IMPLEMENTATION(501, "Not Implementation");
+
+    @Getter
+    private int status;
+
+    @Getter
+    private String message;
+
+    ExceptionCode(int code, String message) {
+        this.status = code;
+        this.message = message;
+    }
+}
+```
