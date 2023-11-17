@@ -1,0 +1,808 @@
+---
+layout: post
+title: JPA를 통한 구현
+date: 2023-11-17
+categories: SPRING
+---
+
+# JPA
+JPA(Java Persistence API)는 Java 에서 사용하는 ORM(Object-Relational Mapping) 기술의 표준 사양(또는 명세, Specification)입니다.
+
+* JPA vs Hibernate ORM vs Spring Data JPA
+
+> **JPA (Java Persistence API)**: 엔터프라이즈 Java 애플리케이션에서 관계형 데이터베이스를 사용하기 위한 표준 스펙(사양 또는 명세, Specification)입니다. API를 직접 사용할 수 있는 것이 아니라, 데이터베이스와의 상호 작용 방법을 정의한 명세로서, "어떻게 구현해야 하는가"에 대한 규격을 제공합니다.
+
+> **Hibernate ORM**: JPA 표준 스펙을 구현한 구현체입니다. JPA에서 정의한 명세를 실제로 구현하여 사용할 수 있는 API를 제공합니다.
+
+> **Spring Data JPA**: JPA 스펙을 구현한 구현체의 API(일반적으로 Hibernate ORM)를 조금 더 쉽게 사용할 수 있도록 해주는 모듈입니다. 우리는 이 Spring Data JPA를 사용하여 데이터 액세스 계층을 구현하면 됩니다.
+
+
+<br/><br/>
+
+## JPA 사용하기 위한 사전 준비
+
+* build.gradle
+```
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // 여기
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+```
+
+* JPA 설정(application.yml)
+```
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2     
+  datasource:
+    url: jdbc:h2:mem:test
+  jpa:
+    hibernate:
+      ddl-auto: create  # (1) 스키마 자동 생성
+    show-sql: true      # (2) SQL 쿼리 출력
+```
+
+## 엔티티 클래스 정의
+
+Spring Data JDBC에서 사용하는 엔티티 매핑 애너테이션은 JPA의 엔티티 매핑 애너테이션과 유사하지만 모듈 자체가 다릅니다.
+
+따라서 우리는 Spring Data JDBC에서 사용한 애너테이션을 제거하고 JPA에 맞는 애너테이션을 새로 추가해야 합니다.
+
+* Member 엔티티 클래스
+
+```
+import com.codestates.order.entity.Order;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long memberId;
+
+    @Column(nullable = false, updatable = false, unique = true)
+    private String email;
+
+    @Column(length = 100, nullable = false)
+    private String name;
+
+    @Column(length = 13, nullable = false, unique = true)
+    private String phone;
+
+    // (1) 추가된 부분:  회원의 상태를 저장하기 위해 추가된 enum 필드
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private MemberStatus memberStatus = MemberStatus.MEMBER_ACTIVE;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false, name = "LAST_MODIFIED_AT")
+    private LocalDateTime modifiedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>();
+
+    public Member(String email) {
+        this.email = email;
+    }
+
+    public Member(String email, String name, String phone) {
+        this.email = email;
+        this.name = name;
+        this.phone = phone;
+    }
+
+    public void addOrder(Order order) {
+        orders.add(order);
+    }
+
+    // (2) 추가 된 부분:  memberStatus에서 사용하는 MemberStatus enum
+    public enum MemberStatus {
+        MEMBER_ACTIVE("활동중"),
+        MEMBER_SLEEP("휴면 상태"),
+        MEMBER_QUIT("탈퇴 상태");
+
+        @Getter
+        private String status;
+
+        MemberStatus(String status) {
+           this.status = status;
+        }
+    }
+}
+```
+
+* Coffee 엔티티 클래스
+
+```
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+public class Coffee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long coffeeId;
+
+    @Column(length = 100, nullable = false)
+    private String korName;
+
+    @Column(length = 100, nullable = false)
+    private String engName;
+
+    @Column(nullable = false)
+    private Integer price;
+
+    @Column(length = 3, nullable = false, unique = true)
+    private String coffeeCode;
+
+    // (1) 추가된 부분 커피의 상태를 저장하기 위해 추가된 enum 필드
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private CoffeeStatus coffeeStatus = CoffeeStatus.COFFEE_FOR_SALE;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false, name = "LAST_MODIFIED_AT")
+    private LocalDateTime modifiedAt = LocalDateTime.now();
+
+    // (2) 추가 된 부분 CoffeeStatus에서 사용하는 CoffeeStatus enum
+    public enum CoffeeStatus {
+        COFFEE_FOR_SALE("판매중"),
+        COFFEE_SOLD_OUT("판매중지");
+
+        @Getter
+        private String status;
+
+        CoffeeStatus(String status) {
+            this.status = status;
+        }
+    }
+}
+```
+
+* Order 엔티티 클래스
+
+```
+import com.codestates.member.entity.Member;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity(name = "ORDERS")
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long orderId;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus = OrderStatus.ORDER_REQUEST;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false, name = "LAST_MODIFIED_AT")
+    private LocalDateTime modifiedAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
+    public void addMember(Member member) {
+        this.member = member;
+    }
+
+    public enum OrderStatus {
+        ORDER_REQUEST(1, "주문 요청"),
+        ORDER_CONFIRM(2, "주문 확정"),
+        ORDER_COMPLETE(3, "주문 처리 완료"),
+        ORDER_CANCEL(4, "주문 취소");
+
+        @Getter
+        private int stepNumber;
+
+        @Getter
+        private String stepDescription;
+
+        OrderStatus(int stepNumber, String stepDescription) {
+            this.stepNumber = stepNumber;
+            this.stepDescription = stepDescription;
+        }
+    }
+}
+```
+
+
+## Repository 인터페이스 구현
+
+* MemberRepository
+
+```
+import com.codestates.member.entity.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface MemberRepository extends JpaRepository<Member, Long> { //(1) 수정된 부분 CrudRepository를 상속하는 대신 JpaRepository를 상속
+    Optional<Member> findByEmail(String email);
+}
+```
+
+* CoffeeRepository
+
+```
+import com.codestates.coffee.entity.Coffee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
+
+public interface CoffeeRepository extends JpaRepository<Coffee, Long> {//(1) 수정된 부분
+    Optional<Coffee> findByCoffeeCode(String coffeeCode);
+
+    // (2) 수정된 부분
+//    @Query(value = "FROM Coffee c WHERE c.coffeeId = :coffeeId")  // (2-1)
+//    @Query(value = "SELECT * FROM COFFEE WHERE coffee_Id = :coffeeId", nativeQuery = true) // (2-2) 
+    @Query(value = "SELECT c FROM Coffee c WHERE c.coffeeId = :coffeeId")  // (2-3)
+    Optional<Coffee> findByCoffee(long coffeeId);
+}
+```
+
+* (1)에서 MemberRepository와 마찬가지로 JpaRepository를 상속했습니다.
+
+* (2)에 대한 설명입니다.
+
+> JPA에서는 복잡한 검색 조건을 지정하기 위한 몇 가지 방법을 제공합니다.
+
+* JPQL을 통한 객체 지향 쿼리 사용
+
+> JPA에서는 JPQL이라는 객체 지향 쿼리를 통해 데이터베이스 내의 테이블을 조회할 수 있습니다.
+
+> JPQL은 데이터베이스의 테이블을 대상으로 조회 작업을 진행하는 것이 아니라 엔티티 클래스의 객체를 대상으로 객체를 조회하는 방법입니다.
+
+> JPQL의 문법을 사용해서 객체를 조회하면 JPA가 내부적으로 JPQL을 분석해서 적절한 SQL을 만든 후에 데이터베이스를 조회하고, 조회한 결과를 엔티티 객체로 매핑한 뒤에 반환합니다.
+
+> (2-3)은 JPQL을 사용해서 coffeeId에 해당하는 커피 정보를 조회하고 있습니다. JPQL의 쿼리문을 보면 SQL과 유사하지만 차이점이 있습니다.
+
+> JPQL은 객체를 대상으로 한 조회이기 때문에 COFFEE 테이블이 아니라 Coffee 클래스라는 객체를 지정해야 하고, coffee_id라는 열이 아닌 coffeeId 필드를 지정해야 합니다.
+
+> 따라서 (2-3)의 “SELECT c FROM Coffee c WHERE c.coffeeId = :coffeeId”에서 Coffee는 클래스명이고, coffeeId는 Coffee 클래스의 필드명입니다.
+
+> ‘c’는 Coffee 클래스의 별칭이기 때문에 “SELECT c FROM~” 와 같이 SQL에서 사용하는 ‘*’이 아니라 ‘c’로 모든 필드를 조회하는 것입니다.
+
+> (2-3)은 (2-1)과 같이 ‘SELECT c’를 생략한 형태로 사용이 가능합니다.
+
+* 네이티브 SQL을 통한 조회
+
+> Spring Data JDBC에서와 마찬가지로 JPA 역시 네이티브 SQL 쿼리를 작성해서 사용할 수 있습니다.
+
+> (2-2)의 nativeQuery 애트리뷰트의 값을 ‘true’로 설정하면 value 애트리뷰트에 작성한 SQL 쿼리가 적용됩니다.
+
+
+* OrderRepository
+
+```
+import com.codestates.order.entity.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface OrderRepository extends JpaRepository<Order, Long> { //(1) 수정된 부분
+}
+```
+
+## Service 클래스 구현
+
+* MemberService
+
+```
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
+import com.codestates.member.entity.Member;
+import com.codestates.member.repository.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+/**
+ *  - 메서드 구현
+ *  - DI 적용
+ *  - Spring Data JPA 적용
+ */
+@Service
+public class MemberService {
+    private final MemberRepository memberRepository;
+
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+
+    public Member createMember(Member member) {
+        verifyExistsEmail(member.getEmail());
+
+        return memberRepository.save(member);
+    }
+
+    public Member updateMember(Member member) {
+        Member findMember = findVerifiedMember(member.getMemberId());
+
+        Optional.ofNullable(member.getName())
+                .ifPresent(name -> findMember.setName(name));
+        Optional.ofNullable(member.getPhone())
+                .ifPresent(phone -> findMember.setPhone(phone));
+        // (1) 추가된 부분
+        Optional.ofNullable(member.getMemberStatus())
+                .ifPresent(memberStatus -> findMember.setMemberStatus(memberStatus));
+
+        // (2) 추가된 부분
+        findMember.setModifiedAt(LocalDateTime.now());
+
+        return memberRepository.save(findMember);
+    }
+
+    public Member findMember(long memberId) {
+        return findVerifiedMember(memberId);
+    }
+
+    public Page<Member> findMembers(int page, int size) {
+        return memberRepository.findAll(PageRequest.of(page, size,
+                Sort.by("memberId").descending()));
+    }
+
+    public void deleteMember(long memberId) {
+        Member findMember = findVerifiedMember(memberId);
+
+        memberRepository.delete(findMember);
+    }
+
+    public Member findVerifiedMember(long memberId) {
+        Optional<Member> optionalMember =
+                memberRepository.findById(memberId);
+        Member findMember =
+                optionalMember.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        return findMember;
+    }
+
+    private void verifyExistsEmail(String email) {
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if (member.isPresent())
+            throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);
+    }
+}
+```
+
+* CoffeeService
+
+```
+import com.codestates.coffee.entity.Coffee;
+import com.codestates.coffee.repository.CoffeeRepository;
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
+import com.codestates.order.entity.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CoffeeService {
+    private final CoffeeRepository coffeeRepository;
+
+    public CoffeeService(CoffeeRepository coffeeRepository) {
+        this.coffeeRepository = coffeeRepository;
+    }
+
+    public Coffee createCoffee(Coffee coffee) {
+        String coffeeCode = coffee.getCoffeeCode().toUpperCase();
+
+        verifyExistCoffee(coffeeCode);
+        coffee.setCoffeeCode(coffeeCode);
+
+        return coffeeRepository.save(coffee);
+    }
+
+    public Coffee updateCoffee(Coffee coffee) {
+        Coffee findCoffee = findVerifiedCoffee(coffee.getCoffeeId());
+
+        Optional.ofNullable(coffee.getKorName())
+                .ifPresent(korName -> findCoffee.setKorName(korName));
+        Optional.ofNullable(coffee.getEngName())
+                .ifPresent(engName -> findCoffee.setEngName(engName));
+        Optional.ofNullable(coffee.getPrice())
+                .ifPresent(price -> findCoffee.setPrice(price));
+
+        // (1) 추가된 부분
+        Optional.ofNullable(coffee.getCoffeeStatus())
+                .ifPresent(coffeeStatus -> findCoffee.setCoffeeStatus(coffeeStatus));
+
+        return coffeeRepository.save(findCoffee);
+    }
+
+    public Coffee findCoffee(long coffeeId) {
+        return findVerifiedCoffeeByQuery(coffeeId);
+    }
+
+    public Page<Coffee> findCoffees(int page, int size) {
+        return coffeeRepository.findAll(PageRequest.of(page, size,
+                Sort.by("coffeeId").descending()));
+    }
+
+    public void deleteCoffee(long coffeeId) {
+        Coffee coffee = findVerifiedCoffee(coffeeId);
+        coffeeRepository.delete(coffee);
+    }
+
+    public Coffee findVerifiedCoffee(long coffeeId) {
+        Optional<Coffee> optionalCoffee = coffeeRepository.findById(coffeeId);
+        Coffee findCoffee =
+                optionalCoffee.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.COFFEE_NOT_FOUND));
+
+        return findCoffee;
+    }
+
+    private void verifyExistCoffee(String coffeeCode) {
+        Optional<Coffee> coffee = coffeeRepository.findByCoffeeCode(coffeeCode);
+        if(coffee.isPresent())
+            throw new BusinessLogicException(ExceptionCode.COFFEE_CODE_EXISTS);
+    }
+
+    private Coffee findVerifiedCoffeeByQuery(long coffeeId) {
+        Optional<Coffee> optionalCoffee = coffeeRepository.findByCoffee(coffeeId);
+        Coffee findCoffee =
+                optionalCoffee.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.COFFEE_NOT_FOUND));
+
+        return findCoffee;
+    }
+}
+```
+
+* OrderService
+
+```
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
+import com.codestates.member.service.MemberService;
+import com.codestates.order.entity.Order;
+import com.codestates.order.repository.OrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+public class OrderService {
+    private final MemberService memberService;
+    private final OrderRepository orderRepository;
+    
+    public OrderService(MemberService memberService,
+                        OrderRepository orderRepository) {
+        this.memberService = memberService;
+        this.orderRepository = orderRepository;
+    }
+
+    public Order createOrder(Order order) {
+        // 회원이 존재하는지 확인
+        memberService.findVerifiedMember(order.getMember().getMemberId());
+
+        // (1) TODO 커피가 존재하는지 조회해야 됨
+
+        return orderRepository.save(order);
+    }
+
+    // (2) 주문 상태 처리를 위한 updateOrder() 메서드 추가
+    public Order updateOrder(Order order) {
+        Order findOrder = findVerifiedOrder(order.getOrderId());
+
+        Optional.ofNullable(order.getOrderStatus())
+                .ifPresent(orderStatus -> findOrder.setOrderStatus(orderStatus));
+        findOrder.setModifiedAt(LocalDateTime.now());
+        return orderRepository.save(findOrder);
+    }
+
+    public Order findOrder(long orderId) {
+        return findVerifiedOrder(orderId);
+    }
+
+    public Page<Order> findOrders(int page, int size) {
+        return orderRepository.findAll(PageRequest.of(page, size,
+                Sort.by("orderId").descending()));
+    }
+
+    public void cancelOrder(long orderId) {
+        Order findOrder = findVerifiedOrder(orderId);
+        int step = findOrder.getOrderStatus().getStepNumber();
+
+        if (step >= 2) {
+            throw new BusinessLogicException(ExceptionCode.CANNOT_CHANGE_ORDER);
+        }
+        findOrder.setOrderStatus(Order.OrderStatus.ORDER_CANCEL);
+        findOrder.setModifiedAt(LocalDateTime.now());
+        orderRepository.save(findOrder);
+    }
+
+    private Order findVerifiedOrder(long orderId) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        Order findOrder =
+                optionalOrder.orElseThrow(() ->
+                        new BusinessLogicException(ExceptionCode.ORDER_NOT_FOUND));
+        return findOrder;
+    }
+}
+```
+
+## 기타: 수정 및 추가된 코드
+
+* OrderController
+
+```
+import com.codestates.coffee.service.CoffeeService;
+import com.codestates.response.MultiResponseDto;
+import com.codestates.response.SingleResponseDto;
+import com.codestates.order.dto.OrderPatchDto;
+import com.codestates.order.dto.OrderPostDto;
+import com.codestates.order.entity.Order;
+import com.codestates.order.mapper.OrderMapper;
+import com.codestates.order.service.OrderService;
+import com.codestates.utils.UriCreator;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/v11/orders")
+@Validated
+public class OrderController {
+    private final static String ORDER_DEFAULT_URL = "/v11/orders";
+    private final OrderService orderService;
+    private final OrderMapper mapper;
+    private final CoffeeService coffeeService;
+
+    public OrderController(OrderService orderService,
+                           OrderMapper mapper,
+                           CoffeeService coffeeService) {
+        this.orderService = orderService;
+        this.mapper = mapper;
+        this.coffeeService = coffeeService;
+    }
+
+    @PostMapping
+    public ResponseEntity postOrder(@Valid @RequestBody OrderPostDto orderPostDto) {
+        Order order = orderService.createOrder(mapper.orderPostDtoToOrder(orderPostDto));
+        URI location = UriCreator.createUri(ORDER_DEFAULT_URL, order.getOrderId());
+
+        return ResponseEntity.created(location).build();
+    }
+
+    // (1) patchOrder 추가
+    @PatchMapping("/{order-id}")
+    public ResponseEntity patchOrder(@PathVariable("order-id") @Positive long orderId,
+                                     @Valid @RequestBody OrderPatchDto orderPatchDto) {
+        orderPatchDto.setOrderId(orderId);
+        Order order = orderService.updateOrder(mapper.orderPatchDtoToOrder(orderPatchDto));
+
+        return new ResponseEntity<>(new SingleResponseDto<>(mapper.orderToOrderResponseDto(order)), HttpStatus.OK);
+    }
+
+    @GetMapping("/{order-id}")
+    public ResponseEntity getOrder(@PathVariable("order-id") @Positive long orderId) {
+        Order order = orderService.findOrder(orderId);
+
+        return new ResponseEntity<>(new SingleResponseDto<>(mapper.orderToOrderResponseDto(order)), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getOrders(@Positive @RequestParam int page,
+                                    @Positive @RequestParam int size) {
+        Page<Order> pageOrders = orderService.findOrders(page - 1, size);
+        List<Order> orders = pageOrders.getContent();
+
+       return new ResponseEntity<>(new MultiResponseDto<>(mapper.ordersToOrderResponseDtos(orders), pageOrders), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{order-id}")
+    public ResponseEntity cancelOrder(@PathVariable("order-id") @Positive long orderId){
+        orderService.cancelOrder(orderId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}
+```
+
+* OrderPatchDto
+
+```
+import com.codestates.order.entity.Order;
+import lombok.Getter;
+
+@Getter
+public class OrderPatchDto {
+    private long orderId;
+    private Order.OrderStatus orderStatus;
+
+    public void setOrderId(long orderId) {
+        this.orderId = orderId;
+    }
+}
+```
+
+* MemberPatchDto
+
+```
+import com.codestates.member.entity.Member;
+import com.codestates.validator.NotSpace;
+import lombok.Getter;
+
+import javax.validation.constraints.Pattern;
+
+@Getter
+public class MemberPatchDto {
+    private long memberId;
+
+    @NotSpace(message = "회원 이름은 공백이 아니어야 합니다")
+    private String name;
+
+    @NotSpace(message = "휴대폰 번호는 공백이 아니어야 합니다")
+    @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$",
+          message = "휴대폰 번호는 010으로 시작하는 11자리 숫자와 '-'로 구성되어야 합니다")
+    private String phone;
+
+    // (1) 추가된 부분. 회원 상태 값을 사전에 체크하는 Custom Validator를 만들수도 있다.
+    private Member.MemberStatus memberStatus;
+
+    public void setMemberId(long memberId) {
+        this.memberId = memberId;
+    }
+```
+
+* MemberResponseDto
+
+```
+import com.codestates.member.entity.Member;
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public class MemberResponseDto {
+    private long memberId;
+    private String email;
+    private String name;
+    private String phone;
+    private Member.MemberStatus memberStatus;   // (1) 추가된 부분
+
+    // (2) 추가된 부분
+    public String getMemberStatus() {
+        return memberStatus.getStatus();
+    }
+}
+```
+
+* CoffeePatchDto
+
+```
+import com.codestates.coffee.entity.Coffee;
+import com.codestates.validator.NotSpace;
+import lombok.Getter;
+import org.hibernate.validator.constraints.Range;
+
+import javax.validation.constraints.Pattern;
+import java.util.Optional;
+
+@Getter
+public class CoffeePatchDto {
+    private long coffeeId;
+
+    @NotSpace(message = "커피명(한글)은 공백이 아니어야 합니다.")
+    private String korName;
+
+    @Pattern(regexp = "^([A-Za-z])(\\s?[A-Za-z])*$", 
+												message = "커피명(영문)은 영문이어야 합니다. 예) Cafe Latte")
+    private String engName;
+
+    @Range(min= 100, max= 50000)
+    private Integer price;
+
+    // (1) 추가된 부분. 커피 상태 값을 사전에 체크하는 Custom Validator를 만들수도 있다.
+    private Coffee.CoffeeStatus coffeeStatus;
+
+    public void setCoffeeId(long coffeeId) {
+        this.coffeeId = coffeeId;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+}
+```
+
+* OrderMapper
+
+```
+package com.codestates.order.mapper;
+
+import com.codestates.order.dto.OrderPatchDto;
+import com.codestates.order.dto.OrderPostDto;
+import com.codestates.order.dto.OrderResponseDto;
+import com.codestates.order.entity.Order;
+import org.mapstruct.Mapper;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface OrderMapper {
+    Order orderPostDtoToOrder(OrderPostDto orderPostDto);
+    Order orderPatchDtoToOrder(OrderPatchDto orderPatchDto);
+    OrderResponseDto orderToOrderResponseDto(Order order);
+    List<OrderResponseDto> ordersToOrderResponseDtos(List<Order> orders);
+    List<CoffeeResponseDto> coffeesToCoffeeResponseDtos(List<Coffee> coffees); // 추가: 주문 정보 중에서 주문한 커피(List)에 대한 정보
+
+}
+```
+
+* OrderCoffeeResponseDto
+
+```
+package com.codestates.order.dto;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public class OrderCoffeeResponseDto {
+    private long coffeeId;
+    private String korName;
+    private String engName;
+    private int price;
+    private int quantity;
+}
+```
+
