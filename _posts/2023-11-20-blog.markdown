@@ -1,0 +1,110 @@
+---
+layout: post
+title: TEST (Mockito와 TDD)
+date: 2023-11-20
+categories: SPRING
+---
+
+# Mockito
+
+Mock 객체가 진짜처럼 동작하게 하는 역할입니다. Spring Framework 자체적으로도 지원하고 있는 Mocking 라이브러리는 바로 Mockito입니다. 
+Mockito의 Mocking 기능을 이용해서 테스트하고자 하는 대상에서 다른 영역(다른 계층 또는 외부 통신이 필요한 서비스 등)을 단절시켜 오로지 테스트 대상에만 집중할 수 있습니다.
+
+
+* 슬라이스 테스트에 Mockito 적용
+
+```
+package com.codestates.slice.mock;
+
+import com.codestates.member.dto.MemberDto;
+import com.codestates.member.entity.Member;
+import com.codestates.member.mapper.MemberMapper;
+import com.codestates.member.service.MemberService;
+import com.codestates.stamp.Stamp;
+import com.google.gson.Gson;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class MemberControllerMockTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private Gson gson;
+
+    // (1)
+    @MockBean
+    private MemberService memberService;
+
+    // (2)
+    @Autowired
+    private MemberMapper mapper;
+
+    @Test
+    void postMemberTest() throws Exception {
+        // given
+        MemberDto.Post post = new MemberDto.Post("hgd@gmail.com",
+                                                        "홍길동",
+                                                    "010-1234-5678");
+				
+        Member member = mapper.memberPostToMember(post);  // (3)
+        member.setMemberId(1L);     // (4)
+
+        // (5)
+        given(memberService.createMember(Mockito.any(Member.class)))
+                .willReturn(member);
+
+        String content = gson.toJson(post);
+
+        // when
+        ResultActions actions =
+                mockMvc.perform(
+                                    post("/v11/members")
+                                        .accept(MediaType.APPLICATION_JSON)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(content)
+                                );
+
+        // then
+       actions
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", is(startsWith("/v11/members/"))));
+    }
+}
+```
+
+@MockBean 애너테이션은 Application Context에 등록되어 있는 Bean에 대한 Mockito Mock 객체를 생성하고 주입해 주는 역할을 합니다.
+
+(1)과 같이 @MockBean 애너테이션을 필드에 추가하면 해당 필드의 Bean에 대한 Mock 객체를 생성한 후, 필드에 주입(DI)합니다.
+
+(1)에서는 MemberService 빈에 대한 Mock 객체를 생성해서 memberService 필드에 주입합니다.
+
+(2)에서 MemberMapper를 DI 받는 이유는 MockMemberService(가칭)의 createMember()에서 리턴하는 Member 객체를 생성하기 위함입니다.
+
+(3)에서 MemberMapper를 이용해 post(MemberDto.Post 타입) 변수를 Member 객체로 변환하고 있습니다. MemberMapper를 굳이 사용하지 않고 new Member()와 같이 Member 객체를 생성해도 되지만 여기서는 post 변수를 재사용하기 위해 MemberMapper로 변환을 했습니다.
+
+실제 createMember()의 리턴 값(Member 객체)에는 memberId가 포함이 되는데 이 memberId는 response의 Location header에 포함이 되어야 하므로 (4)와 같이 MockMemberService(가칭)의 createMember()에서도 memberId를 리턴해 줄 수 있도록 memberId를 추가해 줍니다.
+
+(5)는 Mockito에서 지원하는 Stubbing 메서드입니다. given(memberService.createMember(Mockito.any(Member.class))) given()은 Mock 객체가 특정 값을 리턴하는 동작을 지정하는 데 사용하며, Mockito에서 지원하는 when()과 동일한 기능을 합니다. 여기서는 Mock 객체인 memberService 객체로 createMember() 메서드를 호출하도록 정의하고 있습니다. createMember()의 파라미터인 Mockito.any(Member.class)는 Mockito에서 지원하는 변수 타입 중 하나입니다. MockMemberService(가칭)가 아닌 실제 MemberService 클래스에서 createMember()의 파라미터 타입은 무엇인가요? 바로 Member 타입입니다. 따라서 Mockito.any()에 Member.class를 타입으로 지정해 주었습니다. .willReturn(member) MockMemberService(가칭)의 createMember() 메서드가 리턴할 Stub 데이터입니다.
+
+# TDD(Test Driven Development)
+
+코드를 작성하기 전에 테스트 케이스를 먼저 작성하고, 그 후에 테스트를 통과하는 코드를 작성하는 방식입니다.
