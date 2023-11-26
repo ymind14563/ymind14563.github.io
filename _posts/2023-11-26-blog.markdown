@@ -1,0 +1,130 @@
+---
+layout: post
+title: Spring Security
+date: 2023-11-26
+categories: SPRING
+---
+
+# Spring Security
+
+### 다양한 유형의 사용자 인증 기능 적용
+
+- **폼 로그인 인증**: 사용자가 아이디와 비밀번호를 입력하여 로그인하는 방식
+- **토큰 기반 인증**: 서버가 발급한 토큰을 클라이언트에게 전달하고, 클라이언트는 이 토큰을 이용하여 인증하는 방식
+- **OAuth 2 기반 인증**: 다양한 서비스에서 제공하는 OAuth 2.0 프로토콜을 사용하여 사용자를 인증하고 권한을 부여하는 방식
+- **LDAP 인증**: Lightweight Directory Access Protocol을 사용하여 중앙 집중식 디렉토리 서비스를 통해 사용자 인증을 수행하는 방식
+
+### 애플리케이션 사용자의 역할(Role)에 따른 권한 레벨 적용
+
+- 각 사용자의 역할에 따라 접근 가능한 리소스와 작업의 범위를 제한하는 권한 시스템 적용
+
+### 애플리케이션에서 제공하는 리소스에 대한 접근 제어
+
+- 인가(Authorization) 기능을 통해 사용자의 권한을 확인하고, 요청된 리소스에 대한 접근 권한을 부여하거나 거부하는 기능 구현
+
+### 민감한 정보에 대한 데이터 암호화
+
+- 암호화 알고리즘을 사용하여 민감한 정보를 저장 및 전송할 때 데이터의 보안을 유지하는 기능 구현
+
+### SSL 적용
+
+- SSL(Secure Sockets Layer) 또는 TLS(Transport Layer Security) 프로토콜을 사용하여 데이터 통신 과정에서 보안을 제공하는 방식을 적용하여 데이터의 안전성을 보장
+
+### 일반적으로 알려진 웹 보안 공격 차단
+
+- XSS(Cross-Site Scripting), CSRF(Cross-Site Request Forgery), SQL Injection 등의 웹 보안 공격을 방지하기 위한 필터링 및 대응 기능 구현
+
+
+## 의존 라이브러리 추가(build.gradle)
+
+```
+plugins {
+	id 'org.springframework.boot' version '2.7.2'
+	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+	id 'java'
+}
+
+group = 'com.codestates'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	...
+  ...
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'   // (1)
+  
+  ...
+  ...
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+```
+
+
+```
+package com.codestates.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfiguration {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf().disable()
+            .formLogin()
+            .loginPage("/auths/login-form")
+            .loginProcessingUrl("/process_login")
+            .failureUrl("/auths/login-form?error")
+            .and()
+            .exceptionHandling().accessDeniedPage("/auths/access-denied")   // 수정된 부분
+            .and()
+            .authorizeHttpRequests(authorize -> authorize                  
+                    .antMatchers("/orders/**").hasRole("ADMIN")        
+                    .antMatchers("/members/my-page").hasRole("USER")   
+                    .antMatchers("⁄**").permitAll()                    
+            );
+        return http.build();
+    }
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+        UserDetails user =
+                User.withDefaultPasswordEncoder()
+                        .username("kevin@gmail.com")
+                        .password("1111")
+                        .roles("USER")
+                        .build();
+        return new InMemoryUserDetailsManager(user);
+    }
+}
+```
+* Exception 처리 및 권한 부여 설정
+
+1. **Exception 처리 설정**
+   - `exceptionHandling()` 메서드는 Exception을 처리하는 기능을 제공하며, 리턴하는 `ExceptionHandlingConfigurer` 객체를 통해 구체적인 Exception 처리를 설정할 수 있습니다.
+   - `accessDeniedPage()` 메서드는 403 에러 발생 시, 지정한 URL로 리다이렉트되도록 설정합니다.
+     - 권한이 없는 사용자가 특정 request URI로 접근할 경우, 설정한 페이지가 표시됩니다.
+
+2. **request URI에 대한 권한 부여 설정**
+   - `authorizeHttpRequests()` 메서드는 람다 표현식을 통해 request URI에 대한 접근 권한을 부여할 수 있습니다.
+   - `antMatchers()` 메서드는 Path Pattern을 사용하여 URL을 표현합니다.
+     - `.antMatchers("/orders/**").hasRole("ADMIN")`: ADMIN Role을 가진 사용자만 /orders로 시작하는 모든 URL에 접근 가능
+     - `.antMatchers("/members/my-page").hasRole("USER")`: USER Role을 가진 사용자만 /members/my-page URL에 접근 가능
+     - `.antMatchers("/**").permitAll()`: 나머지 모든 URL은 Role에 상관없이 접근 가능
+
+참고: 더 구체적인 URL 경로부터 접근 권한을 부여한 다음 덜 구체적인 URL 경로에 접근 권한을 부여해야 합니다. (순서가 중요합니다.)
+
