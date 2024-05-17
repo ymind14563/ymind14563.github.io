@@ -1,0 +1,48 @@
+---
+layout: post
+title: "[새싹x코딩온] HTML"
+date: 2024-05-17
+categories: HTML
+---
+
+## HTML 기본 구조 및 요소 소개
+
+### HTML 문서의 기본 구조
+
+```
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문서 제목</title>
+</head>
+<body>
+    <!-- 내용이 여기에 들어갑니다 -->
+</body>
+</html>
+```
+- `<!DOCTYPE html>`: HTML5 문서임을 나타냅니다.
+- `<html>`: HTML 문서의 시작을 나타냅니다. lang 속성을 통해 문서의 언어를 지정할 수 있습니다.
+- `<title>`: 문서의 제목을 나타냅니다.
+- `<body>`: 브라우저에 실제로 표시되는 내용을 담는 부분입니다.
+
+- VSCODE 단축키: ` '! + tab' html 구조를 자동으로 만들어 준다. `
+
+
+<br>
+```
+<h1>나의 첫 HTML 문서 입니다!</h1>
+<div>안녕하세요!</div>
+
+<!-- 중첩(nested) -->
+<div style="background-color: red;">
+    span의 parent
+    <span style="background-color: blue;">div의 child</span>
+    <span style="background-color: green;">div의 child</span>
+</div>
+<div style="background-color: yellow;">또 다른 div</div>
+```
+- `<h1>`: 제목을 나타내는 태그입니다.
+- `<div>`: 구역을 나누는 블록(block) 요소입니다.
+- `<span>`: 텍스트의 일부분을 감싸는 인라인(inline) 요소입니다.
