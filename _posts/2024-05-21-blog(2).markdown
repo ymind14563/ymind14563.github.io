@@ -1,0 +1,106 @@
+---
+layout: post
+title: "[새싹x코딩온] Table Tag"
+date: 2024-05-21
+categories: HTML
+---
+
+## 기본 테이블
+
+- 테이블은 행과 열로 이루어져 있으며, 각 셀에 데이터를 넣어서 정보를 구조화합니다.
+- `border="1"`: 이 속성은 테이블의 테두리를 그릴 때 사용됩니다. 숫자는 테두리의 두께를 나타냅니다. 0으로 설정하여 없앨 수도 있습니다.
+- `width="150" height="150"`: 테이블의 너비와 높이를 설정합니다.
+- `bgcolor="skyblue"`: 테이블의 배경색을 설정합니다.
+
+
+```
+<table border="1" width="150" height="150" bgcolor="skyblue">
+    <caption>My First Table</caption>
+    <tr>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>5</td>
+        <td>6</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>8</td>
+        <td>9</td>
+    </tr>
+</table>
+```
+<br><br><br>
+
+## 테이블 예시 (메뉴판)
+
+- `cellpadding="15"`: 셀의 내부 여백을 설정합니다. 여기서는 15픽셀로 설정하여 셀의 텍스트와 테두리 사이의 여백을 늘립니다.
+- `cellspacing="10"`: 셀 사이의 간격을 설정합니다. 여기서는 10픽셀로 설정하여 테두리와 테두리의 간격을 넓힙니다. (검은색 줄 2개로 표현)
+- `align="center"`: 테이블을 가로로 가운데 정렬합니다.
+
+
+```
+<table border="1" cellpadding="15" cellspacing="10" align="center">
+    <caption>메뉴판</caption>
+    <tr>
+        <th>메뉴</th>
+        <th>가격</th>
+        <th>비고</th>            
+    </tr>
+    <tr>
+        <td>국물떡볶이</td>
+        <td>5000</td>
+        <td>2인 이상 주문 가능</td>
+    </tr>
+    <tr>
+        <td>참치김밥</td>
+        <td>4000</td>
+        <td>X</td>
+    </tr>
+    <tr>
+        <td>치즈김밥</td>
+        <td>4000</td>
+        <td>치즈 추가 500원</td>
+    </tr>
+</table>
+```
+
+## rowspan과 colspan
+
+- rowspan은 해당 셀이 속한 행(row)을 병합
+- colspan은 해당 셀이 속한 열(column)을 병합
+- <b>먼저 병합을 시작하고자하는 부분에서 rowspan, colspan을 사용하고 
+병합을 당하는 부분의 데이터도 존재한다면, 테이블이 깨져 올바른 형태로 나타나지 않습니다. <b>
+
+- cellspacing="0" 이기에 테두리와 테두리 간격이 0입니다. 검은색 줄 하나로만 테이블이 만들어집니다.
+
+```
+<table border="1" cellspacing="0">
+    <caption>NEW 메뉴판</caption>
+    <tr>
+        <th>메뉴</th>
+        <th>가격</th>
+        <th>비고</th>            
+    </tr>
+    <tr>
+        <td>국물떡볶이</td>
+        <td>5000</td>
+        <td>2인 이상 주문 가능</td>
+    </tr>
+    <tr>
+        <td>참치김밥</td>
+        <td rowspan="2">4000</td>
+        <td>X</td>
+    </tr>
+    <tr>
+        <td>치즈김밥</td>
+        <td>치즈 추가 500원</td>
+    </tr>
+    <tr>
+        <td colspan="3">순대 (품절)</td>
+    </tr>
+</table>
+```

@@ -1,0 +1,136 @@
+---
+layout: post
+title: "[새싹x코딩온] Form Tag 종류와 요소"
+date: 2024-05-21
+categories: HTML
+---
+
+
+## 1. form 태그
+
+- form은 화면에 드러나지 않는 추상적인 태그이며, 양식에 불과합니다.
+- form 요소: 폼 태그 안에 있는 사용자의 입력 값을 받는 요소입니다.
+input, textarea, select... 태그들에는 name 속성을 가질 수 있습니다.
+
+- action 속성: 사용자가 폼에 입력한 값을 전달할 주소를 지정합니다.
+- method 속성: 사용자가 폼에 입력한 값을 전달하는 방법을 지정합니다.
+- 서버와 관련된 내용입니다.
+
+```
+<form action="/submit" method="post">
+    <!-- 폼 요소들 -->
+</form>
+```
+
+## 2. input 태그
+
+- type : 입력의 타입을 지정합니다. `text`, `email`, `password`, `number`, `date`, `file` 등 다양한 타입이 있습니다.
+- disabled: 입력을 불가능하게 만듭니다.
+- placeholder: 입력 필드에 미리보기 텍스트를 표시합니다. (안내문구, 예시 등..)
+
+```
+Text <input type="text"> <br>
+Text2 <input type="text" disabled> <br>
+<label for="user-email">이메일</label>
+<input type="email" id="user-email" placeholder="abc@test.com">
+```
+
+## 3. label 태그
+- label 태그의 for 속성 값과 input 태그의 id 속성 값을 일치 시키면, label 글씨를 클릭했을 때 input 창에 포커싱 됩니다.
+이는 사용자가 편리하게 사용 할 수 있기 때문에 웹 접근성에 적합합니다.
+
+```
+<label for="user-email">이메일</label>
+<input type="email" name="" id="user-email" placeholder="abc@test.com">
+```
+
+
+## 4. 기타 input 타입
+
+- color: 색상을 선택할 수 있는 입력 창
+- range: 범위를 설정할 수 있는 슬라이더
+- file: 파일을 업로드할 수 있는 입력 창
+- password: 비밀번호 입력 창
+
+```
+<input type="color">
+<input type="range">
+<input type="file">
+<input type="number">
+<input type="date">
+<input type="datetime-local">
+<input type="password">
+```
+
+## 5. checkbox와 radio 버튼
+
+- checkbox: 여러 개의 선택지 중에서 여러 개를 선택할 수 있습니다.
+- radio: 여러 개의 선택지 중에서 하나만 선택할 수 있습니다. 동일한 `name` 속성을 사용하여 그룹화해야 합니다.
+그룹화한 선택지 중에서 하나만 선택 가능하기에 카테고리화 하지 않으면 전부 선택하게 되어 원하지 않는 결과가 나올 수 있습니다.
+
+- checked: 처음부터 자동으로 선택된 상태로 시작합니다.
+
+```
+<h5>당신의 취미는 무엇인가요?</h5>
+<input type="checkbox" name="interest" value="basketball" checked>농구
+<input type="checkbox" name="interest" value="movie">영화
+<input type="checkbox" name="interest" value="lay-down">누워있기
+
+<h5>당신의 성별은 무엇인가요?</h5>
+<input type="radio" name="gender" value="male" id="male"><label for="male">남성</label>
+<input type="radio" name="gender" value="female" id="female"><label for="female" checked>여성</label>
+```
+
+## 6. textarea 태그
+
+`<textarea>` 태그는 여러 줄의 텍스트를 입력받을 수 있는 요소입니다. `cols`와 `rows` 속성으로 크기를 조절할 수 있습니다.
+
+```
+<textarea placeholder="문의사항을 입력해 주세요." cols="50" rows="20"></textarea>
+```
+
+## 7. select 태그
+
+`<select>` 태그는 드롭다운 리스트를 제공합니다. `<optgroup>`을 사용하여 옵션들을 그룹화할 수 있습니다.
+
+```
+<select name="flowers">
+    <optgroup label="red-flower">
+        <option value="장미">장미</option>
+        <option value="동백꽃">동백꽃</option>
+        <option value="카네이션">카네이션</option>
+    </optgroup>
+    <optgroup label="white-flower">
+        <option value="벚꽃">벚꽃</option>
+        <option value="목련">목련</option>
+        <option value="매화">매화</option>
+    </optgroup>
+</select>
+```
+
+## 8. 버튼
+
+- input 태그의 button 타입: 클릭 가능한 버튼을 생성합니다.
+- button 태그: 더 많은 옵션을 제공하며, `type` 속성으로 `button` 또는 `submit` 값을 가질 수 있습니다.
+
+- button 태그 type 생략 가능합니다. <br>
+form 태그 바깥에 있을 때 기본값은 type="button" 입니다.<br>
+form 태그 내부에 있을 때 기본값은 type="submit" 입니다.
+
+```
+<!-- 단순 버튼 -->
+<input type="button" value="단순 버튼 1">
+<button type="button">단순 버튼 2</button>
+
+<!-- 제출 버튼 -->
+<input type="submit" value="제출 버튼 1">
+<button type="submit">제출 버튼 2</button>
+
+
+<!-- 버튼 기본 값 -->
+<form>
+	<button>버튼 1</button> //<button type="submit">버튼 1</button> 과 같습니다.
+</form>
+
+<button>버튼 2</button>  //<button type="button">버튼 2</button> 과 같습니다.
+```

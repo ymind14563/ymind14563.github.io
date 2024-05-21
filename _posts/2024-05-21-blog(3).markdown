@@ -1,0 +1,81 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS 참조방식"
+date: 2024-05-21
+categories: CSS
+---
+
+CSS는 HTML 요소를 스타일링하는 데 중요한 역할을 합니다.
+
+## 1. 인라인 스타일링 참조방식
+
+인라인 스타일링은 `style` 속성을 사용하여 개별 HTML 요소에 스타일을 <b>직접</b> 적용하는 방법입니다.
+
+```
+<h1 style="color: blue;">CSS 사용법을 익혀봅시다!</h1>
+<h2 style="font-size: larger;">Hello World~!</h2>
+```
+
+## 2. 내장 스타일링 참조방식
+
+- 내장 스타일링은 HTML 문서의 `<head>` 섹션 내에 `<style>` 태그 내에 CSS 스타일을 추가하는 것을 말합니다.
+- `<ul>` 태그는 아쿠아 배경색을 가지도록 스타일이 지정되었습니다. 
+- `<h2>` 태그는 핑크색 텍스트 색상으로 설정됩니다. `<h1>` 태그는 인라인 방식 우선순위로 적용 되었기에 그대로 파란색으로 나타납니다.
+
+```
+...
+<style>
+        ul{
+            background-color: aqua;
+        }
+        /* 인라인방식이 이미 있으므로 h1은 적용이 되지 않는다. 인라인 방식이 우선이기 때문에 */
+        h1, h2 {
+            color: pink;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="color: blue;">CSS 사용법을 익혀봅시다!</h1>
+    <h2 style="font-size: larger;">Hello World~!</h2>
+
+    <ul>
+        <li>원</li>
+        <li>투</li>
+        <li>쓰리</li>
+    </ul>
+...
+```
+
+## 3. 링크(외부) 스타일링 참조방식
+
+- 외부 스타일링은 `<link>` 태그를 사용하여 HTML 문서에 외부 CSS 파일을 연결하는 것을 의미합니다.
+- HTML 문서를 `index.css`라는 외부 CSS 파일에 연결합니다. 여기에는 추가적인 스타일링 규칙을 정의할 수 있습니다.
+
+
+```
+index.html 파일
+...
+<head>
+	<link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+    <ul>
+        <li>원</li>
+        <li>투</li>
+        <li>쓰리</li>
+    </ul>
+</body>
+...
+```
+<br>
+
+```
+index.css 파일
+li {
+    font-size: 30px;
+    color: white;
+    background-color: black;
+}
+```
