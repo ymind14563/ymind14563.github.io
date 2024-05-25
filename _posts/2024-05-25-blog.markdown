@@ -1,0 +1,353 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS 선택자"
+date: 2024-05-25
+categories: CSS
+---
+
+# I. 기본선택자
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 선택자</title>
+    <link rel="stylesheet" href="./index2.css">
+</head>
+<body>
+    <h1>기본 선택자 연습해보기.</h1>
+    <p>기본 선택자 연습해보기2!</p>
+    <span>안녕하세요</span>
+
+    <ol>
+        <li id="first">1</li>
+        <li class="second">2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+    </ol>
+
+    <ul>
+        <li class="small">쥐</li>
+        <li class="small dog">강아지</li>
+        <li class="small">고양이</li>
+        <li class="big">호랑이</li>
+        <li class="big">곰</li>
+    </ul>
+
+    
+    <p class="hello hi bong">안녕하세요</p>
+    
+    <p id="my-hello">안녕하세요</p>
+    
+    <p class="hello hi bong" id="my-hello">안녕하세요</p>
+    
+    <p id="one two">안녕하세요</p>
+
+</body>
+</html>
+```
+## CSS 코드
+
+```css
+/* 전체 선택자 */
+* {
+    color: red;
+}
+
+/* 태그 선택자 */
+h1 {
+    background-color: red;
+}
+
+p {
+    background-color: blueviolet;
+}
+
+/* 클래스 선택자 */
+.second {
+    background-color: aqua;
+}
+
+.small {
+    font-size: 10px;
+}
+
+.big {
+    font-size: 30px;
+}
+
+.dog {
+    color: blue;
+}
+
+/* 아이디 선택자 */
+#first {
+    background-color: lightgreen;
+}
+
+
+.hello {
+    color: green;
+}
+
+.hi {
+    color: blue;
+}
+
+#my-hello {
+    color: black;
+}
+
+#one {
+    color: white;
+}
+```
+
+
+## 1. 기본 선택자
+- HTML 태그 자체를 선택자로 사용합니다.
+- 예: `h1`, `p`, `span` 등.
+
+## 2. 클래스 선택자
+- 클래스는 여러 요소에 동일한 스타일을 적용할 때 사용됩니다.
+- 클래스 선택자는 `.`으로 시작합니다.
+  ```html
+  <p class="hello hi bong">안녕하세요</p>
+  ```
+
+## 3. 아이디 선택자
+- 아이디는 문서 내에서 고유해야 하며 특정 요소를 선택할 때 사용됩니다.
+- 아이디 선택자는 `#`으로 시작합니다.
+  ```html
+  <p id="my-hello">안녕하세요</p>
+  ```
+
+<br>
+
+## <class, id 속성의 올바른 사용법>
+1. 한 요소에 여러 클래스 사용 가능, 공백으로 구분합니다.
+2. 한 요소에 하나의 아이디를 사용 합니다.
+3. 한 요소가 여러 클래스와 하나의 아이디를 사용 가능합니다.
+4. 한 요소가 여러 개의 아이디는 불가능합니다. 
+
+---
+
+<br><br>
+## CSS 선택자 설명
+
+### 전체 선택자
+
+전체 선택자는 문서 내의 모든 요소를 선택합니다.
+
+```css
+* {
+    color: red;
+}
+```
+
+### 태그 선택자
+
+태그 선택자는 특정 HTML 태그를 선택합니다.
+
+```css
+h1 {
+    background-color: red;
+}
+
+p {
+    background-color: blueviolet;
+}
+```
+
+### 클래스 선택자
+
+클래스 선택자는 특정 클래스가 지정된 요소를 선택합니다.
+
+```css
+.second {
+    background-color: aqua;
+}
+
+.small {
+    font-size: 10px;
+}
+
+.big {
+    font-size: 30px;
+}
+
+.dog {
+    color: blue;
+}
+```
+
+### 아이디 선택자
+
+아이디 선택자는 특정 아이디가 지정된 요소를 선택합니다.
+
+```css
+#first {
+    background-color: lightgreen;
+}
+
+#my-hello {
+    color: black;
+}
+
+#one {
+    color: white;
+}
+```
+
+<br><br><br>
+
+
+# II. 다중(복합선택자)
+
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다중(복합) 선택자</title>
+    <link rel="stylesheet" href="./index3.css">
+</head>
+<body>
+    <section class="first">
+        <h2>첫번째 section</h2>
+        <article>
+            <span>K-Pop</span>
+        </article>
+        <article>
+            <ul>
+                <li>에스파</li>
+                <li>뉴진스</li>
+                <li id="lion">소녀시대</li>
+                <li>아이브</li>
+                <li>bts</li>
+            </ul>
+        </article>
+    </section>
+
+    <section class="second">
+        <h2>두번째 section</h2>
+        <article>
+            <span>Pop</span>
+        </article>
+        <article>
+            <ul>
+                <li>찰리푸스</li>
+                <li>마룬파이브</li>
+                <li>아이묭</li>
+            </ul>
+        </article>
+    </section>
+</body>
+</html>
+```
+
+## CSS 코드
+
+```css
+/* 하위(후손) 선택자 : 공백(띄어쓰기) */
+body section {
+    /* 테두리(경계선): 두께, 선 스타일, 선 색상 */
+    border: 1px solid blue;
+}
+
+body section h2 {
+    border: 1px solid green;
+}
+
+/* 자식 선택자 : > */
+.first > h2 {
+    color: white;
+    background-color: navy;
+}
+
+.second > h2 {
+    color: navy;
+    background-color: white;
+}
+
+/* 인접 형제 선택자 : + */
+#lion + li {
+    background-color: aqua;
+}
+
+/* 일반 형제 선택자 : ~ */
+#lion ~ li {
+    color: red;
+}
+```
+
+## CSS 선택자 설명
+
+### 하위(후손) 선택자
+
+하위 선택자는 특정 요소의 모든 후손 요소를 선택합니다. 공백(띄어쓰기)으로 지정되며, 선택자 사이의 모든 후손 요소를 대상으로 스타일을 적용할 수 있습니다.
+
+```css
+body section {
+    border: 1px solid blue; /* 테두리: 두께, 선 스타일, 선 색상 */
+}
+
+body section h2 {
+    border: 1px solid green;
+}
+```
+
+위 코드에서 `body section`은 `body` 요소의 모든 `section` 요소에 파란색 테두리를 적용합니다. 또한, `body section h2`는 `section` 요소 내의 모든 `h2` 요소에 초록색 테두리를 적용합니다.
+
+### 자식 선택자
+
+자식 선택자는 특정 요소의 직계 자식 요소만을 선택합니다. `>` 기호를 사용하여 지정합니다. `(반대, 왼쪽(<)은 적용되지 않습니다.)`
+
+```css
+.first > h2 {
+    color: white;
+    background-color: navy;
+}
+
+.second > h2 {
+    color: navy;
+    background-color: white;
+}
+```
+
+위 코드에서 `.first > h2`는 `class`가 `first`인 `section` 요소의 직계 자식 `h2` 요소에 흰색 글자와 남색 배경을 적용합니다. `.second > h2`는 `class`가 `second`인 `section` 요소의 직계 자식 `h2` 요소에 남색 글자와 흰색 배경을 적용합니다.
+
+### 인접 형제 선택자
+
+인접 형제 선택자는 특정 요소 바로 다음에 위치한 형제 요소를 선택합니다. `+` 기호를 사용하여 지정합니다.
+
+```css
+#lion + li {
+    background-color: aqua;
+}
+```
+
+위 코드에서 `#lion + li`는 아이디가 `lion`인 `li` 요소 바로 다음에 위치한 `li` 요소에 아쿠아색 배경을 적용합니다.  
+`(주의)  
+lion 이라는 아이디를 갖는 요소 바로 뒤에 li 태그가 있어야 함.
+만약 없으면 아무 적용도 되지 않음.`
+
+
+### 일반 형제 선택자
+
+일반 형제 선택자는 특정 요소 다음에 위치한 모든 형제 요소를 선택합니다. `~` 기호를 사용하여 지정합니다.
+
+```css
+#lion ~ li {
+    color: red;
+}
+```
+
+위 코드에서 `#lion ~ li`는 아이디가 `lion`인 `li` 요소 다음에 위치한 모든 `li` 요소에 빨간색 글자를 적용합니다.
