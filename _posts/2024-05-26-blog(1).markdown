@@ -1,0 +1,147 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS position"
+date: 2024-05-26
+categories: CSS
+---
+
+# CSS Position
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index6.css">
+    <title>Position</title>
+</head>
+<body>
+    <h1>CSS Position에 대해 배워보자!</h1>
+    <h2>static, relative, absolute, fixed</h2>
+    <div class="position-static">static</div>
+    <div class="position-relative">
+        relative
+        <div class="position-absolute">absolute</div>
+    </div>
+    <div class="position-fixed">fixed</div>
+</body>
+</html>
+```
+
+## CSS 코드
+
+```css
+div {
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 
+    static : 기본값
+        - 기본값이기 때문에 작성하지 않더라도 적용
+        - lnline 요소: 왼 -> 오 쌓임.
+        - block 요소: 위 -> 아래 쌓임.
+*/
+
+.position-static {
+    background-color: pink;
+    position: static;
+}
+
+/* 
+    relative: 상대 위치
+        - 일반적인 흐름에 따라 배치, top / bottom / left / right 중 하나 이상 작성해야됨.
+        " 원래 있어야 하는 위치 기준" 으로 부터 top / bottom /left / right씩 이동합니다.
+        - 배치(위치)가 바뀌어도 원래 기존 자리가 유지 된다.
+        - 보통 부모 요소로 많이 사용.
+*/
+
+.position-relative {
+    background-color: aquamarine;
+    position: relative;
+    left: 100px;
+}
+
+/* 
+    absolute : 절대 위치
+        - 누구를 기준? : position 속성을 갖는 제일 가까운 조상 기준.
+        -> position 속성을 갖는 조상이 없다면? body 기준
+        -> "특정 요소"를 기준 삼아서 top, bottom, left, right 씩 움직이겠다.
+        - 배치가 바뀌면 기존 자리가 없어진다.
+*/
+
+.position-absolute {
+    background-color: gold;
+    position: absolute;
+    /* left: 100px; */
+}
+
+
+/* 
+    fixed : 고정 위치
+        - viewport(브라우저의 화면 전체)를 기준으로 특정 위치 배치
+        - 스크롤 되어도 움직이지 않음.
+        - header, footer에 많이 사용.
+*/
+.position-fixed {
+    background-color: coral;
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+```
+
+
+
+## static: 기본값
+
+`static`은 모든 요소의 기본값입니다. 별도로 `position: static;`을 명시하지 않아도 자동으로 적용됩니다. `inline` 요소는 왼쪽에서 오른쪽으로 쌓이고, `block` 요소는 위에서 아래로 쌓입니다.
+
+```css
+.position-static {
+    background-color: pink;
+    position: static;
+}
+```
+
+
+## relative: 상대 위치
+
+`relative`는 요소를 배치하면서 `top`, `bottom`, `left`, `right` 속성으로 이동할 수 있게 해줍니다. 여기서 중요한 점은, "원래 있어야 하는 위치를 기준"으로 이동한다는 것입니다. 따라서, `relative` 속성을 사용해 요소의 위치가 변경되어도 그 자리에는 여전히 공간이 유지됩니다. 보통 부모 요소에 많이 사용됩니다.
+
+```css
+.position-relative {
+    background-color: aquamarine;
+    position: relative;
+    left: 100px;
+}
+```
+
+## absolute: 절대 위치
+
+`absolute`는 가장 가까운 `position` 속성을 갖는 조상을 기준으로 배치됩니다. 만약 그런 조상이 없다면 `body`를 기준으로 합니다. "특정 요소"를 기준으로 `top`, `bottom`, `left`, `right` 값으로 위치를 지정할 수 있으며, 배치가 바뀌면 기존 자리가 없어집니다.
+
+```css
+.position-absolute {
+    background-color: gold;
+    position: absolute;
+}
+```
+
+## fixed: 고정 위치
+
+`fixed`는 요소를 `viewport`를 기준으로 특정 위치에 고정시킵니다. 스크롤을 하더라도 요소는 화면의 동일한 위치에 유지됩니다. 이 속성은 주로 `header`나 `footer`에 많이 사용됩니다.
+
+```css
+.position-fixed {
+    background-color: coral;
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+```
