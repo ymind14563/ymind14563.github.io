@@ -351,3 +351,82 @@ lion 이라는 아이디를 갖는 요소 바로 뒤에 li 태그가 있어야 �
 ```
 
 위 코드에서 `#lion ~ li`는 아이디가 `lion`인 `li` 요소 다음에 위치한 모든 `li` 요소에 빨간색 글자를 적용합니다.
+
+<br><br>
+
+# III. 속성 선택자
+
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>속성 선택자</title>
+    <link rel="stylesheet" href="./prac4_css.css">
+</head>
+<body>
+     <input type="text" placeholder="이름" />
+     <input type="password" value="pw" />
+     <input type="text" value="000-0000-0000" />
+     <input type="text" placeholder="핸드폰" />
+     <input type="text" placeholder="주민번호" disabled />
+</body>
+</html>
+```
+
+## CSS 코드
+
+
+```css
+[disabled] {
+    background-color: red;
+}
+
+[placeholder="이름"] {
+    background-color: orange;
+}
+
+input:not([placeholder]) {
+    background-color: blue;
+}
+```
+
+
+## 1. 기본 속성 선택자
+
+기본 속성 선택자는 특정 속성을 가진 모든 요소를 선택합니다. 다음 코드는 `disabled` 속성이 있는 모든 요소의 배경색을 빨간색으로 설정합니다.
+
+```css
+[disabled] {
+    background-color: red;
+}
+```
+
+위 예제에서는 `disabled` 속성이 있는 `<input>` 요소가 빨간색 배경을 갖게 됩니다.
+
+## 2. 속성과 값이 일치하는 선택자
+
+속성과 그 값이 특정 값과 일치하는 요소를 선택할 수 있습니다. 다음 코드는 `placeholder` 속성의 값이 "이름"인 요소의 배경색을 주황색으로 설정합니다.
+
+```css
+[placeholder="이름"] {
+    background-color: orange;
+}
+```
+
+이 선택자는 `placeholder` 속성이 "이름"인 `<input>` 요소에만 적용됩니다.
+
+## 3. 부정 선택자
+
+부정 선택자 `:not()`는 특정 조건을 만족하지 않는 요소를 선택합니다. 다음 코드는 `placeholder` 속성이 없는 `input` 요소의 배경색을 파란색으로 설정합니다.
+
+```css
+input:not([placeholder]) {
+    background-color: blue;
+}
+```
+
+이 선택자는 `placeholder` 속성이 없는 모든 `<input>` 요소에 스타일을 적용합니다.
