@@ -41,14 +41,6 @@ categories: CSS
 
 
 ```css
-/* 웹 폰트 (web-font) */
-/* 
-    - 구글 웹 폰트, 눈누 웹 폰트
-    - 모든 브라우저에서 보는 폰트를 통일 시키는 것.
-    - 폰트를 다운로드 하는 것이 아니라 link tag 에 걸려 있는 주소에서
-      폰트를 가져오는 방식.
-    - 보통 기본 폰트는 body 태그에 작성.
-*/
 
 /* 웹 폰트 수정 방법 3가지
     #1.은 #2와 #3과 달리 html(link)과 css(font-family) 부분 전부 수정해줘야한다.
@@ -109,6 +101,8 @@ body h1 {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
 ```
+
+<br>
 
 ```css
 /* CSS에서 폰트 적용 */
@@ -192,7 +186,6 @@ CSS에서 사용할 수 있는 색상 키워드는 `red`, `blue`, `aqua`, `white
 
 RGB 값은 `rgb(0, 0, 0)` 형식으로, 각각 빨간색, 녹색, 파란색의 값을 0부터 255까지 설정합니다. 이를 통해 16진수 코드보다 더욱 직관적으로 색상을 조절할 수 있습니다.
 
-### 예제
 
 ```css
 .div {
