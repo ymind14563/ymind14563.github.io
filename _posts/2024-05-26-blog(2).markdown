@@ -1,0 +1,150 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS Z-Index"
+date: 2024-05-26
+categories: CSS
+---
+
+# CSS Z-Index
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index7.css">
+    <title>CSS - z-index</title>
+</head>
+<body>
+    <h1>CSS z-index에 대해 배워보자</h1>
+
+    <div class="div1 position-absolute">z-index</div>
+    <div class="div2 position-absolute">z-index</div>
+    <div class="div3 position-absolute">z-index</div>
+    <div class="div4 position-absolute">z-index</div>
+    <div class="div5 position-absolute">z-index</div>
+</body>
+</html>
+```
+
+## CSS 코드
+
+```css
+div {
+    width: 100px;
+    height: 100px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 100px;
+
+    position: absolute;
+}
+
+/* 
+    Z-index
+    - 겹치는 요소에 대한 순서를 결정
+    - 숫자값: 양수, 0, 음수
+    - 숫자값이 클수록 더 위에 쌓임. (가장 앞에 놓인다)
+*/
+
+.div1 {
+    top: 100px;
+    left: 100px;
+    background-color: red;
+    z-index: 8;
+}
+
+.div2 {
+    top: 140px;
+    left: 140px;
+    background-color: orange;
+    z-index: 6;
+}
+
+.div3 {
+    top: 180px;
+    left: 180px;
+    background-color: yellow;
+    z-index: 10;
+}
+
+.div4 {
+    top: 220px;
+    left: 220px;
+    background-color: green;
+    z-index: 4;
+}
+.div5 {
+    top: 260px;
+    left: 260px;
+    background-color: blue;
+    z-index: 12;
+}
+```
+
+## z-index: 겹치는 요소의 순서 결정
+
+`z-index`는 겹치는 요소들 사이의 순서를 결정합니다. 이 속성은 숫자 값을 가지며, 값이 클수록 요소가 더 위에 쌓입니다. `z-index` 값은 양수, 0, 음수 모두 사용할 수 있습니다.
+
+```css
+div {
+    width: 100px;
+    height: 100px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 100px;
+    position: absolute;
+}
+```
+
+위의 코드에서 모든 `div` 요소는 `absolute`:절대 위치 속성을 가지며, 동일한 크기와 스타일을 공유합니다.
+
+```css
+.div1 {
+    top: 100px;
+    left: 100px;
+    background-color: red;
+    z-index: 8;
+}
+
+.div2 {
+    top: 140px;
+    left: 140px;
+    background-color: orange;
+    z-index: 6;
+}
+
+.div3 {
+    top: 180px;
+    left: 180px;
+    background-color: yellow;
+    z-index: 10;
+}
+
+.div4 {
+    top: 220px;
+    left: 220px;
+    background-color: green;
+    z-index: 4;
+}
+
+.div5 {
+    top: 260px;
+    left: 260px;
+    background-color: blue;
+    z-index: 12;
+}
+```
+
+### 예제 설명
+
+1. `.div1` 클래스는 `z-index: 8`을 가집니다. 배경색은 빨간색입니다.
+2. `.div2` 클래스는 `z-index: 6`을 가집니다. 배경색은 주황색입니다.
+3. `.div3` 클래스는 `z-index: 10`을 가집니다. 배경색은 노란색입니다.
+4. `.div4` 클래스는 `z-index: 4`을 가집니다. 배경색은 녹색입니다.
+5. `.div5` 클래스는 `z-index: 12`을 가집니다. 배경색은 파란색입니다.
+
+요소들이 겹칠 때 `z-index` 값이 큰 요소가 가장 앞에 나타나게 됩니다. <br> 
+따라서, `z-index: 12`를 가진 파란색 요소가 가장 위에 표시되고, `z-index: 4`를 가진 녹색 요소가 가장 뒤에 표시됩니다.
