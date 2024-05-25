@@ -1,0 +1,242 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS 가상 클래스 선택자 와 가상 요소 선택자"
+date: 2024-05-25
+categories: CSS
+---
+# 가상 클래스 선택자
+
+## HTML 코드
+
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가상 클래스 선택자</title>
+    <link rel="stylesheet" href="./index4.css">
+</head>
+<body>
+    <div class="div1">
+        <span>div1</span>
+    </div>
+    <input type="text" name="" id="">
+    <div class="links">
+        <a href="https://www.naver.com">네이버</a>
+        <a href="https://www.google.com">구글</a>
+        <a href="https://www.apple.com">애플</a>
+    </div>
+
+    <hr>
+
+    <ul class="zoo">
+        <h1>동물원 입니다.</h1>
+        <div>푸바오</div>
+        <li>사자</li>
+        <li>토끼</li>
+        <li>거북이</li>
+        <div>코알라</div>
+        <li>코끼리</li>
+        <li>원숭이</li>
+    </ul>
+
+</body>
+</html>
+```
+
+## CSS 코드
+
+
+```css
+.div1 {
+    width: 100px;
+    height: 100px;
+    background-color: aquamarine;
+}
+
+/* :hover : 요소에 마우스를 올렸을 때 */
+.div1:hover {
+    background-color: hotpink;
+    width: 150px;
+    height: 150px;
+}
+
+/* :active : 요소를 마우스로 클릭하고 있을 때 */
+.div1:active {
+    background-color: brown;
+    width: 200px;
+}
+
+/* :focus : 요소에 포커스가 되었을 때 */
+input:focus {
+    background-color: violet;
+    color: lightblue;
+    outline-color: yellowgreen;
+}
+
+.links > a:hover {
+    background-color: coral;
+}
+
+.links > a:visited {
+    color: red;
+}
+
+
+/* 요소 상황에 따른 가상 클래스 선택자 */
+.zoo > * {
+    background-color: green;
+    color: white;
+}
+
+/* #1. E:first-child : E(요소)가 첫 번째 자식이라면 */
+.zoo > *:first-child {
+    background-color: red;
+}
+
+/* #2. E:last-child : E(요소)가 마지막 자식이라면 */
+.zoo > *:last-child {
+    background-color: black;
+}
+
+/* #3. E:nth-child(n) : E(요소)가 n번째 자식이라면 */
+.zoo > *:nth-child(2) {
+    background-color: aqua;
+}
+
+/* #4. E:not(XYZ) : XYZ가 아닌 요소 선택 */
+.zoo > *:not(div) {
+    background-color: pink;
+}
+```
+
+## 가상 클래스 선택자
+
+가상 클래스 선택자는 요소가 특정 상태에 있을 때 스타일을 적용합니다.
+
+### :hover
+
+`:hover` 선택자는 요소에 마우스를 올렸을 때 스타일을 적용합니다.
+
+```css
+.div1:hover {
+    background-color: hotpink;
+    width: 150px;
+    height: 150px;
+}
+```
+
+### :active
+
+`:active` 선택자는 요소를 마우스로 클릭하고 있을 때 스타일을 적용합니다.
+
+```css
+.div1:active {
+    background-color: brown;
+    width: 200px;
+}
+```
+
+### :focus
+
+`:focus` 선택자는 요소에 포커스가 되었을 때 스타일을 적용합니다.
+
+```css
+input:focus {
+    background-color: violet;
+    color: lightblue;
+    outline-color: yellowgreen;
+}
+```
+
+### :visited
+
+`:visited` 선택자는 사용자가 방문한 링크를 스타일링합니다.
+
+```css
+.links > a:visited {
+    color: red;
+}
+```
+<br><br>
+
+
+# 가상 요소 선택자
+
+## HTML 코드
+
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가상 요소 선택자</title>
+    <link rel="stylesheet" href="./index4.css">
+</head>
+<body>
+    <div class="box"> 빨리요 ! </div>
+</body>
+</html>
+```
+
+## CSS 코드
+
+
+```css
+.box::before {
+    content: "소방차";
+    color: red;
+}
+
+.box::after {
+    content: "여기";
+    color: white !important;
+    background-color: blue;
+}
+
+.box::after {
+    content: "여기";
+    color: black;
+    background-color: red;
+}
+
+/* !important : 가장 우선 순위가 높다. */
+```
+
+가상 요소 선택자는 HTML 문서에 존재하지 않는 가상의 부분을 생성하여 스타일을 적용합니다. 가상 요소는 `::` 기호를 사용하여 지정합니다.
+
+
+
+### ::before
+
+`::before` 선택자는 요소의 내용 앞에 가상 요소를 생성합니다.
+
+```css
+.box::before {
+    content: "소방차";
+    color: red;
+}
+```
+
+### ::after
+
+`::after` 선택자는 요소의 내용 뒤에 가상 요소를 생성합니다.
+
+```css
+.box::after {
+    content: "여기";
+    color: white !important;
+    background-color: blue;
+}
+```
+
+
+---
+
+## 가상 클래스와 가상 요소의 차이
+
+가상 클래스는 요소의 기존 상태를 나타내며, 가상 요소는 문서의 특정 부분을 생성하여 스타일링합니다. CSS 사양이 발전하면서 이를 명확하게 구분할 필요성이 생겼고, 가상 요소를 `::`로 표기하는 새로운 표기법이 도입되었습니다.
