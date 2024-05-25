@@ -1,0 +1,203 @@
+---
+layout: post
+title: "[새싹x코딩온] 웹 폰트와 CSS 색상"
+date: 2024-05-25
+categories: CSS
+---
+
+# I. 웹 폰트 적용
+
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자주 쓰이는 CSS 속성</title>
+    <link rel="stylesheet" href="./index5.css">
+
+    <!-- #1. google fonts  : link 로 바꾸기-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+    <!-- #2. google fonts  : @import 로 바꾸기-->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+    </style>
+    
+</head>
+<body>
+    <h1>자주 쓰이는 CSS 속성을 공부해보자!</h1>
+    <div>Hello World! 헬로우 월드</div>
+
+</body>
+</html>
+```
+
+## CSS 코드
+
+
+```css
+/* 웹 폰트 (web-font) */
+/* 
+    - 구글 웹 폰트, 눈누 웹 폰트
+    - 모든 브라우저에서 보는 폰트를 통일 시키는 것.
+    - 폰트를 다운로드 하는 것이 아니라 link tag 에 걸려 있는 주소에서
+      폰트를 가져오는 방식.
+    - 보통 기본 폰트는 body 태그에 작성.
+*/
+
+/* 웹 폰트 수정 방법 3가지
+    #1.은 #2와 #3과 달리 html(link)과 css(font-family) 부분 전부 수정해줘야한다.
+    #2.는 html head style 부분에 적용하면 된다.
+    #3.은 css 부분에 @font-face 부분을 복사 붙여넣기 해주고, 
+      적용할 부분 (body h1)에 font-family를 추가 해주면 적용된다.
+*/
+
+
+/* #1. google fonts  : link 로 바꾸기
+    - html link 에 복사 및 css 에 적용할 부분에 font-family 복사
+    - font-family만 있어도 작동함. (weight, style 없어도 됨)
+*/
+body div{
+    font-family: "Nanum Gothic Coding", monospace;
+    font-weight: 400;
+    font-style: normal;
+
+    /* Nanum Gothic Coding 사용, 없다면 monospace 로 대체 */
+}
+
+
+/* #3. 눈누 웹폰트로 사용으로 바꾸기
+    - css에 @font-face 복사 및 적용할 곳에 font-family 추가
+*/
+body h1 {
+    font-family: 'Ownglyph_ryurue-Rg';
+}
+
+@font-face {
+    font-family: 'Ownglyph_ryurue-Rg';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2405-2@1.0/Ownglyph_ryurue-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+```
+
+<br>
+
+# `폰트 사용 시엔 항상 저작권 주의!!`
+
+## 웹 폰트 (web-font)
+- 구글 웹 폰트, 눈누 웹 폰트를 사용합니다.
+- 모든 브라우저에서 보는 폰트를 통일 시키는 것이 목적 중에 하나 입니다.
+- 폰트를 다운로드 하는 것이 아니라 link tag 에 걸려 있는 주소에서 폰트를 가져오는 방식입니다.
+- 보통 기본 폰트는 body 태그에 작성합니다.
+
+## 웹 폰트 적용 방법
+
+### 1. Google Fonts를 링크 태그로 적용하기
+> [구글 웹 폰트 주소](https://fonts.google.com/?subset=korean&noto.script=Kore)
+
+가장 간단한 방법은 HTML의 `<link>` 태그를 사용하는 것입니다. 이 방법은 HTML 문서의 `<head>` 부분에 링크를 추가하고, CSS에서 `font-family` 속성을 설정합니다.
+
+```html
+<!-- HTML의 <head> 부분 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+```
+
+```css
+/* CSS에서 폰트 적용 */
+body div {
+    font-family: "Nanum Gothic Coding", monospace;
+    font-weight: 400;
+    font-style: normal;
+}
+```
+
+이 방법은 `Nanum Gothic Coding` 폰트를 사용하며, 해당 폰트가 없을 경우 `monospace` 폰트로 대체됩니다.
+
+### 2. Google Fonts를 @import로 적용하기
+
+CSS 파일이나 `<style>` 태그 내에서 `@import`를 사용하는 것입니다.
+
+```html
+<!-- HTML의 <style> 부분 -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+</style>
+```
+
+### 3. 눈누 웹 폰트 사용하기
+
+> [눈누 웹 폰트 주소](https://noonnu.cc/)
+
+
+눈누 웹 폰트를 사용하려면 `@font-face` 규칙을 사용하여 CSS에 폰트를 정의하고 적용할 곳에 `font-family`를 설정합니다.
+
+```css
+/* CSS에서 폰트 정의 및 적용 */
+@font-face {
+    font-family: 'Ownglyph_ryurue-Rg';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2405-2@1.0/Ownglyph_ryurue-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body h1 {
+    font-family: 'Ownglyph_ryurue-Rg';
+}
+```
+
+이 방법은 `Ownglyph_ryurue-Rg` 폰트를 정의하고, 이를 `<h1>` 요소에 적용합니다.
+
+<br><br>
+
+# II. CSS 색상 지정 방법
+
+## 1. 색상 키워드
+
+```css
+.div {
+    color: red; /* 빨간색 */
+    background-color: blue; /* 파란색 */
+    border-color: aqua; /* 아쿠아색 */
+}
+```
+
+CSS에서 사용할 수 있는 색상 키워드는 `red`, `blue`, `aqua`, `white` 등 매우 다양합니다.
+
+## 2. 16진수 코드
+
+16진수 코드는 색상을 더 세밀하게 조절할 수 있는 방법입니다. 16진수 코드의 형식은 `#XXXXXX`이며, 여기서 `XX`는 각각 빨간색, 녹색, 파란색의 강도를 나타냅니다. 각 `XX`는 0부터 9까지와 a부터 f까지의 16개의 기호로 표현됩니다.
+
+
+```css
+.div {
+    color: #ffffff; /* 흰색 */
+    background-color: #000000; /* 검정색 */
+    border-color: #ff5733; /* 주황색 */
+}
+```
+
+- `#ffffff`: Red(ff), Green(ff), Blue(ff)로 구성되며 흰색을 나타냅니다.
+- `#000000`: Red(00), Green(00), Blue(00)로 구성되며 검정색을 나타냅니다.
+- `#ff5733`: Red(ff), Green(57), Blue(33)로 구성되며 주황색을 나타냅니다.
+
+## 3. RGB 값
+
+RGB 값은 `rgb(0, 0, 0)` 형식으로, 각각 빨간색, 녹색, 파란색의 값을 0부터 255까지 설정합니다. 이를 통해 16진수 코드보다 더욱 직관적으로 색상을 조절할 수 있습니다.
+
+### 예제
+
+```css
+.div {
+    color: rgb(255, 255, 255); /* 흰색 */
+    background-color: rgb(0, 0, 0); /* 검정색 */
+    border-color: rgb(255, 87, 51); /* 주황색 */
+}
+```
