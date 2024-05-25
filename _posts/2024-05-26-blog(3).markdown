@@ -1,0 +1,129 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS overflow"
+date: 2024-05-26
+categories: CSS
+---
+
+# CSS overflow
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index8.css">
+    <title>Overflow</title>
+</head>
+<body>
+    <h1>CSS overflow에 대해 배워보자!</h1>
+    <p>자식 요소가 부모 요소보다 더 큰 영역을 차지해서 넘치게 된다면?</p>
+    <div class="box">
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Est placeat rem assumenda commodi quae omnis vel ut iure id doloremque, illo eligendi beatae sint necessitatibus, veniam architecto blanditiis excepturi soluta!
+    </div>
+</body>
+</html>
+```
+## CSS 코드
+
+```css
+/* 
+    overflow
+    - 컨텐츠가 너무 크거나 / 길어서 크기보다 넘치게 된다면?
+    - visible: 벗어난 부분 표시
+    - hidden: 벗어난 부분 숨김
+    - scroll: 스크롤 생성.
+    - auto: 넘친다면 스크롤, 안넘치면 스크롤 X
+*/
+
+/* overflow-x: 수평 방향으로 넘칠 때 처리 */
+/* overflow-y: 수직 방향으로 넘칠 때 처리 */
+
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+
+    /* overflow: visible; */
+    /* overflow: hidden; */
+    /* overflow: scroll; */
+    /* overflow: auto; */
+
+    /* overflow-y: visible; */
+    /* overflow-y: hidden; */
+    overflow-x: scroll;
+}
+```
+
+## overflow: 컨텐츠가 너무 클 때 처리 방법
+
+`overflow` 속성은 요소의 크기를 초과하는 콘텐츠를 어떻게 처리할지 결정합니다. 주요 값으로는 `visible`, `hidden`, `scroll`, `auto`가 있습니다.
+
+### visible: 초과된 부분 표시
+
+기본값인 `visible`은 요소의 크기를 초과한 콘텐츠가 그대로 표시되게 합니다.
+
+```css
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+    overflow: visible;
+}
+```
+
+### hidden: 초과된 부분 숨김
+
+`hidden`은 요소의 크기를 초과한 부분을 잘라내고 표시하지 않습니다.
+
+```css
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+    overflow: hidden;
+}
+```
+
+### scroll: 스크롤 생성
+
+`scroll`은 요소의 크기를 초과할 때 스크롤 바를 항상 표시합니다.
+
+```css
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+    overflow: scroll;
+}
+```
+
+### auto: 필요 시 스크롤 생성
+
+`auto`는 콘텐츠가 요소의 크기를 초과할 때만 스크롤 바를 표시합니다.
+
+```css
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+    overflow: auto;
+}
+```
+
+## overflow-x와 overflow-y
+
+수평(`overflow-x`)과 수직(`overflow-y`) 방향으로 각각 초과된 콘텐츠를 따로 처리할 수도 있습니다. 예를 들어, 수평 방향으로만 스크롤 바를 표시하고 싶다면 `overflow-x: scroll;`을 사용합니다.
+
+```css
+.box {
+    width: 200px;
+    height: 100px;
+    background-color: skyblue;
+    overflow-x: scroll;
+}
+```
+
+이렇게 설정하면, 수평 방향으로만 스크롤 바가 나타나고, 수직 방향으로는 기본값(`visible`)이 적용됩니다.
