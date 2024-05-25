@@ -1,0 +1,153 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS Display"
+date: 2024-05-26
+categories: CSS
+---
+
+# CSS display
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index10.css">
+    <title>CSS - display</title>
+</head>
+<body>
+    <h1>CSS display 속성에 대해 알아보자!</h1>
+    <ul>
+        <li>display 속성은 화면에 어떻게 보여질지 결정하는 속성</li>
+        <li>html 태그는 기본적으로 block과 inline 요소 둘 중에 하나를 기본값으로 가짐. </li>
+    </ul>
+
+    <hr>
+    <h2>inline</h2>
+    <ol>
+        <li>span, a, img 태그와 같이 내용물(content)만큼만 공간이 할당됨.</li>
+        <li>content 만큼 공간을 할당하기 때문에, width, height, padding, margin 사용 불가</li>
+        <li>줄바꿈 없이 바로 옆에 배치</li>
+    </ol>
+    <div class="d-inline1">d-inline1 클래스를 갖고 있는 div.</div>
+    <div class="d-inline2">d-inline2</div>
+
+    <hr>
+    <h2>block</h2>
+    <ol>
+        <li>div, p, ul, ol 태그와 같이 한 줄을 다 차지함</li>
+        <li>inline 요소와 달리 width, height, padding, margin 사용 가능</li>
+    </ol>
+    <div class="d-block1">d-block1 클래스를 갖고 있는 div</div>
+    <div class="d-block2">d-block2</div>
+
+    <hr>
+    <h2>inline-block</h2>
+    <ol>
+        <li>block 요소처럼 크기 지정을 하되</li>
+        <li>inline 요소처럼 다른 내용들과 같은 줄을 공유하고 싶은 경우</li>
+        <li>block과 inline 요소의 장점을 가짐.</li>
+    </ol>
+    <div class="d-inline-block1">d-inline-block1 클래스를 갖고 있는 div</div>
+    <div class="d-inline-block2">d-inline-block2</div>
+
+</body>
+</html>
+```
+## CSS 코드
+
+```css
+.d-inline1 {
+    display: inline;
+    background-color: lightblue;
+
+}
+
+.d-inline2 {
+    display: inline;
+    background-color: lightcoral;
+}
+
+.d-block1 {
+    display: block;
+    background-color: lightblue;
+    /* width: 300px; */
+}
+
+.d-block2 {
+    display: block;
+    background-color: lightcoral;
+}
+
+.d-inline-block1 {
+    display: inline-block;
+    background-color: blue;
+}
+
+.d-inline-block2 {
+    display: inline-block;
+    background-color: red;
+    width: 200px;
+    height: 300px;
+    margin: 20px 40px;
+}
+```
+CSS의 `display` 는 요소가 페이지에 어떻게 표시될지를 결정합니다. `display` 속성의 주요 값인 `inline`, `block`, `inline-block`에 대해 알아보겠습니다.
+
+## display: 화면 표시 방식 결정
+
+`display` 속성은 HTML 요소가 화면에 어떻게 배치될지를 정의합니다. HTML 태그는 기본적으로 `block` 요소와 `inline` 요소 둘 중 하나로 표시됩니다.
+
+### display: inline
+
+`inline` 요소는 내용물(content)만큼의 공간이 할당되며, 줄바꿈 없이 바로 옆에 배치됩니다. 대표적인 `inline` 요소는 `span`, `a`, `img` 태그가 있습니다. <br>  `inline` 요소는 `width`, `height`, `padding`, `margin`을 사용할 수 **없**습니다.
+
+```css
+.d-inline1 {
+    display: inline;
+    background-color: lightblue;
+}
+
+.d-inline2 {
+    display: inline;
+    background-color: lightcoral;
+}
+```
+
+### display: block
+
+`block` 요소는 한 줄을 다 차지하며, 다음 요소는 줄바꿈이 됩니다. 대표적인 `block` 요소는 `div`, `p`, `ul`, `ol` 태그가 있습니다. <br> `block` 요소는 `width`, `height`, `padding`, `margin`을 사용할 수 **있**습니다.
+
+```css
+.d-block1 {
+    display: block;
+    background-color: lightblue;
+    /* width: 300px; */
+}
+
+.d-block2 {
+    display: block;
+    background-color: lightcoral;
+}
+```
+
+### display: inline-block
+
+`inline-block` 요소는 `block` 요소처럼 크기 지정을 할 수 있으면서도, `inline` 요소처럼 다른 내용들과 같은 줄을 공유합니다. 즉, `block`과 `inline` 요소의 장점을 모두 가집니다.
+
+```css
+.d-inline-block1 {
+    display: inline-block;
+    background-color: blue;
+}
+
+.d-inline-block2 {
+    display: inline-block;
+    background-color: red;
+    width: 200px;
+    height: 300px;
+    margin: 20px 40px;
+}
+```
