@@ -1,0 +1,90 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS Viewport"
+date: 2024-05-28
+categories: CSS
+---
+
+# CSS Viewport
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>viewPort</title>
+
+    <style>
+        .vw {
+            width: 100vw;
+            height: 50vw;
+            background-color: aqua;
+        }
+        .vh {
+            width: 50vh;
+            height: 50vh;
+            background-color: red;
+        }
+        .parent {
+            width: 300px;
+            height: 100px;
+            background-color: blue;
+        }
+        .child {
+            width: 10%;
+            height: 100px;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <h1>viewPort</h1>
+
+    <div class="vw">vw</div>
+    <div class="vh">vh</div>
+    <div class="parent">
+        <div class="child">%</div>
+    </div>
+
+    <hr>
+    <h3>vw (Viewport Width)</h3>
+    <ul>
+        <li>"vw"는 뷰포트의 너비를 기준으로 합니다.</li>
+        <li>뷰포트의 너비를 100 등분한 단위!</li>
+        <li>ex) 1vw = 1% 너비</li>
+        <li>화면의 너비에 따라 크기가 조정</li>
+    </ul>
+    <hr>
+    <h3>vh (Viewport Height)</h3>
+    <ul>
+        <li>"vh"는 뷰포트의 높이를 기준으로 합니다.</li>
+        <li>뷰포트의 높이를 100 등분한 단위!</li>
+        <li>ex) 1vh = 1% 높이</li>
+        <li>화면이 높이에 따라 크기가 조정!</li>
+    </ul>
+
+    <hr>
+    <h3>% (Percentage)</h3>
+    <ul>
+        <li>"%"는 부모 요소의 크기를 기준으로 합니다.</li>
+        <li>부모 요소의 크기를 100 등분한 단위!</li>
+        <li>부모 요소의 크기에 따라 크기가 조정!</li>
+    </ul>
+</body>
+</html>
+```
+## ViewPort
+
+ViewPort은 웹 페이지를 표시하는 화면의 크기를 기준으로 하는 단위입니다. (= 상대적 크기 조정) <br>
+주로 반응형 웹 디자인에서 사용되며, 화면 크기에 따라 요소의 크기를 조정, 설정합니다.
+
+### vw (Viewport Width)
+"vw"는 뷰포트의 너비를 기준으로 합니다. 뷰포트의 너비를 100 등분한 단위이며, 화면의 너비에 따라 크기가 조정됩니다. 예를 들어, 1vw는 화면 너비의 1%를 의미합니다.
+
+### vh (Viewport Height)
+"vh"는 뷰포트의 높이를 기준으로 합니다. 뷰포트의 높이를 100 등분한 단위이며, 화면의 높이에 따라 크기가 조정됩니다. 예를 들어, 1vh는 화면 높이의 1%를 의미합니다.
+
+### % (Percentage)
+"%"는 부모 요소의 크기를 기준으로 합니다. 부모 요소의 크기를 100 등분한 단위이며, 부모 요소의 크기에 따라 크기가 조정됩니다.
