@@ -1,0 +1,183 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS Animation"
+date: 2024-05-28
+categories: CSS
+---
+
+# CSS Animation
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Animation</title>
+    <link rel="stylesheet" href="./index13.css">
+</head>
+<body>
+    <h1>CSS Animation을 배워보자!</h1>
+
+    <div class="box"></div>
+    <div class="bounce_ball_1"></div>
+    <div class="bounce_ball_2"></div>
+</body>
+</html>
+```
+## CSS 코드
+
+```css
+/* 
+    - animaiton-name: @keyframes 애니메이션 이름 지정
+        - 시작 : from or 0%
+        - 중간 : 0 ~ 100%
+        - 끝 : to or 100%
+    - animation-duration : 애니메이션이 한 번 재생되는 데 걸리는 시간을 지정. (단위 : s)
+    - animation-delay : 애니메이션이 시작되기 전에 기다리는 시간을 지정. (단위 : s)
+    - animation-iteration-count : 애니메이션 반복 횟수 (default: 1, infinite: 무한 반복)
+    - animation-timing-function : 애니메이션의 속도 변화를 지정
+        - linear, ease, ease-in, ease-out, ease-in-out 등등
+    - animation-direction : 애니메이션의 방향을 지정
+        - normal, reverse(반대 방향), alternate(반복될때마다 방향 바꿔줌), alternate-reverse
+        - alternate: from -> to 방향으로 애니메이션 진행 -> (다음 회차) to -> from 방향을 바꿔가며 반복.
+*/
+
+.box {
+    width: 100px;
+    height: 100px;
+    background-color: cyan;
+    position: relative;
+
+    animation-name: Ani_square;
+    animation-duration: 2s;
+    animation-delay: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+/* damon : 애니메이션의 이름 (개발자 맘대로 짓기) */
+@keyframes Ani_square {
+    0% {
+        left: 0px;
+    }
+
+    25% {
+        left: 200px;
+    }
+
+    50% {
+        left: 400px;
+    }
+
+    75% {
+        left: 200px;
+    }
+
+    100% {
+        left: 0px;
+    }
+}
+
+.bounce_ball_1 {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color: black;
+    border-radius: 50%;
+    left: 100px;
+    top: 0;
+
+    /* animation-name: bounce1;
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate; */
+
+    /* 애니메이션 단축 프로퍼티 */
+    animation: bounce1 1s ease-out  infinite alternate ;
+}
+
+@keyframes bounce1 {
+    to {
+        top: 50px;
+    }
+
+    from {
+        top: 300px;
+    }
+}
+
+.bounce_ball_2 {
+    width: 50px;
+    height: 50px;
+    background-color: tomato;
+    border-radius: 50%;
+    position: absolute;
+
+    animation-name: bounce2;
+    animation-iteration-count: infinite;
+    animation-duration: 2s;
+}
+
+@keyframes bounce2 {
+    from, to {
+        bottom: 0px;
+        animation-timing-function: ease-out;
+        /* 0px에서 정상속도로 시작 -> 속도 줄이면서 300px 됨. */
+    }
+    50% {
+        bottom: 300px;
+        animation-timing-function: ease-in;
+        /* 300px 에서 천천히 시작되어 -> 0px 로 가면서 정상속도로 끝 */
+    }
+}
+
+/* 
+    Tip)
+    * from에서 to로의 애니메이션 (정방향 애니메이션) (from ~ to)
+    - from은 애니메이션의 시작 상태를 나타냅니다.
+    - to는 애니메이션의 종료 상태를 나타냅니다.
+    이러한 경우 애니메이션은 from 상태에서 시작하여 to 상태로 종료합니다.
+    * to에서 from으로의 애니메이션 (역방향 애니메이션) (to ~ from)
+    - to는 애니메이션의 시작 상태를 나타냅니다.
+    - from은 애니메이션의 종료 상태를 나타냅니다.
+    - 이러한 경우 애니메이션은 to 상태에서 시작하여 from 상태로 종료합니다.
+*/
+```
+
+
+### Animation 속성
+
+1. **`animation-name`**: 애니메이션의 이름을 지정합니다. `@keyframes` 규칙을 참조합니다. <br> **(주의)** `animation-name`의 값과 @keyframes 의 이름과 같아야 정상적으로 적용됩니다.
+
+2. **`animation-duration`**: 애니메이션이 한 번 재생되는 데 걸리는 시간을 설정합니다. (단위: 초)
+
+3. **`animation-delay`**: 애니메이션이 시작되기 전에 기다리는 시간을 설정합니다. (단위: 초)
+
+4. **`animation-iteration-count`**: 애니메이션의 반복 횟수를 설정합니다. `infinite`로 설정하면 무한 반복됩니다.
+(default: 1)
+
+5. **`animation-timing-function`**: 애니메이션의 속도 변화를 설정합니다. 
+
+- **`linear`**: 애니메이션을 시작부터 끝까지 일정한 속도로 진행시킵니다. 즉, 애니메이션이 일정한 속도로 직진하는 것과 같습니다. 
+- **`ease`**: 애니메이션을 처음에는 천천히 시작하고, 점점 빠르게 가속하여 진행한 후 마지막에는 천천히 끝나도록 만듭니다. 이는 자연스러운 애니메이션 효과를 주는 가장 일반적인 타이밍 함수입니다. **(천천-빠름-천천)**
+- **`ease-in`**: 애니메이션을 천천히 시작하고, 끝에 가까워질수록 더 빠르게 가속합니다.
+- **`ease-out`**: 애니메이션을 천천히 시작하여, 끝에 가까워질수록 느려집니다.
+- **`ease-in-out`**: 애니메이션을 처음과 끝에서 모두 천천히 시작하여, 중간에 최대 속도에 도달한 후 다시 천천히 끝나도록 만듭니다.**(천천-보통-천천)**
+<br>
+
+![alt text](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/ce679285-8126-4a21-97af-3e827ae83cd5)
+
+> 이 외에도 `cubic-bezier()` 함수를 사용하여 사용자 정의 타이밍 함수를 만들 수도 있습니다. `cubic-bezier()` 함수는 네 개의 값 (P1, P2)을 사용하여 타이밍 함수의 곡선을 정의합니다. 이 함수를 사용하면 더욱 다양하고 복잡한 애니메이션을 만들 수 있습니다. <br>
+(참고) https://cubic-bezier.com/#.24,1.21,.72,1.37
+
+
+6. **`animation-direction`**: 애니메이션의 방향을 설정합니다. 
+
+- **`normal`**: 애니메이션은 처음부터 끝까지 정상적으로 재생됩니다.
+- **`reverse`**: 애니메이션은 역방향으로 재생됩니다. 즉, 끝에서 시작으로 되감아지는 것처럼 보입니다.
+- **`alternate`**: 애니메이션을 한 번은 정방향으로, 다음 번은 역방향으로 번갈아가며 재생합니다.
+- **`alternate-reverse`**: `alternate`와 비슷하지만, 역방향으로 시작하여 정방향으로 끝납니다.
+
