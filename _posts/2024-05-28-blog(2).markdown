@@ -1,0 +1,116 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS 숨기는 속성 3가지"
+date: 2024-05-28
+categories: CSS
+---
+
+# CSS 숨기는 속성 3가지
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요소를 숨기는 3가지 속성</title>
+    <link rel="stylesheet" href="./index12.css">
+</head>
+<body>
+    <h1>CSS 속성 3형제</h1>
+    <hr>
+    <div class="square">origin</div>
+    <div class="square d-none">d-none</div>
+    <div class="square invisible">invisible</div>
+    <div class="square opacity-0">opacity</div>
+    <div class="square">origin</div>
+
+    <hr>
+    <h2>display: none</h2>
+    <ul>
+        <li>요소를 화면에 표시하지 않음.</li>
+        <li>요소가 차지하는 공간도 사라진다.</li>
+        <li>그냥 없애 버리는 방법</li>
+    </ul>
+
+    <hr>
+    <h2>visibility: hidden</h2>
+    <ul>
+        <li>요소만 사라지고 차지하던 공간은 그대로 남는다.</li>
+        <li>모습과 속성을 숨긴다.</li>
+    </ul>
+
+    <hr>
+    <h2>opacity: 0</h2>
+    <ul>
+        <li>요소만 사라지고 차지하던 공간은 그대로 남는다.</li>
+        <li>모습만 숨기고 속성은 남는다 (ex. 클릭 호버 포커스 등 이벤트 가능).</li>
+        <li>투명도 0 ~ 1 사이 조절 가능</li>
+    </ul>
+
+</body>
+</html>
+```
+## CSS 코드
+
+```css
+.square {
+    width: 100px;
+    height: 100px;
+    border : 1px solid black;
+    display: inline-block;
+    text-align: center;
+    line-height: 100px;
+}
+
+.d-none {
+    /* display: none; */
+    background-color: blue;
+}
+.invisible {
+    /* visibility: hidden; */
+    background-color: lightblue;
+}
+.opacity-0 {
+    /* opacity: 0.5; */
+    background-color: lightcyan;
+}
+```
+
+
+### 1. `display: none`
+
+- 요소를 화면에 표시하지 않습니다.
+- 요소가 차지하는 공간도 사라집니다.
+- 페이지 레이아웃에서 완전히 요소를 없애는 방법입니다.
+
+```css
+.d-none {
+    display: none;
+}
+```
+
+### 2. `visibility: hidden`
+
+- 요소는 사라지지만, 차지하던 공간은 그대로 유지됩니다.
+- 요소의 모습과 속성을 숨깁니다.
+- 페이지 레이아웃을 유지하면서 요소를 숨기는 방법입니다.
+
+```css
+.invisible {
+    visibility: hidden;
+}
+```
+
+### 3. `opacity: 0`
+
+- 요소는 사라지지만, 차지하던 공간은 그대로 유지됩니다.
+- 요소의 모습만 숨기고, 속성은 유지됩니다. <br> 예를 들어 클릭, 호버, 포커스 등의 이벤트는 여전히 발생합니다.
+- 투명도를 조절하여 요소를 부분적으로 표시할 수 있습니다. (0 ~ 1)
+
+```css
+.opacity-0 {
+    opacity: 0;
+}
+```
