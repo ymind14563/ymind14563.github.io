@@ -1,0 +1,287 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS Flex"
+date: 2024-05-28
+categories: CSS
+---
+
+# CSS flex
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Flex</title>
+    <link rel="stylesheet" href="./index11.css">
+</head>
+<body>
+    <h1>Flexbox와 친해지기</h1>
+
+    <hr>
+    <div class="container">
+        <div class="item1 items">1</div>
+        <div class="item2 items">2</div>
+        <div class="item3 items">3</div>
+        <div class="item4 items">4</div>
+        <div class="item5 items">5</div>
+    </div>
+
+    <hr>
+
+    <h3>
+        <ul>
+            <li>CSS3 등장부터 나타난 방식</li>
+            <li>화면 레이아웃을 구성할 때, 가장 많이 사용하는 방법 중 하나</li>
+            <li>(중요) 부모 요소에 flex를 선언하면, 자ㅣㄱ 요소들의 레이아웃을 변경시킴.</li>
+        </ul>
+
+        <h3>Flex-Contatiner</h3>
+        <ul>
+            <li>flex 속성을 갖는 요소로 flex 부모 요소라고도 함.</li>
+            <li>컨테이너에 적용 가능한 속성이 있음.</li>
+        </ul>
+            <li>flex 속성을 갖는 요소의 자식 요소들로 flex 자식 요소라고도 함</li>
+            <li>아이템에 적용 가능한 속성이 있음.</li>
+    </h3>
+</body>
+</html>
+```
+
+## CSS 코드
+
+```css
+.container {
+    width: 300px;
+    height: 500px;
+    background-color: #333;
+    margin: 0 auto;
+
+    display: flex;
+    /* 부모 요소에 "flex"를 선언하면, 자식(item)이 가로 방향으로 배치된다. */
+
+    /* 
+        FlexBox 기본 용어
+        * 주죽 (Main Axis)
+        - Flex 컨테이너 내에서 Flex 아이템들이 배치되는 기본 방향을 나타내는 축.
+        * 교차축 (Cross Axis)
+        - 주축에 수직인 축
+    */
+
+    /* 
+        flex-direction : flex 방향을 설정 (주축 방향 설정)
+        - row (default) : 수평 정렬 (좌 -> 우)
+        - row reverse : 수평 정렬 (우 -> 좌)
+        - column : 수직 정렬 (위 -> 아래)
+        - column reverse : 수직 정렬 (아래 -> 위)
+    */
+
+    /* row 일 때 */
+    /* flex-direction: row; */
+    /* flex-direction: row-reverse; */
+
+    /* column 일 때 */
+    /* flex-direction: column; */
+    /* flex-direction: column-reverse; */
+
+    /* 
+        justifiy-content : 주축을 따라 아이템을 어떻게 배치할 것인지
+        - flex-direction 수평 정력; 주축 = row (가로)
+        - flex direction 수직 정렬; 주축 = colum(세로)
+        - flex-start (default) : 아이템을 주축에 대해서 start 지점을 기준으로 나열 한다.
+        - flex-end : 아이템을 주축에 대해서 end 지점을 기준으로 나열 한다.
+        - space-between : 처음과 마지막 아이템을 양 끝에 붙이고 나머지 영역을 공평하게 나눈다.
+        - space-around : 아이템들의 모든 여백을 공평하게 갖도록 한다. (양끝 영역의 단위가 1이라면, 나머지 영역의 단위는 2)
+        - space-evenly : start부터 첫 아이템의 간격, 아이템 끼리의 간격, 마지막 아이템부터 end 까지의 모든 간격이 일정하다.
+    */
+
+    /* justify-content: flex-start; */
+    /* justify-content: flex-end; */
+    /* justify-content: space-between; */
+    /* justify-content: space-around; */
+    /* justify-content: space-evenly; */
+
+    /* 
+        align-items : 교차축에 대해서 아이템을 어떻게 배치 할 것인지?
+        - flex-direction 수평 정력; 교차축 = colum (세로)
+        - flex direction 수직 정렬; 교차축 = row (가로)
+        - stretch (default) : container의 교차축을 채우기 위해 늘림. item의 width와 height크기를 정하지 않았을 때 적용.
+        - flex-start : 교차축에 대하여 시작점으로 정렬.
+        - flex-end : 교차축에 대하여 끝점으로 정렬.
+        - center : 교차축에 대하여 가운데 정렬.
+        - baseline : 아이템을 텍스트의 베이스라인을 기준으로 정렬.
+    */
+
+
+    /* align-items: stretch; */
+    /* align-items: flex-start; */
+    /* align-items: flex-end; */
+    /* align-items: center; */
+    /* align-items: baseline; */
+
+    /* 
+        flex-wrap : 줄바꿈 (개행) 처리
+        -> 컨테이너(부모)가 한 줄에 아이템을 다 수용하지 못할 때, 줄바꿈 관련 설정
+        - nowrap (default) : 줄바꿈 안함.
+        - wrap : 줄바꿈 함.
+        - wrap-reverse : 줄바꿈 하는데 아이템을 역순 배치.
+    */
+
+    /* flex-wrap: nowrap; */
+    /* flex-wrap: wrap; */
+    /* flex-wrap: wrap-reverse; */
+
+    /* 
+        align-content : 여러 행에 대한 정렬.
+        (조건) flex-wrap : wrap / wrap-reverse 상태에서 아이템이 두 줄 이상일 때 수직축 방향 설정함.
+    */
+
+    /* align-content: stretch; */
+    /* align-content: flex-start; */
+    /* align-content: flex-end; */
+    /* align-content: center; */
+    /* align-content: space-between; */
+    /* align-content: space-around; */
+    /* align-content: space-evenly; */
+
+
+    }
+
+.items {
+    width: 100px;
+    height: 100px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 100px;
+}
+
+.item1 {
+    background-color: red;
+    font-size: 10px;
+}
+.item2 {
+    background-color: orange;
+    font-size: 15px;
+}
+.item3 {
+    background-color: yellow;
+    font-size: 20px;
+}
+.item4 {
+    background-color: green;
+    font-size: 25px;
+}
+.item5 {
+    background-color: blue;
+    font-size: 30px;
+}
+```
+<br><hr>
+
+> ```
+> /* 부모 요소에 "flex"를 선언하면, 자식(item)이 가로 방향으로 배치된다. */
+> .container {
+>   display: flex; 
+> }
+> ```
+
+### Flexbox의 기본 용어
+
+- **주축 (Main Axis)**: Flex 아이템들이 배치되는 기본 방향을 나타내는 축입니다. 
+- **교차축 (Cross Axis)**: 주축에 수직인 축입니다. 주로 수직 방향(row) 또는 수평 방향(column)을 나타냅니다.
+
+### Flexbox의 속성
+
+1. **`flex-direction`**: 아이템의 배치 방향을 설정합니다.
+    - `row`: 아이템을 수평으로 배열합니다. (default; 좌 -> 우)
+    - `row-reverse`: 아이템을 수평으로 배열하되, 역순으로 배치합니다. (우 -> 좌)
+    - `column`: 아이템을 수직으로 배열합니다. (위 -> 아래)
+    - `column-reverse`: 아이템을 수직으로 배열하되, 역순으로 배치합니다. (아래 -> 위)
+
+    ```css
+    /* row 일 때 */
+    flex-direction: row;
+    flex-direction: row-reverse;
+
+    /* column 일 때 */
+    flex-direction: column;
+    flex-direction: column-reverse;
+    ```
+<br>
+ 
+2. **`justify-content`**: 주축을 따라 아이템을 어떻게 배치할지 설정합니다.
+    > - flex-direction 수평 정렬; 주축 = row (가로)
+    > - flex direction 수직 정렬; 주축 = colum(세로) 
+    
+    <br>
+
+    - `flex-start`: 주축의 시작 부분에 아이템을 배치합니다. (default)
+    - `flex-end`: 주축의 끝 부분에 아이템을 배치합니다.
+    - `space-between`: 첫 번째와 마지막 아이템을 제외하고 아이템 사이의 간격을 균등하게 배치합니다.
+    - `space-around`: 아이템 주변에 동일한 간격을 두고 배치합니다. (양끝 영역의 단위가 1이라면, 나머지 영역의 단위는 2)
+    - `space-evenly` : start부터 첫 아이템의 간격, 아이템 끼리의 간격, 마지막 아이템부터 end 까지의 모든 간격이 일정합니다.
+
+
+    ```css
+    justify-content: flex-start;
+    justify-content: flex-end;
+    justify-content: space-between;
+    justify-content: space-around;
+    justify-content: space-evenly;
+    ```
+<br>
+ 
+3. **`align-items`**: 교차축을 따라 아이템을 어떻게 배치할지 설정합니다.
+    > - flex-direction 수평 정력; 교차축 = colum (세로)
+    > - flex direction 수직 정렬; 교차축 = row (가로)
+    
+    <br>
+
+    - `stretch`: 교차축을 채우기 위해 아이템을 늘립니다.
+    - `flex-start`: 교차축의 시작 부분에 아이템을 배치합니다.
+    - `flex-end`: 교차축의 끝 부분에 아이템을 배치합니다.
+    - `center`: 교차축을 기준으로 아이템을 가운데 정렬합니다.
+    - `baseline`: 아이템의 기준선을 맞추어 배치합니다.
+
+    ```css
+    align-items: stretch;
+    align-items: flex-start;
+    align-items: flex-end;
+    align-items: center;
+    align-items: baseline;
+    ```
+<br>
+ 
+4. **`flex-wrap`**: 아이템이 한 줄에 모두 배치되지 못할 때, 줄바꿈을 어떻게 처리할지 설정합니다.
+    - `nowrap`: 모든 아이템을 한 줄에 배치하며, 넘치는 경우는 줄바꿈하지 않습니다. (default)
+    - `wrap`: 아이템을 여러 줄로 나누어 배치합니다.
+    - `wrap-reverse`: 아이템을 여러 줄로 나누어 배치하되, 역순으로 배치합니다.
+
+    ```css
+    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    flex-wrap: wrap-reverse;
+    ```
+<br>
+ 
+5. **`align-content`**: 여러 행에 대한 정렬을 설정합니다.
+    - 주로 `wrap` 또는 `wrap-reverse` 상태에서 여러 행이 생성될 때 사용됩니다.
+    - `stretch`: 여러 행을 균일하게 늘려 교차축을 채웁니다.
+    - `flex-start`: 여러 행을 시작 부분에 정렬합니다.
+    - `flex-end`: 여러 행을 끝 부분에 정렬합니다.
+    - `center`: 여러 행을 가운데 정렬합니다.
+    - `space-between`: 여러 행 사이의 간격을 균등하게 배치합니다.
+    - `space-around`: 여러 행 주변에 동일한 간격을 두고 배치합니다.
+    - `space-evenly`: start부터 end 까지의 모든 간격이 일정합니다.
+
+    ```css
+    align-content: stretch;
+    align-content: flex-start;
+    align-content: flex-end;
+    align-content: center;
+    align-content: space-between;
+    align-content: space-around;
+    align-content: space-evenly;
+    ```
