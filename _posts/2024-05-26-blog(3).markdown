@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS overflow
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -26,7 +26,7 @@ categories: CSS
 </body>
 </html>
 ```
-## CSS 코드
+### CSS 코드
 
 ```css
 /* 
@@ -56,6 +56,9 @@ categories: CSS
     overflow-x: scroll;
 }
 ```
+
+<br>
+<hr>
 
 ## overflow: 컨텐츠가 너무 클 때 처리 방법
 

@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS Animation
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -26,7 +26,7 @@ categories: CSS
 </body>
 </html>
 ```
-## CSS 코드
+### CSS 코드
 
 ```css
 /* 
@@ -147,6 +147,8 @@ categories: CSS
 */
 ```
 
+<br>
+<hr>
 
 ### Animation 속성
 
@@ -168,11 +170,19 @@ categories: CSS
 - **`ease-in-out`**: 애니메이션을 처음과 끝에서 모두 천천히 시작하여, 중간에 최대 속도에 도달한 후 다시 천천히 끝나도록 만듭니다.**(천천-보통-천천)**
 <br>
 
-![alt text](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/ce679285-8126-4a21-97af-3e827ae83cd5)
+<div style="text-align: center; font-size: 12px;">
+    <img src="https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/ce679285-8126-4a21-97af-3e827ae83cd5" alt="animation attribution" style="width: 100%; max-width: 600px;">
+<br>
+출처: cubic-bezier
+</div>
 
 > 이 외에도 `cubic-bezier()` 함수를 사용하여 사용자 정의 타이밍 함수를 만들 수도 있습니다. `cubic-bezier()` 함수는 네 개의 값 (P1, P2)을 사용하여 타이밍 함수의 곡선을 정의합니다. 이 함수를 사용하면 더욱 다양하고 복잡한 애니메이션을 만들 수 있습니다. <br>
-(참고) https://cubic-bezier.com/#.24,1.21,.72,1.37
 
+<div style="text-align: center;">
+<a href="https://cubic-bezier.com/#.24,1.21,.72,1.37">cubic-bezier</a>
+</div>
+
+<br>
 
 6. **`animation-direction`**: 애니메이션의 방향을 설정합니다. 
 

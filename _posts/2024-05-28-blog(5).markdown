@@ -6,12 +6,12 @@ categories: JS
 ---
 
 # JS 참조 방식
-
-<br><hr>
+<hr>
 
 ## 대화상자 표시방식
 
-## HTML 코드
+
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -42,13 +42,17 @@ categories: JS
     </script>
 </html>
 ```
-## JAVASCRIPT 코드
+### JAVASCRIPT 코드
 
 ```js
 alert("여기는 index.js 파일 - [링크방식]");
 ```
 
-### **alert, console.log, confirm 설명**
+
+<br>
+<hr>
+
+## **alert, console.log, confirm 설명**
 
 #### - alert
 
@@ -80,11 +84,13 @@ confirm("여기는 head와 body 사이에 있는 confirm");
 
 이 코드는 "여기는 head와 body 사이에 있는 confirm"이라는 메시지가 표시된 확인,취소 버튼이 있는 창을 띄웁니다.
 
-<br><br><hr>
+<br>
+<hr>
+<hr>
 
 ## JS 참조 방식
 
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -151,11 +157,17 @@ confirm("여기는 head와 body 사이에 있는 confirm");
 </body>
 </html>
 ```
-## JAVASCRIPT 코드
+### JAVASCRIPT 코드
 
 ```js
 console.log("Hello! (링크)")
 ```
+
+
+<br>
+<hr>
+
+
 
 ### 1. Head 태그 내부에 스크립트 작성하기
 

@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # I. 기본선택자
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -50,7 +50,7 @@ categories: CSS
 </body>
 </html>
 ```
-## CSS 코드
+### CSS 코드
 
 ```css
 /* 전체 선택자 */
@@ -106,6 +106,9 @@ p {
     color: white;
 }
 ```
+
+<br>
+<hr>
 
 
 ## 1. 기본 선택자

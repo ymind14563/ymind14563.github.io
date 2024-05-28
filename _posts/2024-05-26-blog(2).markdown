@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS Z-Index
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -29,7 +29,7 @@ categories: CSS
 </html>
 ```
 
-## CSS 코드
+### CSS 코드
 
 ```css
 div {
@@ -83,6 +83,9 @@ div {
     z-index: 12;
 }
 ```
+
+<br>
+<hr>
 
 ## z-index: 겹치는 요소의 순서 결정
 

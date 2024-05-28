@@ -7,7 +7,7 @@ categories: CSS
 
 # I. 웹 폰트 적용
 
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -37,7 +37,7 @@ categories: CSS
 </html>
 ```
 
-## CSS 코드
+### CSS 코드
 
 
 ```css
@@ -79,6 +79,7 @@ body h1 {
 ```
 
 <br>
+<hr>
 
 # `폰트 사용 시엔 항상 저작권 주의!!`
 

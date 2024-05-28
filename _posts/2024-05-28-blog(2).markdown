@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS 숨기는 속성 3가지
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -52,7 +52,7 @@ categories: CSS
 </body>
 </html>
 ```
-## CSS 코드
+### CSS 코드
 
 ```css
 .square {
@@ -77,6 +77,9 @@ categories: CSS
     background-color: lightcyan;
 }
 ```
+
+<br>
+<hr>
 
 
 ### 1. `display: none`

@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS Viewport
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -75,6 +75,10 @@ categories: CSS
 </body>
 </html>
 ```
+
+<br>
+<hr>
+
 ## ViewPort
 
 ViewPort은 웹 페이지를 표시하는 화면의 크기를 기준으로 하는 단위입니다. (= 상대적 크기 조정) <br>

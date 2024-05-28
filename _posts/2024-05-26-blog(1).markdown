@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS Position
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -30,7 +30,7 @@ categories: CSS
 </html>
 ```
 
-## CSS 코드
+### CSS 코드
 
 ```css
 div {
@@ -96,6 +96,9 @@ div {
 }
 ```
 
+
+<br>
+<hr>
 
 
 ## static: 기본값

@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS display
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -56,7 +56,7 @@ categories: CSS
 </body>
 </html>
 ```
-## CSS 코드
+### CSS 코드
 
 ```css
 .d-inline1 {
@@ -94,6 +94,11 @@ categories: CSS
     margin: 20px 40px;
 }
 ```
+
+<br>
+<hr>
+
+
 CSS의 `display` 는 요소가 페이지에 어떻게 표시될지를 결정합니다. `display` 속성의 주요 값인 `inline`, `block`, `inline-block`에 대해 알아보겠습니다.
 
 ## display: 화면 표시 방식 결정

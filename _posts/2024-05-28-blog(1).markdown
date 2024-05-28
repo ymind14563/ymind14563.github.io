@@ -6,7 +6,7 @@ categories: CSS
 ---
 
 # CSS flex
-## HTML 코드
+### HTML 코드
 
 ```html
 <!DOCTYPE html>
@@ -50,7 +50,7 @@ categories: CSS
 </html>
 ```
 
-## CSS 코드
+### CSS 코드
 
 ```css
 .container {
@@ -178,7 +178,10 @@ categories: CSS
     font-size: 30px;
 }
 ```
-<br><hr>
+
+<br>
+<hr>
+
 
 > ```
 > /* 부모 요소에 "flex"를 선언하면, 자식(item)이 가로 방향으로 배치된다. */
