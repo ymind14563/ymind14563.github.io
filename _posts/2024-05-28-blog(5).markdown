@@ -1,0 +1,236 @@
+---
+layout: post
+title: "[새싹x코딩온] JS 참조 방식"
+date: 2024-05-28
+categories: JS
+---
+
+# JS 참조 방식
+
+<br><hr>
+
+## 대화상자 표시방식
+
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 시작!</title>
+
+    <script>
+        alert("여기는 head 내부 ~ !");
+        console.log("여기는 head 내부에 위치한 코드");
+    </script>
+
+    <script src="./index.js"></script>
+</head>
+    <script>
+        alert("여기는 head와 body 사이 ~ !");
+        confirm("여기는 head와 body 사이에 있는 confirm");
+    </script>
+<body>
+    <script>
+        alert("여기는 body 내부 ~ !");
+    </script>
+</body>
+    <script>
+        alert("여기는 body 외부 ~ !");
+    </script>
+</html>
+```
+## JAVASCRIPT 코드
+
+```js
+alert("여기는 index.js 파일 - [링크방식]");
+```
+
+### **alert, console.log, confirm 설명**
+
+#### - alert
+
+`alert` 함수는 간단한 경고 대화상자를 표시합니다. 사용자가 확인 버튼을 누르기 전까지 다른 작업을 할 수 없습니다.
+
+```javascript
+alert("여기는 head 내부 ~ !");
+```
+
+이 코드는 "여기는 head 내부 ~ !"라는 메시지가 표시된 경고창을 띄웁니다.
+
+#### - console.log
+
+`console.log` 함수는 개발자 콘솔에 메시지를 출력합니다. 이는 주로 디버깅 목적으로 사용됩니다.
+
+```javascript
+console.log("Head 안!");
+```
+
+이 코드는 개발자 콘솔에 "Head 안!"이라는 메시지를 출력합니다.
+
+#### - confirm
+
+`confirm` 함수는 확인과 취소 버튼이 있는 대화상자를 표시합니다. 사용자가 확인 버튼을 클릭하면 `true`, 취소 버튼을 클릭하면 `false`를 반환합니다.
+
+```javascript
+confirm("여기는 head와 body 사이에 있는 confirm");
+```
+
+이 코드는 "여기는 head와 body 사이에 있는 confirm"이라는 메시지가 표시된 확인,취소 버튼이 있는 창을 띄웁니다.
+
+<br><br><hr>
+
+## JS 참조 방식
+
+## HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 위치별 사용해보기</title>
+
+    <!-- JS 파일 불러오기 -->
+    <!-- Head 태그 내부에 위치할 때 -->
+    <!-- 방법1) <script> 태그 안에 작성 -->
+    <script>
+        console.log("Head 안!")
+    </script>
+
+    <!-- 방법2) <script> 태그의 scr 속성에 js 파일 경로 작성-->
+    <script src="./index2.js"></script>
+
+    <!-- 
+        <head> 태그는 사람들에게 직관적으로 보이지 않는 내용.
+        <body> 태그는 사람들에게 직관적으로 보이는 내용.
+
+            ** 방법1 & 방법2
+            <head> 안에 <script> 태그를 넣을 경우
+
+            - 로드 시점 : <script>가 페이지의 렌더링이 시작되기 전에 로드.
+             -- 장점 : <script>가 페이지 내용을 수정하거나 초기화 할 수 있으므로 초기화 작업이 필요한 경우 적합하다.
+             -- 단점 : <script>가 페이지 렌더링을 차단할 수 있어 사용자가 페이지를 빠르게 볼 수 없는 문제가 발생 가능합니다.
+                    ex) <script> 내용이 너무 길면 흰 화면이 오래 보여 오류처럼 보일 수도 있음. -> 시용자가 페이지를 나오게 됨.
+     -->
+</head>
+<body>
+        <!-- Body 태그 내부에 위치할 때 -->
+        <!-- 방법3) <script> 태그 안에 작성 -->
+        <script>
+            console.log("Body 안!")
+        </script>
+
+        <!-- 방법4) <script> 태그의 src 속성에 js 파일 경로 작성 -->
+        <script src="./index2.js"></script>
+
+        <!-- 
+            html 코드는 위에서부터 아래방향으로 순차적으로 읽는다.
+
+            ** 방법3 & 방법4
+            <body> 안에 <script> 태그를 넣을 경우
+
+            - 로드 시점 : 페이지의 나머지 콘텐츠가 로드된 후에 <script>가 로드.
+             -- 장점 : 페이지의 초기 렌더링이 완료된 후에 동적으로 콘텐츠를 조작하거나 로드할 수 있다.
+             -- 단점 : 페이지의 초기 렌더링은 빠를 수 있지만, 페이지의 전체적인 사용자 경험이 끝날 때까지 <script>의 로드가 지연 될 수 있다.
+                    ex) 먼저 버튼이 보여지지만, <script>가 로드 되기 전에 버튼을 누르면 동작을 안하기 때문에 오류처럼 보일 수 있음.
+         -->
+
+         <!-- 
+            Q) 그럼 어떻게 해야하나?
+            A) 특정 위치가 더 좋다 ! 라고 말할 수 없음.
+            A) 이러한 위치에 따른 차이점을 고려하여 웹 페이지의 요구사항과 *사용자가 경험을 고려하여 적절한 위치를 선택해야 한다.
+            A2) 보통 <head> 에 넣는다.
+         -->
+
+         <!-- ** 사용자 경험이란 (UX / User eXperience) -->
+         <!-- A) 사용자가 제품, 서비스 또는 시스템을 이용하는 동안 느끼는 모든 경험의 종합. (디자인, 사용자 인터페이스 등등) -->
+</body>
+</html>
+```
+## JAVASCRIPT 코드
+
+```js
+console.log("Hello! (링크)")
+```
+
+### 1. Head 태그 내부에 스크립트 작성하기
+
+#### 방법 1: `<script>` 태그 안에 직접 작성하기
+
+HTML의 `<head>` 태그 내부에 JavaScript 코드를 직접 작성할 수 있습니다.
+
+```html
+<head>
+    <script>
+        console.log("Head 안!")
+    </script>
+</head>
+```
+
+#### 방법 2: `<script>` 태그의 `src` 속성에 파일 경로 작성하기
+
+외부 JavaScript 파일을 불러올 수도 있습니다.
+
+```html
+<head>
+    <script src="./index2.js"></script>
+</head>
+```
+
+### **(방법 1 & 방법 2)** `<head>`안에 `<script>` 태그를 넣을 경우 장단점
+
+**장점:**
+- 초기화 작업이 필요한 경우 적합합니다. 페이지의 렌더링이 시작되기 전에 스크립트가 로드되므로, 페이지 내용을 수정하거나 초기화할 수 있습니다.
+
+**단점:**
+- 스크립트가 페이지 렌더링을 차단할 수 있습니다. 스크립트 내용이 너무 길면 사용자가 페이지를 볼 수 없게 되어 흰 화면이 오래 보일 수 있습니다.
+
+<br><br>
+
+### 2. Body 태그 내부에 스크립트 작성하기
+
+#### 방법 3: `<script>` 태그 안에 직접 작성하기
+
+JavaScript 코드를 `<body>` 태그 내부에 직접 작성할 수도 있습니다.
+
+```html
+<body>
+    <script>
+        console.log("Body 안!")
+    </script>
+</body>
+```
+
+#### 방법 4: `<script>` 태그의 `src` 속성에 파일 경로 작성하기
+
+또한, 외부 JavaScript 파일을 불러올 수도 있습니다:
+
+```html
+<body>
+    <script src="./index2.js"></script>
+</body>
+```
+### **(방법 3 & 방법 4)** `<body>`안에 `<script>` 태그를 넣을 경우 장단점
+
+**장점:**
+- 페이지의 초기 렌더링이 완료된 후에 스크립트가 로드되므로, 페이지의 초기 렌더링이 빠릅니다. 이 방식은 동적으로 콘텐츠를 조작하거나 로드하는 경우 적합합니다.
+
+**단점:**
+- 스크립트 로드가 지연될 수 있습니다. 페이지가 먼저 렌더링되지만, 스크립트가 로드되기 전에는 일부 기능이 동작하지 않을 수 있습니다.
+
+
+<hr><br><br>
+
+## 그럼 어디에 작성하는 것이 옳은 것일까?
+
+JavaScript를 삽입할 위치에 대한 정답은 없습니다.
+
+각 위치마다 장단점이 있으므로, 
+- 일반적으로 초기화 작업이 필요한 경우에는 `<head>` 태그에, 
+- 페이지의 초기 렌더링이 중요한 경우에는 `<body>` 태그에 
+
+JavaScript를 삽입하는 것이 좋습니다.
