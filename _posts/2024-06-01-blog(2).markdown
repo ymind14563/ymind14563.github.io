@@ -1,0 +1,306 @@
+---
+layout: post
+title: "[새싹x코딩온] JS 연산자"
+date: 2024-06-01
+categories: JS
+---
+
+# JS 연산자
+<br>
+<hr>
+
+## 1. 대입 연산자
+변수에 값을 `할당`할 때 사용하는 연산자입니다. ( `=` )
+
+```js
+let a = 5;
+let b = 2;
+```
+
+## 2. 산술 연산자
+
+- **사칙연산**: `+`, `-`, `*`, `/`
+- **나머지 연산**: `%`
+- **거듭제곱 연산**: `**`
+
+```js
+console.log(a + b); // 7
+console.log(a - b); // 3
+console.log(a * b); // 10
+console.log(a / b); // 2.5
+console.log(a % b); // 1
+console.log(a ** b); // 25
+```
+
+## 3. 비교 연산자
+
+### 1) 동등 비교
+- **동등**: `==`, `===`
+- **부등**: `!=`, `!==`
+
+`==`와 `!=`는 "값"만 비교하며, 타입을 비교하지 않는 관대한 연산자입니다. <br> `===`와 `!==`는 "값"과 "타입" 모두를 비교하는 엄격한 연산자입니다.
+
+```js
+console.log(1 == 1); // true
+console.log(1 == 2); // false
+
+console.log(1 != 2); // true
+console.log(1 != 1); // false
+
+// 값만 비교
+console.log(`1` == 1); // true
+console.log(`1` != 1); // false
+
+console.log(1 === 1); // true
+console.log(1 === 2); // false
+
+console.log(1 !== 2); // true
+console.log(1 !== 1); // false
+
+// 값과 타입 모두 비교
+console.log(`1` === 1); // false
+console.log(`1` !== 1); // true
+```
+
+### 2) 크기 비교
+크기 비교 연산자는 두 값을 비교하여 대소 관계를 평가합니다. `=` 는 항상 오른쪽에 위치합니다.
+
+- `>` (크다)
+- `<` (작다)
+- `>=` (크거나 같다)
+- `<=` (작거나 같다)
+
+```js
+console.log(2 > 1); // true
+console.log(2 >= 1); // true
+console.log(2 < 1); // false
+console.log(2 <= 1); // false
+```
+
+### 동등 연산자 2개 (`==`)는 예기치 못한 결과를 발생시킬 수 있으므로 사용을 자제하는 것이 좋습니다. JavaScript는 느슨한 언어이기 때문입니다.
+
+```js
+console.log(1 == `1`); // true
+console.log('0' == false); // true
+console.log(`` == 0); // true
+console.log(null == undefined); // true
+```
+
+## 4. 논리 연산자
+
+- **NOT** (`!`): 참을 거짓으로, 거짓을 참으로 바꿉니다.
+- **AND** (`&&`): 여러 값 중 모두가 참일 때 참입니다.
+- **OR** (`||`): 여러 값 중 하나라도 참이면 참입니다.
+
+```js
+console.log(!true); // false
+console.log(!false); // true
+console.log(!!true); // true
+console.log(!!false); // false
+
+console.log(true && true); // true
+console.log(true && false); // false
+console.log(false && false); // false
+
+console.log(true || true); // true
+console.log(true || false); // true
+console.log(false || false); // false
+
+console.log(!(2 > 1)); // false
+console.log(2 > 1 && -2 < 1); // true
+console.log((2 > 1 && -2 < 1) || 5 > 2); // true
+```
+
+## 5. 문자열 연산
+문자열에서 `+` 연산자는 문자열을 결합합니다. <U>더하기 이외의 연산은 숫자로 자동 형변환되어 계산됩니다.</U>
+
+```js
+console.log(`안녕` + `하세요`); // 안녕하세요
+console.log(`12` + `34`); // 1234
+
+console.log(`5` - `2`); // 3
+console.log(`5` * `2`); // 10
+console.log(`5` / `2`); // 2.5
+```
+
+## 6. 증감 연산자
+증감 연산자는 변수 값을 1 증가 또는 감소시킵니다. 위치에 따라 결과가 다릅니다.
+
+- **후위 연산자 (postfix operator)**: 변수에 먼저 대입한 후 +1(-1) 연산을 수행합니다.
+- **전위 연산자 (prefix operator)**: 변수에 먼저 +1(-1) 연산을 수행한 후 대입합니다.
+
+```js
+let num = 10;
+let num2 = 20;
+let result1, result2;
+
+console.log("num >", num); // num > 10
+
+result1 = num++;
+console.log(result1); // 10
+console.log(num); // 11
+
+result2 = ++num2;
+console.log(result2); // 21
+console.log(num2); // 21
+```
+
+## 7. 연산자 줄여쓰기
+
+```js
+let num = 10;
+let num2 = 20;
+
+num += 1; // num = num + 1
+console.log(num); // 11
+
+num -= 1; // num = num - 1
+console.log(num); // 10
+
+num *= num2; // num = num * num2
+console.log(num); // 200
+
+num /= num2; // num = num / num2
+console.log(num); // 10
+```
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 연산자</title>
+    <script src="./index5.js"></script>
+</head>
+<body>
+    <h1>JavaScript 연산자를 배워보자</h1>
+</body>
+</html>
+```
+
+### JAVASCRIPT 코드
+```js
+// 연산자
+
+// 대입 연산자 (=)
+// : 변수에 값을 "할당" 할 때 사용하는 연산자.
+
+// 산술 연산자
+// 사칙연산 :  +, -, /, *
+// 나머지 연산 : %
+// 거듭제곱 연산 : **
+
+let a = 5;
+let b = 2;
+
+console.log(a + b); // 7
+console.log(a - b); // 3
+console.log(a * b); // 10
+console.log(a / b); // 2.5
+console.log(a % b); // 1
+console.log(a ** b); // 25
+
+// 비교 연산자
+// #1. 동등 비교
+// - 같다 (동등) : ==, ===
+// - 같지 않다 (부등) : !=, !==
+// ==, != : "값"만 비교 => type은 비교하지 않는 관대한 연산자.
+// ===, !== : "값" 과 "type" 모두 비교 => 엄격한 연산자.
+
+console.log(1 == 1); // true
+console.log(1 == 2); // false
+console.log(1 != 2); // true
+console.log(1 != 1); // false
+console.log(`1` == 1); // true => 값만 비교, 타입비교 X
+console.log(`1` != 1); // false
+console.log(`------------------`);
+console.log(1 === 1); // true
+console.log(1 === 2); // false
+console.log(1 !== 2); // true
+console.log(1 !== 1); // false
+console.log(`1` === 1); // false => 값, 타입 둘다 비교
+console.log(`1` !== 1); // true
+console.log(`------------------`);
+
+
+// #2. 크기 비교
+// >, <, >=, <=
+console.log(2 > 1); // true
+console.log(2 >= 1); // true
+console.log(2 < 1); // false
+console.log(2 <= 1); // true
+console.log(`------------------`);
+
+// 동등연산자 2개 (==) 는 예기치 못한 결과를 발생할 수도 있기 때문에 사용을 자제하도록 하자..! (느슨한 언어이기 때문에)
+console.log(1 == `1`); // true
+console.log('0' == false); // true
+console.log(`` == 0); // true
+console.log(null == undefined); // true
+console.log(`------------------`);
+
+// 논리 연산자
+// ! : not (참 -> 거짓, 거짓 -> 참)
+// && : and (여러 값 중 모두가 참 -> 참)
+// || : or (여러 값 중 하나라도 참 -> 참)
+
+console.log(!true); // false
+console.log(!false); // true
+console.log(!!true); // true
+console.log(!!false); // false
+
+console.log(true && true); // true
+console.log(true && false); // false
+console.log(false && false); // false
+
+console.log(true || true); // true
+console.log(true || false); // true
+console.log(false || false); // false
+
+console.log(!(2 > 1)); // !true => false
+console.log(2 > 1 && -2 < 1); // true $$ true => true
+console.log((2 > 1 && -2 < 1) || 5 > 2); // (true && true) || true => true
+console.log(`------------------`);
+
+// 문자열에서 + 연산 : 문자열 더하기
+console.log(`안녕` + `하세요`);
+console.log(`12` + `34`);
+
+// 더하기 이외의 연산은 숫자로 자동 형변환 되어서 계산.
+console.log(`5` - `2`); // 3
+console.log(`5` * `2`); // 10
+console.log(`5` / `2`); // 2.5
+console.log(`------------------`);
+
+// 증감연산자
+// ++ : 변수 값을 1 증가
+// -- : 변수 값을 1 감소
+// 증감 연산자를 붙이는 위치에 따라 결과가 다르다.
+let result1, result2;
+let num = 10, num2 = 20;
+console.log("num >", num);
+// 후위 연산자 (postfix operator) : 변수에 먼저 대입한 후 +1(-1) 연산을 수행
+result1 = num++
+console.log(result1); // 10
+console.log(num); // 11
+console.log(result1); // 10
+
+// 전위 연산자 (prefix operator) : 변수에 먼저 +1(-1) 연산을 수행 한 후 대입.
+result2 = ++num2
+console.log("result2 >", result2); // 21
+console.log(num2); // 21
+console.log(result2); // 21
+
+// 연산자 줄여쓰기
+// +=, -= 연산자를 더 자주 씀.
+console.log(num += 1); // 12
+console.log(num); // 12
+console.log(num -= 1); // 11
+console.log(num *= num2); // 11 * 21 = 231
+console.log(num); // 231
+console.log(num /= num2); // 231 / 21 = 11
+```
