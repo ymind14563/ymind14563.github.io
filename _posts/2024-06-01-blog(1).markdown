@@ -6,7 +6,7 @@ categories: JS
 ---
 
 # JS 자료형 (data type)
-<br>
+
 <hr>
 
 ## JavaScript 데이터 타입 정리
