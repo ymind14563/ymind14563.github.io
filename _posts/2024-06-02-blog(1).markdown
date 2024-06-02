@@ -1,0 +1,352 @@
+---
+layout: post
+title: "[새싹x코딩온] JS 반복문"
+date: 2024-06-02
+categories: JS
+---
+
+# JS 반복문
+
+<hr>
+
+## 1. `for`문
+
+`for`문은 반복 횟수가 정해져 있을 때 주로 사용됩니다.
+
+### 기본적인 `for`문
+
+```js
+for (let i = 0; i < 10; i++) {
+    // i가 0에서 9까지 총 10번 반복합니다.
+    console.log("안녕", i);
+}
+```
+
+### 5부터 1까지 출력하기 ( `i--` )
+
+```js
+for (let i = 5; i >= 1; i--) {
+    console.log(i);
+}
+```
+
+### 1부터 n까지의 합 구하기
+
+```js
+let n = 10;
+let sum = 0;
+for (let i = 1; i <= n; i++) {
+    sum += i;
+    console.log(`현재 i는 ${i}, 누적합계는 ${sum}입니다.`);
+}
+console.log(`총 합계는 ${sum}입니다.`);
+```
+
+### 1부터 20까지의 숫자 중 짝수의 합 구하기
+
+```js
+let num = 20;
+let num_sum = 0;
+for (let i = 1; i <= num; i++) {
+    if (i % 2 === 0) {
+        console.log(`${i}는 짝수입니다.`);
+        num_sum += i;
+        console.log(`현재까지 누적합계는 ${num_sum}입니다.`);
+    }
+}
+console.log(`총 합계는 ${num_sum}입니다.`);
+```
+
+## 2. `while`문
+
+`while`문은 조건이 참인 동안 반복합니다.
+
+### 기본적인 `while`문
+
+```js
+let idx = 0;
+while (idx < 10) {
+    console.log(`안녕하세요`, idx + 1);
+    idx += 1;
+}
+```
+
+### 조건을 만족할 때까지 반복하기
+
+```js
+let idx2 = 0;
+while (true) {
+    console.log(`반갑습니다.`, idx2 + 2);
+    idx2 += 1;
+    if (idx2 == 10) break;
+}
+
+/*
+반갑습니다. 2   // if문에서 idx2 = 1
+반갑습니다. 3   // if문에서 idx2 = 2
+반갑습니다. 4   // if문에서 idx2 = 3 
+반갑습니다. 5   // if문에서 idx2 = 4
+반갑습니다. 6   // if문에서 idx2 = 5
+반갑습니다. 7   // if문에서 idx2 = 6
+반갑습니다. 8   // if문에서 idx2 = 7
+반갑습니다. 9   // if문에서 idx2 = 8
+반갑습니다. 10  // if문에서 idx2 = 9
+반갑습니다. 11  // if문에서 idx2 = 10 // break;
+*/
+```
+
+### 구구단 출력하기 (`while`문 버전)
+
+```js
+let i = 2, j = 1;
+while (i < 10) {
+    console.log(`${i}단 시작.`);
+    while (j < 10) {
+        const multiply = `${i} x ${j} = ${i * j}`;
+        console.log(multiply);
+        j++;
+    }
+    i++;
+    j = 1; // j = 9 상태이기 때문에 1로 초기화.
+}
+
+// `for 문` 과의 비교
+for (let i = 2; i < 10; i++) {
+    console.log(`${i}단 시작`);
+    for (let j = 1; j < 10; j++) {
+        console.log(`${i} x ${j} = ${i * j}`);
+    }
+}
+
+```
+
+## 3. `do-while`문
+
+`do-while`문은 조건이 참인지 여부에 상관없이 코드 블록을 최소 한 번 실행한 후 조건을 검사합니다.
+
+### 기본적인 `do-while`문
+
+```js
+let g = 1;
+do {
+    console.log(g);
+    g++;
+} while (g <= 5);
+```
+
+### 사용자의 입력을 조건으로 반복하기
+
+```js
+let number;
+do {
+    number = parseInt(prompt("숫자를 입력하세요 (10보다 큰 숫자):"), 10);
+} while (number <= 10);
+console.log(`입력한 숫자: `, number);
+// 10보다 작은 숫자를 입력하면 prompt가 반복되고,
+// 10보다 큰 숫자를 입력하면 숫자가 출력된다.
+```
+> **참고** parseInt(99, 10);
+두 번째 매개변수는 10진수로 해석함을 의미합니다.
+생략하면 javascript에서는 기본적으로 10진수로 해석합니다.
+만약 생략하고, 16진수 등의 값으로 입력할 경우 예기치 않은 오류값이 생성될 수 있으므로, 입력값에 따라 설정할 수 있습니다.
+```js
+number = parseInt(`A`, 10); // NaN
+number = parseInt(`A`, 16); // 10
+```
+
+
+## 4. `break`와 `continue`
+
+반복문에서 특정 조건에 따라 반복을 중단하거나 다음 반복으로 넘어갈 수 있습니다.
+
+### `break`
+
+```js
+for (let i = 1; i <= 10; i++) {
+    if (i === 5) {
+        break; // i가 5일 때 반복문을 종료합니다.
+    }
+    console.log(i);
+}
+// 출력 결과 : 1, 2, 3, 4
+```
+
+### `continue`
+
+```js
+for (let i = 1; i <= 5; i++) {
+    if (i === 3) {
+        continue; // 현재 반복을 중지하고 다음 반복으로 넘어갑니다.
+    }
+    console.log(i);
+}
+// 출력 결과 : 1, 2, 4, 5
+```
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 반복문</title>
+    <script src="./index8.js"></script>
+</head>
+<body>
+    <h1>JavaScript 반복문을 배워보자 !</h1>
+</body>
+</html>
+```
+
+### JAVASCRIPT 코드
+```js
+// 반복문
+
+// for문
+for (let i = 0; i < 10; i++) {
+    // i가 0 ~ 9 이면 총 10 번 반복
+    console.log("안녕", i);
+}
+
+// 1 ~ 5 출력
+for (let i = 1; i <= 5; i++) {
+    console.log(i);
+}
+
+console.log("---------------------");
+// 5 ~ 1 출력
+for (let i = 5; i >= 1; i --) {
+    console.log(i);
+}
+
+console.log("---------------------");
+
+// 1부터 n까지의 합 구하기
+// let n = parseInt(prompt(`숫자를 입력해주세요.`));
+let n = 10;
+let sum = 0;
+for (let i = 0; i <= n; i++) {
+    // sum 변수에 값을 재할당 (이전 sum 변수의 값 + 현재 반복 변수 i)
+    sum += i;
+    console.log(`현재 i 는 ${i}, 누적합계는 ${sum} 입니다.`);
+}
+console.log(`총 합계는 ${sum} 입니다.`);
+
+console.log("---------------------");
+
+// 1 ~ 20 까지 숫자를 반복
+// 1 ~ 20 중에서 짝수 일 때의 합을 구하기.
+let num = 20;
+let num_sum = 0;
+for (let i = 1; i <= num; i++) {
+    if (i % 2 === 0) {
+        console.log(`${i} 은 짝수입니다.`);
+        num_sum += i;
+        console.log(`현재까지 누적합계는 ${num_sum} 입니다.`);
+    }
+    
+}
+console.log(`총 합계는 ${num_sum} 입니다.`);
+
+console.log("---------------------");
+
+
+
+// while 문
+let idx = 0;
+while (idx < 10) {
+    console.log(`안녕하세요`, idx + 1);
+    idx += 1;
+}
+
+let idx2 = 0;
+while (true) {
+    console.log(`반갑습니다.`, idx2 + 2);
+    idx2 += 1;
+    if (idx2 == 10) break;
+}
+
+console.log("---------------------");
+
+// 구구단 while 버전
+let i = 2, j = 1;
+
+while (i < 10) {
+    console.log(`${i}단 시작.`);
+    while (j < 10) {
+        const multiply = `${i} x ${j} = ${i*j}`
+        console.log(multiply);
+        j++;
+    }
+    i++;
+    j = 1;
+}
+
+
+/////////////////////////////////////////////////
+
+//do ~ while 문
+/**
+ * JavaScript에서 사용되는 반복문 중 하나로,
+ * 조건이 참인지 여부에 상관없이 코드 블록을 최소 한 번 실행 한 후 조건을 검사한다.
+ * 즉) 항상 코드 블록을 한 번 실행한 다음, 조건이 참인 동안 반복을 계속 !
+ */
+
+// * 구문
+// do {
+//     // 실행할 코드 내용
+// } while(조건);
+
+// ex1)
+// let g = 1;
+// do {
+//     console.log(g);
+//     g++;
+// } while (g <= 5);
+
+// ex2)
+
+let number;
+
+do {
+    number = parseInt(prompt(`숫자를 입력하세요 (10보다 큰 숫자):`), 10);
+} while (number <= 10)
+    console.log(`입력한 숫자: `, number);
+
+
+/////////////////////////////////////////////////
+// break & continue
+// - 반복문에서 사용 되는 제어문.
+
+// # break
+// - 반복문을 중단하고 빠져나옴.
+
+// # continue
+// - 현재 반복을 중지하고 다음 반복으로 넘어감.
+
+// ex)
+for (let i = 1; i <= 10 ; i++) {
+    if (i === 5) {
+        break; // i = 5 일 때 반복문 종료.
+    }
+    console.log(i);
+}
+// 출력 결과 : 1, 2, 3, 4
+console.log(`------------------------------`);
+
+// ex2)
+for (let i = 1; i <= 5; i++) {
+    if (i === 3) {
+        continue; // 현재 반복을 중지하고 다음 반복으로 넘어간다.
+    }
+    console.log(i);
+
+}
+// 출력 결과 : 1, 2, 4, 5
+console.log(`------------------------------`);
+```
