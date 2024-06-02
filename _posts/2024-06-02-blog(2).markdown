@@ -1,0 +1,330 @@
+---
+layout: post
+title: "[새싹x코딩온] JS 내장 메서드"
+date: 2024-06-02
+categories: JS
+---
+
+# JS 내장 메서드
+
+<hr>
+
+## 1. 내장 메서드
+
+내장 메서드란 프로그래밍 언어나 프레임워크에서 기본적으로 제공되는 메서드를 말합니다. 이러한 메서드는 따로 설치하거나 추가 설정할 필요 없이 바로 사용할 수 있습니다.
+
+## 2. 문자열 관련 내장 메서드
+
+### 1) 문자열 인덱싱
+
+문자열은 각 문자의 위치를 나타내는 인덱스를 가지고 있으며, 이 인덱스를 사용하여 특정 문자를 가져올 수 있습니다.
+
+```js
+let str = `Happy Birthday`;
+
+console.log(str[0]); // H
+console.log(str[0] + str[12]); // Ha
+
+// 조금 더 복잡한 인덱싱
+console.log(str[0] + str[1] + str[8] + str[11]); // Harh
+```
+
+### 2) 문자열 길이
+
+문자열의 길이는 `length` 속성을 사용하여 확인할 수 있습니다. <br>
+`length`는 속성이기에 `()`가 없습니다.
+
+```js
+let str2 = `     Happy Birthday  `;
+
+console.log(str.length); // 14
+console.log(str2.length); // 21
+```
+
+### 3) 소문자 변환
+
+문자열을 대문자나 소문자로 변환할 수 있습니다.
+
+```js
+console.log(str.toUpperCase()); // HAPPY BIRTHDAY
+console.log(str.toLowerCase()); // happy birthday
+```
+
+### 4) 양끝 공백 제거
+
+문자열의 양끝 공백을 제거할 수 있습니다.
+
+```js
+console.log(str.trim()); // 기존에도 양끝 공백 없기에 그대로 출력
+console.log(str2.trim()); // 양끝 공백 제거
+console.log(str2.trim().length); // 15 (양끝 공백 제거 후 길이)
+```
+
+### 5) 문자열 검색
+
+문자열 내에서 특정 문자의 위치를 찾을 수 있습니다. `indexOf` 메서드는 첫 번째로 일치하는 문자의 인덱스를 반환하며, 문자가 존재하지 않으면 -1을 반환합니다.
+
+```js
+console.log(str.indexOf('y')); // 4
+console.log(str.indexOf('i')); // 7
+console.log(str.indexOf(' ')); // 5
+console.log(str.indexOf('v')); // -1 (없는 문자)
+console.log(str.indexOf()); // -1 (매개변수로 아무 값이 들어가지 않으면 -1 반환)
+```
+
+### 6) 문자열 자르기
+
+`slice` 메서드는 문자열의 일부를 추출할 수 있습니다. 음수 값을 사용하면 뒤에서부터 센 위치를 기준으로 합니다.
+
+```js
+console.log(str.slice(10)); // hday (10번 위치에서 끝까지)
+console.log(str.slice(1, 5)); // appy (start(1) ~ end-1 (4))
+console.log(str.slice(-4)); // hday (뒤에서 4번째 위치에서 끝까지)
+```
+
+### 7) 문자열 바꾸기
+
+`replace` 메서드는 문자열 내의 특정 문자열을 다른 문자열로 바꿀 수 있습니다. `replaceAll` 메서드는 모든 일치하는 문자열을 바꿉니다.
+
+```js
+console.log(str.replace('p', 'w')); // Hawpy Birthday
+console.log(str.replace('B', 'w')); // Happy wirthday
+console.log(str.replaceAll('p', 'w')); // Hawwy Birthday
+```
+
+### 8) 문자열 쪼개기
+
+`split` 메서드는 문자열을 특정 구분자로 쪼개어 배열로 변환합니다.
+
+```js
+let str3 = `dinner`;
+console.log(str3.split('e')); // ['dinn', 'r']
+// 기준이 되는 e는 없어짐.
+console.log(str3.split(`r`)); // ['dinne', '']
+// 기준이 되는 r은 없어지고, 마지막 문자열이기에 빈 배열이 우측에 출력.
+
+console.log(str3.split('n')); // ['di', '', 'er']
+// 순서1) 처음 기준이 되는 n은 없어지고, [`di`,`ner`]
+// 순서2) 두 번째(나머지) n도 쪼개져서 좌측에 빈배열 출력. ['di', '', 'er']
+// 최종출력) ['di', '', 'er']
+```
+
+### 9) 문자열 반복
+
+`repeat` 메서드는 문자열을 지정된 횟수만큼 반복합니다.
+
+```js
+console.log(str3.repeat(4)); // dinnerdinnerdinnerdinner
+```
+
+<hr>
+
+## 3. 배열 내장 메서드
+
+배열을 다루는데 유용한 다양한 기능들을 제공하는 내장 메서드들입니다.
+
+### 1) 배열 요소 추가 및 제거
+
+배열의 끝이나 앞에 요소를 추가하거나 제거할 수 있습니다.
+
+```js
+let arr = [1, 2, 3, 4, 5];
+let arr2 = ['quokka', 'dog', 'koala', 'panda'];
+
+// 배열에 값을 추가하려면
+arr[5] = 6; 
+console.log(arr); // [1, 2, 3, 4, 5, 6]
+
+arr[8] = 100; // 없는 배열은 empty로 처리.
+console.log(arr); // [1, 2, 3, 4, 5, 6, empty, empty, 100]
+
+// push() : 맨 끝에 요소 추가
+arr.push(10);
+console.log(arr); // [1, 2, 3, 4, 5, 6, empty, empty, 100, 10]
+
+// pop() : 맨 끝에 요소 제거
+arr.pop();
+console.log(arr); // [1, 2, 3, 4, 5, 6, empty, empty, 100]
+
+// unshift() : 맨앞에 요소 추가
+arr2.unshift('cat');
+console.log(arr2); // ['cat', 'quokka', 'dog', 'koala', 'panda']
+
+// shift() : 맨앞에 요소 제거
+arr2.shift();
+console.log(arr2); // ['quokka', 'dog', 'koala', 'panda']
+```
+
+### 2) 배열의 길이와 포함 여부 검사
+
+배열의 길이를 확인하거나 특정 요소가 포함되어 있는지 검사할 수 있습니다.
+
+```js
+console.log(arr.length); // 9
+console.log(arr2.includes('quokka')); // true
+console.log(arr2.includes('apple')); // false
+```
+
+### 3) 배열 뒤집기와 병합
+
+배열을 뒤집거나 특정 구분자로 병합할 수 있습니다.
+
+```js
+console.log(arr.reverse()); 
+console.log(arr); // [100, empty, empty, 6, 5, 4, 3, 2, 1]
+
+console.log(arr2.join('')); // quokkadogkoalapanda
+console.log(arr2.join('-')); // quokka-dog-koala-panda
+```
+
+## 4. 메서드 체이닝
+
+여러 메서드를 연결해서 사용할 수 있습니다.
+
+```js
+console.log(`hello`.split(``)); // ['h', 'e', 'l', 'l', 'o']
+console.log(`hello`.split(``).reverse()); // ['o', 'l', 'l', 'e', 'h']
+console.log(`hello`.split(``).reverse().join()); // o,l,l,e,h
+console.log(`hello`.split(``).reverse().join(``)); // olleh
+```
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 내장메서드</title>
+    <script src="./index9.js"></script>
+</head>
+<body>
+    <h1>JavaScript 내장메서드를 배워보자!</h1>
+</body>
+</html>
+```
+
+### JAVASCRIPT 코드
+```js
+// 내장 메서드란 ?
+// - 프로그래밍 언어나 프레임워크에서 기본적으로 제공되는 메서드.
+// - 따로 설치하거나 추가 설정할 필요가 없다.
+
+// 문자열 관련 내장 메서드
+// - 문자열을 다루는데 유용한 기능들을 제공.
+
+let str = `Happy Birthday`;
+let str2 = `     Happy Birthday  `;
+
+// 문자열 인덱싱
+console.log(str[0]); // H
+console.log(str[0] + str[12]); // Ha
+
+// Hard
+console.log(str[0] + str[1] + str[8] + str[11]);
+
+// 문자열 길이 (length는 메서드가 아닌 속성입니다.)
+console.log(str.length); // 14
+console.log(str2.length); // 21
+
+// 대/소문자 변환
+console.log(str.toUpperCase()); // HAPPY BIRTHDAY
+console.log(str.toLowerCase()); // happy birthday
+
+// 양끝 공백 제거
+console.log(str.trim()); // 기존에도 양끝 공백 없기에 그대로
+console.log(str2.trim()); // 양끝 공백 제거
+console.log(str2.trim().length); // 양끝 공백 제거 상태에서의 길이
+
+console.log(`----------------------------------`);
+
+// indexOf() 글자 위치 찾기
+// 위치(index) : 0부터 시작.
+// 같은 문자열이 있으면 처음에 나오는 위치
+console.log(str.indexOf`y`); // 4
+console.log(str.indexOf`i`); // 7
+console.log(str.indexOf` `); // 5
+console.log(str.indexOf`v`); // -1
+// 존재하지 않는 문자에 대해 검색하면 -1 반환.
+console.log(str.indexOf()); // -1
+// 매개변수로 아무 값이 들어가지 않는다면 -1 반환.
+
+// slice() 문자열 자르기
+// 음수값이 들어간다면 뒤에서부터 순서를 센다.
+console.log(str.slice(10)); //hday * 10번 위치에서부터 끝까지
+console.log(str.slice(1, 5)); //appy * strat(1) ~ end-1 (4) 까지 자르기.
+console.log(str.slice(-4)); // hday * 뒤에서 4번째 위치의 글자 ~ 끝까지
+
+console.log(`----------------------------------`);
+
+// replace() 문자열 바꾸기
+console.log(str.replace(`p`, `w`)); // Hawpy Birthday
+console.log(str.replace(`B`, `w`)); // Happy wirthday
+console.log(str.replaceAll(`p`, `w`)); // Hawwy Birthday
+
+// split() 문자열 쪼개기 (배열로 변환)
+let str3 = `dinner`;
+console.log(str3.split(`e`)); // ['dinn', 'r'] - 기준이 되는 e는 없어짐.
+console.log(str3.split(`n`)); // [`di`, ``, `er`] - 처음 기준이 되는 n은 없어지고, 다음 n도 없어지지만 빈배열로 남는다.
+
+// repeat() 문자열 반복
+console.log(str3.repeat(4)); //dinnerdinnerdinnerdinner
+
+console.log(`----------------------------------`);
+
+/////////////////////////////////////////////
+// 배열 내장 메서드
+let arr = [1, 2, 3, 4, 5];
+let arr2 = [`quokka`, `dog`, `koala`, `panda`];
+
+// How? 배열에 값을 추가하려면?
+arr[5] = 6; // arr 배열의 5번 인덱스에 6ㅇ라는 값 추가.
+console.log(arr);
+arr[8] = 100; // 인덱스를 건너뛰면 빈 값(empty)이 들어가게 됨.
+console.log(arr);
+
+// push() : 맨 끝에 요소 추가
+arr.push(10);
+console.log(arr);
+
+// pop() : 맨 끝에 요소 제거
+arr.pop();
+console.log(arr);
+
+// unshift() : 맨앞에 요소 추가
+arr2.unshift(`cat`);
+console.log(arr2);
+
+// shift() : 맨앞에 요소 제거
+arr2.shift();
+console.log(arr2);
+
+// length : 배열의 길이 반환
+console.log(arr.length); // 9
+
+// includes(요소) : 요소가 있는지 없는지 검사 (true or false)
+console.log(arr2.includes(`quokka`)); // true
+console.log(arr2.includes(`apple`)); // false
+
+//reverse() 
+console.log(arr.reverse()); 
+console.log(arr); // 원본 배열이 변경된다.
+
+// join() : join 안의 문자열 기준으로 배열의 내용이 병합된다.
+console.log(arr2);
+console.log(arr2.join(``));
+console.log(arr2.join(`-`)); // 결과값이 - 로 병합, 병합된 것은 문자열
+
+console.log(`----------------------------------`);
+
+// 메서드 체이닝 (method chaining)
+// 여러 메서드를 연결해서 사용할 수 있다.
+console.log(`hello`.split(``)); // ['h', 'e', 'l', 'l', 'o']
+console.log(`hello`.split(``).reverse()); // ['o', 'l', 'l', 'e', 'h']
+console.log(`hello`.split(``).reverse().join()); // o,l,l,e,h
+console.log(`hello`.split(``).reverse().join(``)); // olleh
+```
