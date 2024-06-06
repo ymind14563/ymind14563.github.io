@@ -1,0 +1,272 @@
+---
+layout: post
+title: "[새싹x코딩온] JS DOM 요소 가져오기"
+date: 2024-06-06
+categories: JS_DOM
+---
+
+# JS DOM: 요소 가져오기
+
+<hr>
+
+## 1. getElement, getElements
+
+### 1) `getElementById`
+
+특정 `id`를 가진 요소를 선택합니다. 해당 ID를 가진 요소가 없으면 `null`을 반환합니다.
+
+```js
+console.log(document.getElementById('green'));
+console.log(document.getElementById('red'));
+```
+
+### 2) `getElementsByClassName` <U>(HTMLCollection)</U>
+
+특정 `class`를 선택하여 `HTMLCollection`을 반환합니다. 해당 클래스를 가진 요소가 없으면 빈 컬렉션을 반환합니다.
+
+```js
+console.log(document.getElementsByClassName('pink'));
+console.log(document.getElementsByClassName('pink')[1]);
+```
+
+### 3) `getElementsByTagName` <U>(HTMLCollection)</U>
+
+특정 `tag`를 선택하여 `HTMLCollection`을 반환합니다.
+
+```js
+console.log(document.getElementsByTagName('div'));
+```
+
+### 4) `getElementsByName` <U>(NodeList)</U>
+
+특정 `name`을 `NodeList`를 반환합니다.
+
+```js
+console.log(document.getElementsByName('id'));
+```
+
+<br>
+
+## 2. querySelector
+
+### 1) `querySelector` (CSS Selector)
+
+CSS 선택자를 이용하여 첫 번째로 발견된 요소 하나를 선택합니다. 해당하는 요소가 없으면 `null`을 반환합니다.
+
+```js
+console.log(document.querySelector('.pink'));
+console.log(document.querySelector('.others'));
+console.log(document.querySelector('#green'));
+console.log(document.querySelector('div'));
+console.log(document.querySelector('[name="id"]'));
+```
+
+### 2) `querySelectorAll` (CSS Selector) <U>(NodeList)</U>
+
+- CSS 선택자를 이용하여 모든 해당 요소를 선택하여 `NodeList`를 반환합니다.
+
+- `querySelectorAll` 후 인덱스를 사용하여 선택할 수 있습니다.
+
+```js
+console.log(document.querySelectorAll('.pink'));
+console.log(document.querySelectorAll('.others'));
+console.log(document.querySelectorAll('#green'));
+console.log(document.querySelectorAll('div'));
+console.log(document.querySelectorAll('[name="id"]'));
+
+console.log(document.querySelectorAll('.pink')[0]);
+console.log(document.querySelectorAll('.pink')[1]);
+console.log(document.querySelectorAll('.pink')[2]);
+console.log(document.querySelectorAll('.pink')[3]);
+```
+
+
+<br>
+
+## 3. 유사 배열에 관해 (HTMLCollection, NodeList)
+
+- 유사 배열은 배열처럼 인덱스와 길이(length)를 가지지만, 실제 배열이 아닙니다.
+- 따라서 배열의 메서드를 직접 사용할 수 없습니다.
+- HTMLCollection 은 동적인 컬렉션입니다.
+- NodeList 는 정적인 컬렉션입니다.
+
+### 1) <U>HTMLCollection -> `forEach()` 메서드 사용 불가</U>
+
+`Array.from()` 을 통해 배열로 변환하여 사용합니다.
+
+```js
+Array.from(document.getElementsByClassName('pink')).forEach((elem) => console.log(elem));
+```
+
+### 2) <U>NodeList -> `forEach()` 반복문 사용 가능</U>
+
+```js
+document.querySelectorAll('.pink').forEach((elem) => console.log(elem));
+
+// `for of` 반복문도 사용 가능
+const pinks = document.querySelectorAll('.pink');
+for (let pink of pinks) {
+    console.log(pink);
+}
+```
+
+
+
+<br>
+
+## 4. <u>인덱스 선택</u>
+
+### 1) HTMLCollection = getElementsByTagName 예시
+- 문서 내의 모든 <span> 요소를 가져와 HTMLCollection 형태로 반환합니다.
+-  인덱스를 통해 특정 요소에 접근 = <span>의 첫번째 요소입니다.
+
+### 2) NodeList = querySelectorAll 예시
+- 문서 내의 클래스가 pink인 모든 요소를 NodeList 형태로 반환합니다.
+- [0]은 첫 번째 클래스를 가진 요소를 반환합니다.
+
+```html
+<body>
+    <span class="pink">2</span>
+    <span class="pink">4</span>
+    <span>세 번째 텍스트</span>
+    <span>네 번째 텍스트</span>
+    <span>다섯 번째 텍스트</span>
+
+    <div class="pink">첫 번째 핑크</div>
+    <div class="pink">두 번째 핑크</div>
+    <div class="pink">세 번째 핑크</div>
+    <div class="pink">네 번째 핑크</div>
+
+    <script>
+    const text = document.getElementsByTagName('span');
+    text[0].textContent = `1`;
+
+    const text1 = document.getElementsByTagName('span')[0];
+    text1.textContent = `2`;
+        
+
+    const text2 = document.querySelectorAll(`.pink`)[1];
+    text2.textContent = `3`;
+    
+    const text3 = document.querySelectorAll(`.pink`);
+    text3[1].textContent = `4`;
+
+
+    console.log(document.querySelectorAll('.pink')[0]); // 2
+    console.log(document.getElementsByTagName(`span`)[0]); // 2
+    console.log(document.querySelectorAll(`.pink`)[1]); // 4
+    </script>
+</body>
+```
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="./index3.js"></script>
+    <!-- defer: 페이지가 로드된 후에 외부 스크립트를 실행 -->
+    <title>JS DOM : 요소 가져오기</title>
+    <style>
+        div {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin: 10px;
+            text-align: center;
+            line-height: 100px;
+        }
+        .pink {
+            background-color: pink;
+        }
+    
+        #green {
+            background-color: green;
+        }
+        
+        #red {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>DOM 연습</h1>
+    <div class="pink">1</div>
+    <div class="pink">2</div>
+    <div class="pink">3</div>
+    <div class="pink">4</div>
+    <div class="others" id="green"></div>
+    <div class="others" id="red"></div>
+
+    <input type="text" name="id">
+    <input type="button" name="id" value="click">
+</body>
+</html>
+```
+
+### JAVASCRIPT 코드
+```js
+// document 객체를 이용해 HTML "요소 선택"
+// 1. getElementById
+console.log(document.getElementById('green'));
+console.log(document.getElementById('red'));
+
+// 2. getElementsByClassName (HTMLCollection)
+console.log(document.getElementsByClassName('pink'));
+console.log(document.getElementsByClassName('pink')[1]);
+
+// 3. getElementsByTagName (HTMLCollection)
+console.log(document.getElementsByTagName('div'));
+
+// 4. getElementsByName (NodeList)
+console.log(document.getElementsByName('id'));
+
+// 5. querySelector(css selector)
+// - 처음 발견한 하나만 가지고옴
+console.log(document.querySelector('.pink'));
+console.log(document.querySelector('.others'));
+console.log(document.querySelector('#green'));
+console.log(document.querySelector('div'));
+console.log(document.querySelector('[name="id"]'));
+
+// 6. querySelectorAll (css selector) (NodeList)
+// - 선택자에 해당되는 모든 요소를 선택 
+console.log(document.querySelectorAll('.pink'));
+console.log(document.querySelectorAll('.others'));
+console.log(document.querySelectorAll('#green'));
+console.log(document.querySelectorAll('div'));
+console.log(document.querySelectorAll('[name="id"]'));
+
+console.log(document.querySelectorAll('.pink')[0]);
+console.log(document.querySelectorAll('.pink')[1]);
+console.log(document.querySelectorAll('.pink')[2]);
+console.log(document.querySelectorAll('.pink')[3]);
+
+console.log('-------------------');
+// *유사 배열 (HTMLCollection, NodeList)
+// [] 식으로 생긴 배열을 의미. 배열은 아님!!!
+// index, length는 가짐
+// 배열과 달리 사용 가능한 메서드가 제한.
+
+// NodeList -> forEach() 반복문 사용 가능.
+document.querySelectorAll('.pink').forEach((elem) => console.log(elem));
+
+// HTMLCollection -> forEach() 메서드 사용 X
+// 반복을 해야된다? -> Array 변경 (Array.from())
+Array.from(document.getElementsByClassName('pink')).forEach((elem) => 
+    console.log(elem));
+
+// for of 반복문도 가능합니다.
+const pinks = document.querySelectorAll('.pink');
+for (let pink of pinks) {
+    console.log(pink);
+}
+```
+
