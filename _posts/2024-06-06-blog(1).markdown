@@ -1,0 +1,359 @@
+---
+layout: post
+title: "[새싹x코딩온] JS Object"
+date: 2024-06-06
+categories: JS_DOM
+---
+
+# 
+
+<hr>
+
+## 1. JS 값과 참조의 전달
+
+### 1) 값에 의한 전달 (Pass by Value)
+
+- 원시 타입(primitive type)은 값(value)이 복사되어 전달됩니다.
+
+- 함수로 전달될 때, 변수의 값이 복사되어 함수의 매개변수로 전달됩니다. 따라서 함수 내에서 매개변수의 값을 변경하더라도 원본 변수의 값은 변하지 않습니다. 
+
+- 왜냐하면 함수 내에서 사용되는 변수는 함수 내에서만 유효한 지역 변수이기 때문입니다. `x`가 `num`의 값의 복사본을 가지고 있기 때문입니다.
+
+```js
+let num = 1;
+let num2 = num;
+console.log(num, num2); // 1 1
+console.log(num === num2); // true
+
+num = 5; // 1 -> 5
+console.log(num, num2); // 5 1
+console.log(num === num2); // false
+
+function changeValue(x) {
+    x = 10;
+    console.log(`x > `, x); // 10
+}
+changeValue(num);
+console.log(`num > `, num); // 5
+```
+
+<br>
+
+### 2) 참조에 의한 전달 (Pass by Reference)
+
+객체나 배열 같은 참조 타입이 전달될 때 사용됩니다. 변수의 메모리 위치(참조)가 전달되므로, 함수 내에서 요소를 변경하면 원래 변수도 변경됩니다.
+
+<br>
+
+- `obj`와 `obj2`는 현재 데이터도 같고 참조값(주소)도 같습니다.
+```js
+const obj = {one: 1, two: 2};
+const obj2 = obj;
+console.log(obj, obj2); // {one: 1, two: 2}
+console.log(obj === obj2); // true
+
+obj.five = 5;
+console.log(obj, obj2); // {one: 1, two: 2, five: 5}
+console.log(obj === obj2); // true
+
+// obj와 obj2는 현재 데이터도 같고 참조값 (address, 주소)도 같다.
+```
+
+<br>
+
+- `obj3`와 `obj4`는 현재 데이터가 같지만, 서로 다른 별도의 객체입니다. 즉, 참조값(주소)가 다릅니다.
+```js
+console.log(`------------------------------`);
+
+const obj3 = {one: 1, two: 2};
+const obj4 = {one: 1, two: 2};
+console.log(obj3, obj4); // {one: 1, two: 2}
+console.log(obj3 === obj4); // false
+
+// obj3와 obj4는 현재 데이터가 같지만, 서로 다른 별도의 객체이다.
+// 즉, 참조값 (address, 주소)가 다르다.
+
+obj3.five = 5;
+console.log(obj3, obj4);
+console.log(obj3 === obj4); // false
+```
+
+<br>
+
+## 2. JS 표준 내장 객체
+
+JavaScript 표준 내장 객체는 기본적으로 미리 정의된 객체들로, 모든 JS 환경에서 사용할 수 있는 기능들을 제공합니다. 자주 사용되는 기능을 미리 구현해 놓은 것이며, 대표적인 예로 Date 객체와 Math 객체가 있습니다.
+
+### 1) Date 객체
+
+`Date` 객체를 사용하여 날짜와 시간을 생성하고 응용할 수 있습니다.
+
+#### 날짜 생성 및 사용 예시
+
+```js
+let now = new Date();ㄱㄱ
+console.log(now);
+```
+
+#### 타임스탬프 (timestamp)
+
+타임스탬프는 1970년 1월 1일을 기준으로 흘러간 밀리초(ms)를 나타내는 정수입니다. 이를 "에포크" 이후의 시간이라고도 합니다.
+
+```js
+let jan_01_1970 = new Date(0);
+console.log(jan_01_1970); // Thu Jan 01 1970 09:00:00 GMT+0900 (한국 표준시)
+
+let jan_02_1970 = new Date(24 * 3600 * 1000);
+console.log(jan_02_1970); // 24시간 뒤
+```
+
+#### Date 객체 응용 예시
+
+```js
+let date = new Date('2024-06-03');
+console.log("date > ", date); // date >  Mon Jun 03 2024 09:00:00 GMT+0900 (한국 표준시)
+
+let date2 = new Date(2024, 6, 3); // MM(0 ~ 11 주의)
+console.log("date2 > ", date2); // date2 > Wed Jul 03 2024 00:00:00 GMT+0900 (한국 표준시)
+```
+
+#### Date 객체 관련 메서드
+
+```js
+console.log(now.getFullYear()); // 연도를 반환 (예: 2024)
+console.log(now.getMonth() + 1); // 월을 반환 (** 0부터 11까지, 주의 필요)
+console.log(now.getDate()); // 날짜를 반환 (1부터 31까지)
+console.log(now.getHours()); // 시간을 반환 (0부터 23까지)
+console.log(now.getMinutes()); // 분을 반환 (0부터 59까지)
+console.log(now.getSeconds()); // 초를 반환 (0부터 59까지)
+console.log(now.getMilliseconds()); // 밀리초를 반환 (0부터 999까지)
+console.log(now.getDay()); // 요일을 반환 (0(일요일)부터 6(토요일)까지)
+console.log(now.getTime()); // 1970년 1월 1일부터 현재까지의 밀리초 단위의 시간을 반환
+```
+
+```js
+now.setFullYear(2025); // 연도를 2025로 설정
+now.setMonth(11); // 월을 12월로 설정 (0부터 11까지)
+now.setDate(25); // 날짜를 25일로 설정
+now.setHours(10); // 시간을 10시로 설정
+now.setMinutes(30); // 분을 30분으로 설정
+now.setSeconds(45); // 초를 45초로 설정
+now.setMilliseconds(123); // 밀리초를 123으로 설정
+```
+
+<br>
+
+### 2) Math 객체
+
+`Math` 객체는 다양한 수학적 상수와 함수를 제공합니다.
+
+#### Math 객체의 속성
+
+```js
+console.log(Math.E); // 자연로그
+console.log(Math.PI); // 파이
+console.log(Math.SQRT2); // 2의 제곱근
+```
+
+#### Math 객체의 메서드
+
+```js
+console.log(Math.min(100, -2, 0, 5)); // -2
+console.log(Math.max(100, -2, 0, 5)); // 100
+console.log(Math.round(5.3124)); // 5 -> 반올림
+console.log(Math.ceil(5.3124)); // 6 -> 올림
+console.log(Math.floor(5.7124)); // 5 -> 내림
+console.log(Math.random()); // 0 <= x < 1 범위의 난수
+```
+
+#### Math.random() 응용 예시
+
+```js
+// 0 ~ 9
+console.log(Math.random() * 10); // 0 <= x < 10
+console.log(Math.floor(Math.random() * 10)); // 0 <= x <= 9
+
+// 0 ~ 10
+console.log(Math.floor(Math.random() * 11)); // 0 <= x <= 10
+```
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Object</title>
+    <script src="index.js"></script>
+</head>
+<body>
+    <h1>JavaScript의 객체에 대해 알아보자!</h1>
+    
+</body>
+</html>
+```
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS 표준 객체</title>
+    <script src="./index2.js"></script>
+</head>
+<body>
+    <h1>JavaScript의 표준 객체를 알아보자!</h1>
+</body>
+</html>
+```
+
+### JAVASCRIPT 코드
+```js
+// 변수 or (함수 매개변수)가 전달될 때,
+// 값 또는 참조가 어떻게 전달되는지?
+
+// #1. pass by value (값에 의한 전달)
+// - 원시 타입(primitive type)은 값(value)이 복사되어 전달.
+
+let num = 1;
+let num2 = num;
+console.log(num, num2); // 1 1
+console.log(num === num2); //true
+
+num = 5; // 1 -> 5
+console.log(num, num2); // 5 1
+console.log(num === num2); // false
+
+function changeValue(x) {
+    x = 10;
+    console.log(`x > `, x); // 10
+}
+changeValue(num);
+console.log(`num > `, num); // 5
+
+// 함수로 전달될 때, 변수의 값이 복사되어 함수의 매개변수로 전달.
+// 따라서 함수 내에세 매개변수의 값을 변경하더라도 원본 변수의 값은 변하지 않음.
+// Why? 함수 내에서 사용되는 변수는 함수 내에서만 유효한 지역 변수이기 때문.
+// x가 num의 값의 복사본을 가지고 있기 때문.
+
+// #2. pass by reference (참조에 의한 전달)
+// - 객체나 배열 같은 참조 타입 전달될 때 사용.
+// - 변수의 메모리 위치(참조)가 전달되므로, 함수 내에서 요소를 변경하면 원래 변수도 변경됨.
+
+const obj = {one : 1, two : 2};
+const obj2 = obj;
+console.log(obj, obj2); // {one : 1, two : 2}
+console.log(obj === obj2); // true
+
+obj.five = 5;
+console.log(obj, obj2); // {one : 1, two : 2, five: 5}
+console.log(obj === obj2); // true
+
+// obj와 obj2는 현재 데이터도 같고 참조값 (address, 주소)도 같다.
+
+console.log(`------------------------------`);
+
+const obj3 = {one : 1, two : 2};
+const obj4 = {one : 1, two : 2};
+console.log(obj3, obj4); // {one : 1, two : 2}
+console.log(obj3 === obj4); // false
+
+// why?
+// obj3와 ob4는 현재 데이터가 같지만, 서로 다른 별도의 객체이다.
+// 즉, 참조값 (address, 주소)가 다르다.
+
+obj3.five = 5;
+console.log(obj3, obj4);
+console.log(obj3 === obj4); // false
+```
+
+
+```js
+// js 표준 내장 객체
+// - 기본적으로 미리 정의된 객체
+// - 모든 JS 환경에서 사용할 수 있는 내장 객체들을 말한다.
+// - 자주 사용되는 기능을 미리 구현해 놓은 것.
+
+// #1. Date 객체 : 시간, 날짜
+
+// 날짜 생성하여 저장.
+let now = new Date();
+console.log(now);
+
+// 참고) 타임스탬프 (timestamp)
+// : 1970년 1월 1일을 기준으로 흘러간 밀리초(ms)를 나타내는 정수
+// "에포크" 이후의 시간을 나타냄.
+// Q) 에포크? 특정 시간의 기준점
+// Q2) why? 이 시간 이후인가요?
+// A) 1. 역사적인 이유 - 유닉스 os에서 타임스탬프를 측정하는데 사용된 날짜 초기 컴퓨터 시간 나타냄.
+//    2. 기술적인 편의성 - 시간을 숫자로 표현하는 방법. 수학적으로 편리한 계산을 가능하케 함.
+
+
+// new Date(timestamp)
+let jan_01_1970 = new Date(0);
+console.log(jan_01_1970); // // Thu Jan 01 1970 09:00:00 GMT+0900 (한국 표준시)
+
+let jan_02_1970 = new Date(24 * 3600 * 1000);
+console.log(jan_02_1970); // 24시간 뒤
+
+// new Date(data_string)
+let date = new Date(`2024-06-03`);
+console.log("date > ", date); // date >  Mon Jun 03 2024 09:00:00 GMT+0900 (한국 표준시)
+
+let date2 = new Date(`2024`, `06`, `03`); // MM(0(1월) ~ 11(12월) 주의)
+console.log("date2 >", date2); // date2 > Wed Jul 03 2024 00:00:00 GMT+0900 (한국 표준시)
+
+// 관련 메서드
+// 객체 점 접근법
+// getDate() : 월의 몇번째 날인지 반환합니다.
+// getDay() : 주의 몇 번째 날인지 반환합니다 (0부터 시작)
+// getMonth() : 몇번째 달인지 반환합니다. (0부터 시작)
+// getHours() : 시간을 반환합니다. (0부터 23까지)
+// getMinutes() : 분을 반환합니다. (0부터 59까지)
+// getSeconds() : 초를 반환합니다. (0부터 59까지)
+// getMillisecons() : 밀리초를 반환합니다. (0부터 999까지)
+// getTime() : 1970년 1월 1일부터 현재까지의 밀리초 단위의 시간을 반환합니다.
+
+console.log(now.getFullYear()); // 2024
+console.log(now.getMonth() + 1); // 5 Month는 0부터 시작 (0 ~ 11 주의)
+console.log(now.getDate()); // 3
+console.log(now.getHours()); // 13
+console.log(now.getMinutes()); // 38
+console.log(now.getSeconds()); // 39
+console.log(now.getMilliseconds()); // 0 ~ 999
+console.log(now.getDay()); // 0(일) ~ 6(토)
+
+
+console.log(`------------------------------`);
+
+
+// Math 객체
+// 수학적인 상수와 함수
+
+// 속성
+console.log(Math.E); // 자연로그
+console.log(Math.PI); // 파이
+console.log(Math.SQRT2); // 2의 제곱근
+
+// 메서드
+console.log(Math.min(100, -2, 0, 5)); // -2
+console.log(Math.max(100, -2, 0, 5)); // 100
+console.log(Math.round(5.3124)); // 5 -> 반올림
+console.log(Math.ceil(5.3124)); // 6 -> 올림
+console.log(Math.floor(5.7124)); // 5 -> 내림
+console.log(Math.random()); // 0 <= x < 1 범위의 난수
+
+// Math.random() 응용 예시
+// 0 ~ 9
+console.log(Math.random() * 10); // 0 <= x < 10
+console.log(Math.floor(Math.random() * 10)); // 0 <= x <= 9
+
+// 0 ~ 10
+console.log(Math.floor(Math.random() * 11)); // 0 <= x <= 10
+```eeee
