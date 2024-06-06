@@ -46,6 +46,7 @@ console.log(`num > `, num); // 5
 <br>
 
 - `obj`와 `obj2`는 현재 데이터도 같고 참조값(주소)도 같습니다.
+
 ```js
 const obj = {one: 1, two: 2};
 const obj2 = obj;
@@ -62,6 +63,7 @@ console.log(obj === obj2); // true
 <br>
 
 - `obj3`와 `obj4`는 현재 데이터가 같지만, 서로 다른 별도의 객체입니다. 즉, 참조값(주소)가 다릅니다.
+
 ```js
 console.log(`------------------------------`);
 
