@@ -5,7 +5,7 @@ date: 2024-06-06
 categories: JS_DOM
 ---
 
-# 
+# JS Object
 
 <hr>
 
