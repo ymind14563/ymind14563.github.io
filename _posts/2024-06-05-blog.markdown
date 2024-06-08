@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "정보처리기사필기"
+title: "정보처리기사 필기"
 date: 2024-06-05
 categories: 정보처리기사
 ---
