@@ -1,0 +1,50 @@
+---
+layout: post
+title: "전자정부프레임워크"
+date: 2024-06-08
+categories: 전정프
+---
+![98d5716e10348490b52bf7ea2f6dcac3](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/4d949f3c-4f1f-4062-8dd4-6566360e2d21)
+
+<br>
+
+ ## <center> <b>전자정부 표준프레임워크 (v4.2)</b></center>
+
+
+
+* 2024년 6월 10일 ~ 6월 16일 (7일간)
+* 전자정부 표준프레임워크 및 공통컴포넌트 개요
+* 표준프레임워크 소개(아키텍처, 프레임워크, 오픈소스)
+* 개발환경 구성, 실행환경(공통기반, 화면처리, 데이터처리)
+* 공통컴포넌트 소개 및 적용 방법
+* 템플릿 프로그램 실습
+* 프레임워크 : 모바일 표준프레임워크 개요 및 실행/개발환경
+* 클라우드 네이티브-(동영상 '2시간' 분량)
+* ​​​​​​​템플릿 및 MSA 소개 (개요)
+* ​​​​​​​템플릿 개발환경 구성
+* 템플릿 구성 실습​​​​​​​(Backend와 Frontend) 
+* **시험점수 60점 이상 (총 20문제, 1문제당 5점 배점)  : 1회 응시 가능(재시험 없음)**
+
+<br>
+
+전자정부프레임워크 교육을 듣게 되었습니다.
+일단 듣기론 spring 기반에 Mybatis, jQuery 위주로 한다고 들었는데, 교육기간 치고는 절대 적지 않은 양을 배워서 힘들 수도 있다는 얘기를 들었습니다. <br>
+
+개개인마다 다르겠지만 2~3년차 현업분들도 숨찰 정도라네요.
+한 번 정도는 들었던 내용들이라 어떻게 될진 모르겠지만
+살려주세요. <br>
+
+과제 8개 + 시험이 기다리고 있습니다.
+<br>
+
+![교육과정](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/2a144cd2-601d-48ea-8dee-f17740d75512)
+**출처: 나한테 온 교육 안내 메일**
+
+<br>
+<br>
+
+[전자정부프레임워크 교육페이지](https://www.egovframe.go.kr/home/eduinfo/eduinfoRead.do?pagerOffset=0&searchKey=&searchValue=&menuNo=64&eduId=EDU_0000000000001190)
+
+[교육 교재](https://www.egovframe.go.kr/home/ntt/nttRead.do?pagerOffset=0&searchKey=&searchValue=&menuNo=65&bbsId=4&nttId=1750)
+
+[표준프레임워크 퍼스트북](https://www.egovframe.go.kr/home/ntt/nttRead.do?menuNo=65&bbsId=4&nttId=1449)
