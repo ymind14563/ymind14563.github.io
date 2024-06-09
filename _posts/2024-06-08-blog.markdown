@@ -8,9 +8,7 @@ categories: 전정프
 
 <br>
 
- ## <b>전자정부 표준프레임워크 (v4.2)</b>
-
-
+## <b>`전자정부 표준프레임워크 (v4.2)`</b>
 
 * 2024년 6월 10일 ~ 6월 16일 (7일간)
 * 전자정부 표준프레임워크 및 공통컴포넌트 개요
@@ -26,6 +24,15 @@ categories: 전정프
 * **시험점수 60점 이상 (총 20문제, 1문제당 5점 배점)  : 1회 응시 가능(재시험 없음)**
 
 <br>
+<br>
+
+## - 2024-06-10 내용 추가
+
+![image](https://github.com/ymind14563/personalities/assets/163737600/807c3ded-8f39-4ebf-936d-12519a8312ee)
+
+![image](https://github.com/ymind14563/personalities/assets/163737600/db1a30f0-5341-458e-a9b1-85f1c411a4f8)
+
+<br>
 
 전자정부프레임워크 교육을 듣게 되었습니다.
 일단 듣기론 spring 기반에 Mybatis, jQuery 위주로 한다고 들었는데, 교육기간 치고는 절대 적지 않은 양을 배워서 힘들 수도 있다는 얘기를 들었습니다. <br>
@@ -35,9 +42,12 @@ categories: 전정프
 살려주세요. <br>
 
 과제 8개 + 시험이 기다리고 있습니다.
+
+
 <br>
 
 ![교육과정](https://github.com/ymind14563/ymind14563.github.io/assets/163737600/2a144cd2-601d-48ea-8dee-f17740d75512)
+
 **출처: 나한테 온 교육 안내 메일**
 
 <br>
