@@ -1,0 +1,422 @@
+---
+layout: post
+title: "[새싹x코딩온] JS DOM 이벤트리스너"
+date: 2024-06-09
+categories: JS_DOM
+---
+
+# JS DOM: `addEventListener`
+
+자바스크립트에서 이벤트 핸들러를 등록하는 주요 방법은 두 가지가 있습니다.
+
+1. HTML 속성(`onXXX` 속성)을 사용하는 방법
+2. 자바스크립트의 `addEventListener` 메서드를 사용하는 방법
+
+<br>
+
+## 1. `HTML 속성`으로 사용
+
+```html
+<h1 onclick="clickH1()">JS 이벤트</h1>
+```
+<br>
+```js
+function clickH1() {
+    alert('제목 클릭! 함수 이용');
+}
+```
+
+`h1` 요소를 클릭할 때 `clickH1` 함수가 실행되어 alert이 실행됩니다.
+
+<br>
+
+## 2. `addEventListener` 사용
+
+###  1) 버튼에 이벤트리스너 적용
+
+```html
+<div class="btn btn--black">버튼1</div>
+<div class="btn btn--green">버튼2</div>
+<div class="btn btn--blue">버튼3</div>
+<div class="btn btn--red">버튼4</div>
+<div id="container"></div>
+```
+<br>
+
+```js
+const btn1 = document.querySelector('.btn--black');
+const btn2 = document.querySelector('.btn--green');
+const btn3 = document.querySelector('.btn--blue');
+const btn4 = document.querySelector('.btn--red');
+const container = document.getElementById('container');
+
+// 클릭 이벤트
+btn1.addEventListener('click', function() {
+    alert('버튼 1을 클릭하셨네요!');
+});
+
+
+// mouseover 및 mouseout 이벤트
+btn1.addEventListener('mouseover', function() {
+    btn1.style.backgroundColor = 'aqua';
+});
+btn1.addEventListener('mouseout', function() {
+    btn1.style.backgroundColor = 'rgb(44, 44, 44)';
+});
+
+
+// 클릭 시 새로운 요소 생성
+btn2.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'pink';
+    div.innerHTML = 'HI!!!!!';
+    container.append(div);
+});
+
+
+// 기존 요소의 색상 변경
+btn3.addEventListener('click', changeColor);
+
+function changeColor() {
+    const divs = document.querySelectorAll('#container div');
+    for (let div of divs) {
+        div.style.backgroundColor = 'skyblue';
+    }
+}
+
+
+// 버튼 색상 변경
+btn4.addEventListener('click', changeBtnColor);
+
+function changeBtnColor() {
+    this.style.backgroundColor = 'yellow';
+}
+```
+**참고** this. 은 함수를 실행하게 한 본 요소 자체를 일컫습니다. (예시에선 btn4.)
+
+<br>
+
+### 2) 키 이벤트
+
+- 키 이벤트는 사용자가 키보드를 눌렀을 때 발생합니다.
+- 브라우저는 발생한 이벤트에 대한 정보를 담은 `이벤트 객체 (event object)`를 이벤트 리스너에 전달합니다.
+
+```js
+const btn = document.querySelector('button');
+const input = document.querySelector('input');
+
+btn.addEventListener('click', function(event) {
+    console.log(event); // 이벤트 객체 출력
+});
+
+input.addEventListener('keydown', function(e) {
+    console.log(e);
+    console.log(e.code); // 눌러진 키의 고유 코드
+    console.log(e.key); // 입력된 값
+
+    if (e.code === 'ArrowUp') {
+        console.log('▲');
+    } else if (e.code === 'ArrowDown') {
+        console.log('▼');
+    } else {
+        console.log('others');
+    }
+});
+```
+**참고** mousedown 이벤트 객체는 (마우스 좌표, 버튼 번호) 정보를 가지고, keydown 이벤트 객체는 (키 코드값, 어떤 키가 눌렸는지에 대한 정보) 정보를 가집니다.
+
+
+<br>
+
+### 3) 폼 이벤트
+
+```html
+<h2>Todo list</h2>
+<form id="todo-form">
+    <input type="text" name="todo">
+    <button>ADD</button>
+</form>
+<ul class="todos"></ul>
+```
+<br>
+
+```js
+const todoForm = document.getElementById('todo-form');
+const todos = document.querySelector('.todos');
+
+todoForm.addEventListener('submit', (e) => {
+    e.preventDefault(); // 폼 제출이 페이지를 새로고침하지 않도록 함 = 폼 제출을 막음, 누락 시 새로고침하면 submit되기전에 값이 사라지기에 제대로 적용되지 않음.
+
+    const todoInput = document.querySelector('input[name="todo"]');
+    const newTodo = todoInput.value.trim();
+
+    if (newTodo !== '') {
+        const newTodoLi = document.createElement('li');
+        newTodoLi.append(newTodo);
+        todos.append(newTodoLi);
+    }
+
+    // 입력 필드값 초기화
+    todoInput.value = '';
+});
+```
+<br>
+
+### 4) 입력 변경 및 입력 이벤트
+
+```html
+<hr>
+<h2>변경 이벤트</h2>
+<input type="text" id="change-input">
+<div class="intro"></div>
+```
+<br>
+
+```js
+const chgInput = document.querySelector('#change-input');
+
+// 변경 이벤트: 입력 필드가 포커스를 잃을 때 발생
+// 입력 후 마우스 등 입력창에서 벗어나면 실행.
+chgInput.addEventListener('change', function(e) {
+    console.log('change!!');
+    console.log(e.target.value); 
+});
+
+// 입력 이벤트: 입력 필드의 값이 변경될 때마다 발생
+// input에 키 입력 시 하단에 입력 그대로 출력.
+chgInput.addEventListener('input', function() {
+    const div = document.querySelector('.intro');
+    div.textContent = this.value;
+});
+```
+
+## 3. defer 에 관해
+
+```js
+<script defer src="./index5.js"></script>
+```
+JavaScript의 defer 속성은 `<script>` 태그에서 사용되며, 웹페이지의 로딩이 완료된 후에 스크립트를 실행할 수 있도록 합니다.
+
+일반적으로 `<script>` 태그는 HTML 파싱 중에 발견되면 즉시 다운로드되고 실행됩니다. 이는 스크립트가 다운로드되고 실행될 때까지 브라우저가 HTML 파싱을 일시 중지하게 만들어 웹페이지의 로딩 시간이 느려질 수 있습니다. 그러나 defer 속성을 사용하면 스크립트가 다운로드되긴 하지만 HTML 파싱을 차단하지 않습니다. 대신에, 스크립트는 HTML 파싱이 완료된 후에 순서대로 실행됩니다.
+
+
+- DOM을 따라 반드시 순서대로 실행되어야 한다면 `<script>`
+- DOM이나 다른 스크립트에 의존성이 없고, 실행 순서가 중요하지 않은 경우라면 `<script async>`
+- DOM이나 다른 스크립트에 의존성이 있고, 실행 순서가 중요한 경우라면 `<script defer>`
+
+<img width="488" alt="4" src="https://github.com/ymind14563/ymind14563.github.io/assets/163737600/0672a8e7-27a1-464e-afd7-fb0bf7ee5d9e">
+<img width="488" alt="5" src="https://github.com/ymind14563/ymind14563.github.io/assets/163737600/aa2b37f5-f611-461c-9ac8-58e29e98491e">
+
+[스크립트의 실행 시점을 조절하는 Async와 Defer 속성](https://wormwlrm.github.io/2021/03/01/Async-Defer-Attributes-of-Script-Tag.html)
+
+`개인적으로 아무리 봐도 코드에 이상이 없는거 같은데 왜 이렇게 안되는건가` 싶을 땐 거의 defer 입력으로 해결했던 경험이 있습니다. 출처에 이해 하기 쉽게 설명한 블로그가 있으니 꼭 읽어보면 좋겠습니다.
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS DOM : addEventListener</title>
+    <script defer src="./index5.js"></script>
+
+    <style>
+        body {
+          height: 2000px;
+        }
+        .btn {
+          width: 80px;
+          height: 35px;
+          border-radius: 13px;
+          text-align: center;
+          line-height: 35px;
+          font-weight: 700;
+          margin: 10px;
+          cursor: pointer;
+        }
+  
+        .btn--black {
+          background-color: rgb(44, 44, 44);
+          color: #fff;
+        }
+  
+        .btn--green {
+          background-color: green;
+          color: yellow;
+        }
+  
+        .btn--blue {
+          background-color: rgb(73, 73, 255);
+          color: bisque;
+        }
+  
+        .btn--red {
+          background-color: orangered;
+          color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- <h1 onClick="alert('제목 클릭')">js 이벤트</h1> -->
+    <h1 onclick="clickH1()">JS 이벤트</h1>
+    <div class="btn btn--black">버튼1</div>
+    <div class="btn btn--green">버튼2</div>
+    <div class="btn btn--blue">버튼3</div>
+    <div class="btn btn--red">버튼4</div>
+    <div id="container"></div>
+
+    <button>Click Me</button>
+    <input type="text">
+
+    <h2>Todo list</h2>
+    <form id="todo-form">
+        <input type="text" name="todo">
+        <button>ADD</button>
+    </form>
+    <ul class="todos"></ul>
+
+    <hr>
+    <h2>변경 이벤트</h2>
+    <input type="text" id="change-input">
+    <div class="intro"></div>
+</body>
+</html>
+```
+### JAVASCRIPT 코드
+
+```js
+// js Event(이벤트)
+// 어떤 사건을 의미
+// ex. 버튼 클릭, 웹페이지 로드, 키가 눌렸을 때, ...
+
+// 이벤트에 "함수" 등록 방법 2가지
+// - HTML 상에서 onXXX 속성으로 등록
+// - js 에서 listener 를 사용해 등록
+
+// 1. onXXX 속성으로 등록
+function clickH1() {
+    alert('제목 클릭! 함수 이용');
+}
+
+// 2. addEventListener
+const btn1 = document.querySelector('.btn--black');
+const btn2 = document.querySelector('.btn--green');
+const btn3 = document.querySelector('.btn--blue');
+const btn4 = document.querySelector('.btn--red');
+const container = document.getElementById('container');
+
+
+// addEventListener (이벤트 종류, 이벤트가 발생했을 때 일어날 일 함수로 작성)
+btn1.addEventListener('click', function() {
+    alert('버튼 1을 클릭하셨네요!')
+})
+
+btn1.addEventListener('mouseover', function() {
+    btn1.style.backgroundColor = 'aqua';
+})
+
+btn1.addEventListener('mouseout', function() {
+    btn1.style.backgroundColor = 'rgb(44, 44, 44)';
+})
+
+btn2.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'pink';
+    div.innerHTML = 'HI!!!!!';
+    container.append(div);
+})
+
+btn3.addEventListener('click', changeColor)
+
+function changeColor() {
+    const divs = document.querySelectorAll('#container div')
+    console.log(divs);
+    for (let div of divs) {
+        div.style.backgroundColor = 'skyblue';
+    }
+}
+
+btn4.addEventListener('click', changeBtnColor)
+
+function changeBtnColor() {
+    console.log(this); // 자기 자신 => btn4
+    // console.log(this.parentNode); // this를 이용해 부모 접근
+    this.style.backgroundColor = 'yellow';
+}
+
+// key Event
+// 이벤트 객체
+// - 브라우저는 발생한 이벤트에 대한 정보를 담은 "이벤트 객체 (event object)"를 이벤트 리스너에 전달.
+// ex. mousedown 이벤트 발생 -> 이벤트 객체는 (마우스 좌표, 버튼 번호) 정보를 가짐.
+// ex. keydown 이벤트 발생 -> 이벤트 객체는 (키 코드값, 어떤 키가 눌렸는지에 대한 정보) 정보를 가짐.
+
+const btn = document.querySelector('button');
+const input = document.querySelector('input');
+
+btn.addEventListener('click', function(event) {
+    // event 객체
+    // 이벤트에 대한 다양한 정보를 포함.
+    console.log(event); // 이벤트 객체에 대한 정보 출력
+})
+
+input.addEventListener('keydown', function(e) {
+    console.log(e);
+    console.log(e.code); // 눌려진 키의 고유 코드
+    console.log(e.key); // input에 입력된 값
+
+    if (e.code === 'ArrowUp') {
+        console.log('▲');
+    } else if (e.code === 'ArrowDown') {
+        console.log('▼');
+    } else {
+        console.log('others');
+    }
+})
+
+
+// 폼 이벤트
+const todoForm = document.getElementById('todo-form');
+const todos = document.querySelector('.todos');
+
+todoForm.addEventListener('submit', (e) => {
+    console.log('submit');
+    e.preventDefault(); // 폼 submit 이벤트가 새로고침 되는 걸 막음.
+    // 폼 제출을 막음.
+
+    const todoInput = document.querySelector('input[name="todo"]')
+    // console.log(todoInput.value); // 입력된 값
+
+    const newTodo = todoInput.value.trim(); // 양쪽 공백 제거
+
+    if (newTodo !== '') {
+        const newTodoLi = document.createElement('li'); // <li></li>
+        newTodoLi.append(newTodo); // <li>input 입력 값</li>
+        todos.append(newTodoLi);
+    }
+
+    // input 창 초기화
+    todoInput.value = '';
+})
+
+// change: input요소에 변경이 일어나고, 다른 요소를 클릭해서
+// input이 포커스 아웃(blur)처리 되었을 때 일어나는 이벤트
+
+const chgInput = document.querySelector('#change-input');
+chgInput.addEventListener('change', function(e) {
+    console.log('change!!');
+    console.log(e.target.value); 
+})
+
+// input에 값이 입력될 때마다 이벤트 발생
+chgInput.addEventListener('input', function() {
+    console.log("입력 발생!");
+    // console.log(this.value);
+    const div = document.querySelector('.intro');
+    div.textContent = this.value;
+})
+```
