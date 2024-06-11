@@ -1,0 +1,248 @@
+---
+layout: post
+title: "[새싹x코딩온] CSS 미디어쿼리"
+date: 2024-06-11
+categories: CSS
+---
+
+# CSS 미디어쿼리
+
+<hr>
+
+## 1. 미디어쿼리란?
+
+미디어쿼리는 특정 조건에 따라 CSS 스타일을 적용할 수 있도록 해주는 규칙입니다. 주로 화면 크기, 해상도, 방향 등과 같은 미디어 특성에 따라 다른 스타일을 적용할 때 사용됩니다. 
+<br>
+
+### 반응형 웹과 적응형 웹
+
+- **반응형 웹 (Responsive Web)**
+  - 다양한 기기와 화면 크기에 적응하여 웹 페이지의 레이아웃이 유동적으로 변하는 웹 디자인 방식입니다.
+  - 사용자 경험(UX)을 최적화하고 다양한 기기에서 일관된 사용성을 제공하는 것이 주요 목표입니다.
+
+- **적응형 웹 (Adaptive Web)**
+  - 사전에 정의된 여러 레이아웃을 사용하여 다양한 화면 크기에 맞추는 방식입니다.
+  - 각기 다른 디바이스에 대해 특정 레이아웃을 준비해두고, 사용자의 기기 화면 크기에 맞춰 적합한 레이아웃을 적용합니다.
+
+<br>
+
+## 2. 미디어쿼리 사용 방법
+
+미디어쿼리는 `@media` 키워드를 사용하여 정의합니다.
+
+```css
+@media 미디어타입 (조건) {
+    /* CSS 규칙 */
+}
+```
+
+예를 들어, 화면 너비가 768px 이하인 경우 특정 스타일을 적용하려면 아래와 같습니다.
+
+```css
+@media screen and (max-width: 768px) {
+    /* 768px 이하일 때 적용할 스타일 */
+}
+```
+
+<br>
+
+## 3. 미디어쿼리 조건
+
+- **width, min-width, max-width**: 화면 너비를 기준으로 조건을 설정합니다.
+- **height, min-height, max-height**: 화면 높이를 기준으로 조건을 설정합니다.
+- **orientation**: 화면의 방향을 기준으로 조건을 설정합니다. `portrait` (세로 모드)와 `landscape` (가로 모드)가 있습니다.
+- **resolution**: 화면의 해상도를 기준으로 조건을 설정합니다.
+- **aspect-ratio, min-aspect-ratio, max-aspect-ratio**: 화면의 가로 세로 비율을 기준으로 조건을 설정합니다.
+
+<br>
+
+## 4. 미디어쿼리 예시
+
+```css
+/* 기본 스타일 */
+.header {
+    background-color: blanchedalmond;
+}
+
+.main {
+    background-color: aqua;
+    display: flex;
+}
+
+.section {
+    background-color: cornflowerblue;
+    width: 80%;
+}
+
+.aside {
+    background-color: hotpink;
+    width: 20%;
+}
+
+.footer {
+    background-color: chartreuse;
+}
+
+/* viewport width가 480px 이하 일 때 */
+@media (max-width: 480px) {
+    .header {
+        height: 50px;
+    }
+
+    .main {
+        flex-direction: column-reverse;
+    }
+
+    .aside {
+        width: 100%;
+        height: 50px;
+    }
+    .section {
+        width: 100%;
+        height: 50px;
+    }
+    .footer {
+        height: 50px;
+    }
+}
+
+
+/* 화면 너비가 481px ~ 768px 일 때 */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .header {
+        height: 150px;
+    }
+
+    .main {
+        flex-direction: column;
+    }
+
+    .aside {
+        display: none;
+    }
+}
+
+/* 가로 모드 */
+@media screen and (orientation: landscape) {
+    body {
+        background-color: lightgreen;
+    }
+}
+
+/* 세로 모드 */
+@media screen and (orientation: portrait) {
+    body {
+        background-color: lightpink;
+    }
+}
+```
+
+<br>
+<hr>
+
+### HTML 코드
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 미디어쿼리</title>
+    <link rel="stylesheet" href="./mediaquery.css">
+</head>
+<body>
+    <header class="header">Header</header>
+    <main class="main">
+        <section class="section">Main</section>
+        <aside class="aside">Aside</aside>
+    </main>
+    <footer class="footer">Footer</footer>
+</body>
+</html>
+```
+### CSS 코드
+
+```css
+/* 
+    * 반응형 웹
+    - 다양한 기기와 화면 크기에 적응하여 웹 페이지의 레이아웃이 유동적으로 변하는 웹 디자인 방식.
+    - 사용자 경험(UX)을 최적화 하는 것과 다양한 기기에서 일관된 사용성을 제공하는 것이 주요 목표.
+    * 적응형 웹
+    - 사전에 정의된 여러 레이아웃을 사용하여 다양한 화면 크기에 맞추는 방식
+    - 각기 다른 디바이스에 대해 특정 레이아웃을 준비 해두고, 사용자의 기기 화면 크기에 맞춰 적합한 레이아웃을 적용
+*/
+
+.header {
+    background-color: blanchedalmond;
+}
+
+.main {
+    background-color: aqua;
+    display: flex;
+}
+
+.section {
+    background-color: cornflowerblue;
+    width: 80%;
+}
+
+.aside {
+    background-color: hotpink;
+    width: 20%;
+}
+
+.footer {
+    background-color: chartreuse;
+}
+
+@media (max-width: 480px) {
+    /* viewport width가 480px 이하 일 때 */
+    .header {
+        height: 50px;
+    }
+
+    .main {
+        flex-direction: column-reverse;
+    }
+
+    .aside {
+        width: 100%;
+        height: 50px;
+    }
+    .section {
+        width: 100%;
+        height: 50px;
+    }
+    .footer {
+        height: 50px;
+    }
+}
+@media screen and (min-width: 481px) and (max-width: 768px){
+    /* 화면 너비가 481px ~ 768px */
+    .header {
+        height: 150px;
+    }
+
+    .main {
+        flex-direction: column;
+    }
+
+    .aside {
+        display: none;
+    }
+}
+
+/* 가로 모드 */
+@media screen and (orientation: landscape) {
+    body {
+        background-color: lightgreen;
+    }
+}
+/* 세로 모드 */
+@media screen and (orientation: portrait) {
+    body {
+        background-color: lightpink;
+    }
+}
+```
