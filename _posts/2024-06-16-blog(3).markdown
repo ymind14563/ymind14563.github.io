@@ -1,0 +1,71 @@
+---
+layout: post
+title: "[새싹x코딩온] NCP 서버 반납"
+date: 2024-06-16
+categories: NCP
+---
+
+# 서버 반납이란 ?
+- 더 이상 사용하지 않는 경우 의미 없는 과금 방지를 위해 서버를 반납합니다.
+
+<br>
+
+# 반납 단계
+1) 서버 정지
+2) 반납
+3) 반납 보호 (설정된 경우)
+
+<br>
+
+# 서버 반납하기
+<br>
+
+1) 서버 정지를 우선 클릭해줍니다.
+![1  서버 정지](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/7ea39763-072c-4d49-a1af-5b21822d4e20)
+
+<br>
+
+2) 정지하더라도 요금은 청구되니 반납을 해줍니다.
+![2  주의사항](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/b782469d-936c-4b37-9e02-04a43d52012d)
+
+<br>
+
+3) 반납을 클릭해줍니다.
+![3  반납](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/a892c10b-8cb3-4991-aa4b-230129766ef5)
+
+<br>
+
+4) 공인 IP도 함께 반납합니다.
+![4  반납 주의 사항](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/a3c172fd-d760-40c6-ad98-f83e165db7f3)
+
+<br>
+
+5) 설정 된 경우 반납 보호을 알려줍니다.
+![5  반납 보호](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/5e8203ee-ebc2-4a5c-aaea-833cc6627dd0)
+
+
+<br>
+
+6) 반납 보호 설정으로 갑니다.
+![6  반납 보호](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/82f1ed88-0e9e-477e-9db6-1037eddafc8e)
+
+<br>
+
+7) 반납 보호를 해제합니다.
+![7  반납 보호](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/9ee980f2-3107-43f3-92bd-7fa7c01cea3b)
+
+<br>
+
+8) 다시 반납 버튼을 클릭합니다.
+![8  반납](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/f3a26da7-d5b3-4ef8-8637-941dfe8c96a6)
+
+<br>
+
+9) 반납 중으로 변경됩니다.
+![9  반납중](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/570d6c1f-6b0d-4894-98ff-2d77a4a572c7)
+
+
+<br>
+
+10) 반납이 완료된 후 기존 다른 서버가 없다면 초기 생성화면으로 돌아옵니다. (반납 완료)
+![10  반납 완료 ](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/3654a278-0bf1-43e5-afe4-dfb3de238159)
