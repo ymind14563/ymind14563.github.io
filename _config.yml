@@ -13,7 +13,7 @@ sass:
   sass_dir: _sass
 plainwhite:
   name: Jun
-  tagline: 백엔드 개발자 블로그
+  tagline: 나를 위한 블로그
   date_format: "%b %-d, %Y"
   sitemap: true # set to true to generate sitemap.xml content
   search: true # set to true to enable searchbar
