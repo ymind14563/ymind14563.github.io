@@ -1,0 +1,104 @@
+---
+layout: post
+title: "[새싹x코딩온] NCP(NAVER CLOUD PLATFORM)"
+date: 2024-06-16
+categories: NCP
+---
+
+# NCP(NAVER CLOUD PLATFORM)
+- 네이버 클라우드 플렛폼
+- 네이버에서 제공하는 클라우드 기반 인프라 제공 서비스 입니다.
+
+<br>
+
+# 들어가면서
+1) VPC 란?
+- VPC는 Virtual Private Cloud의 약자로, 클라우드 환경에서 가상의 네트워크를 생성하여 사용할 수 있게 하는 서비스입니다. VPC를 사용하면 사용자는 자신만의 독립된 네트워크 환경을 구성할 수 있습니다.
+2) Subnet 이란?
+- 서브넷은 VPC 내에서 더 작은 네트워크 구역으로 나누는 것입니다. 서브넷은 IP 주소 범위로 구분되며, VPC 내에서 논리적으로 네트워크를 분할하여 사용합니다. 예를 들어, 퍼블릭 서브넷과 프라이빗 서브넷을 구분하여 외부에서 접근 가능한 리소스와 내부에서만 접근 가능한 리소스를 분리할 수 있습니다.
+3) ACG 란?
+- ACG는 Access Control Group의 약자로, 네트워크 접근 제어를 설정하는 규칙 집합입니다. 일반적으로 보안 그룹(Security Group)이라고도 합니다. ACG를 사용하여 특정 IP 주소나 포트에 대한 접근을 허용하거나 차단할 수 있습니다. 
+
+<br>
+
+# 0. 생성 단계
+1) VPC 생성
+2) Subnet 생성
+3) ACG 생성
+4) 서버 생성
+5) 비밀번호 생성
+
+![0  콘솔 위치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/b68c0669-90d8-4760-b28a-1acc016817fd)
+
+<br>
+
+# 1. VPC 생성
+
+![2-0  vpc 위치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/2a774f4d-6d13-4719-90ab-765881d1f5bf)
+
+![2-1  vpc 생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/5355e5b6-f80d-4247-b3c4-a4678d3ce3e4)
+
+> VPC의 IP 주소 범위는, private 대역(10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) 내에서 /16~/28 범위여야 합니다. <br>
+예시: 10.0.0.0/16, 172.16.0.0/16, 192.168.0.0/16
+
+<br>
+
+# 2. Subnet 생성
+
+![2-2 서브넷 위치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/d9f6b8e9-02e5-4885-aab8-d3bd4ecc4618)
+
+![2-3  서브넷 생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/4d5aed04-bf39-43e4-98e3-c8304a9a0f77)
+
+> Subnet의 IP 주소 범위는, private 대역(10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) 내에서 /16~/28 범위여야 합니다. <br>
+예시: 10.0.0.0/24, 172.16.0.0/24, 192.168.0.0/24
+
+<br>
+
+# 3. ACG 생성
+
+![2-4  acg 위치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/e2081352-e177-4b21-9845-20391ec4c9b7)
+
+![2-5  acg 생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/e218236e-2280-4453-886e-3bb368ced0cf)
+
+![2-6 acg 설정 인바운드](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/4f219d90-1124-4d33-a915-76eae0c177ba)
+> 인바운드 설정에서 접근 소스란에 접근을 허용하는 IP를 입력하고 허용 포트에 허용하고자 하는 포트 번호를 입력합니다. <br>
+여기서는 전체를 의미하는 0.0.0.0/0을 입력하고 ssh 접속을 위해 22번 포트를 설정합니다.
+
+<br>
+
+# 4. 서버 생성
+
+![0  server 위치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/ff975d24-4c63-48b1-9f45-c95473fe90dd)
+
+ <br> 
+
+![1  ncp 서버 생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/76915d7b-9b28-4772-a225-e4b459d1ac2a)
+> 위에서 생성한 VPC, Subnet 등을 지정해주고, Network Interface도 기본으로 추가합니다. <br> 서버를 서비스 목적으로 이용하려면 공인 IP가 필요합니다. 공인 IP로 직접적으로 접속하게 됩니다.  <br> 과금요소이니만큼 생각하여 설정하고 사용하지 않을 시엔 반납해주면 됩니다.  <br>  반납 보호는 서버를 실수로 혹은 고의로 없애는 상황에서 한번 더 보호하는 보호 장치입니다.
+
+ <br> 
+
+![2  스토리지 설정](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/5bc45f6e-8132-416c-b78e-078d324ddd21)
+
+![3  pem 키 생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/a8618138-c7a0-4adf-8591-4d493b9e5bad)
+
+![4  pem 키 이미지](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/00994f1b-b930-44eb-8cb6-da63f3bde146)
+
+![5  acg 설정](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/276521da-6c3e-475d-bed4-6d26ea4970f9)
+
+![6 서버생성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/41192ad2-8c60-495f-92c1-d529c4916b3c)
+
+![7  생성중](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/ad657cac-cad8-4c26-b374-14de6d024e43)
+
+![8  운영중](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/a11e208b-ec76-4d78-91e8-b3c050c867dc)
+
+<br>
+
+# 5. 비밀번호 생성
+
+![9  관리자 비밀번호 확인](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/3cc0c71a-26f0-45ab-82ed-45eb2bddeefa)
+
+![10  pem 입력](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/bfdd249a-ccb7-402e-9ec7-78f4f1cdfd50)
+
+![11  관리자 비밀번호 확인](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/3aa1ca8e-bc80-4da5-9963-0b5223a68900)
+
+> 생성된 비밀번호로 번거로운 pem 파일 업로드 대신에 접속하고자 할 떄 사용할 수 있습니다.
