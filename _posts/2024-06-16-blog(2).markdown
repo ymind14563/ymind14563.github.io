@@ -1,0 +1,135 @@
+---
+layout: post
+title: "[새싹x코딩온] 서버 접속(PUTTY와 FileZilla)"
+date: 2024-06-16
+categories: 서버 접속
+---
+
+<br>
+
+# 들어가면서
+0) Windows는 PUTTY와 FileZilla, Mac은 terminal과 FileZilla를 이용합니다. (Mac 접속 방법은 블로그 하단 참고)
+
+1) PUTTY 란?
+- PuTTY는 오픈 소스 터미널 에뮬레이터, 직렬 콘솔 및 네트워크 파일 전송 응용 프로그램입니다. 주로 Windows 환경에서 사용되며, Linux와 같은 다양한 운영 체제에서도 실행할 수 있습니다.
+
+2) FileZilla 란?
+- FileZilla는 오픈 소스 파일 전송 프로토콜(FTP) 클라이언트 및 서버 응용 프로그램입니다. 주로 FTP를 통해 파일을 업로드하고 다운로드하는 데 사용됩니다.
+
+3) Apache 란?
+- Apache HTTP Server입니다. Apache 서버 소프트웨어는 전 세계적으로 가장 널리 사용되는 웹 서버 소프트웨어 중 하나입니다.
+
+<br>
+
+# 1. PUTTY
+
+1) [>>> PUTTY 다운로드](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
+![PUTTY 다운로드 페이지](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/3a3757ee-860c-4118-85b6-074f839931e7)
+
+<br>
+
+ 2) 공인 IP 주소를 HOST NAME에 입력하고 SSH접속을 위해 22를 PORT에 입력합니다.
+ 편한 접속을 위해 프로필을 만들어 줍니다.
+![2  설정](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/cc18110e-98ed-4d85-8f03-5b06c7d54c97)
+
+<br>
+
+3) root 권한 접속을 위한 root 입력합니다.
+![3  root 입력](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/77434250-e921-486e-8e0d-5c55d7ba57b5)
+
+<br>
+
+4) pem 파일을 업로드하여 확인하였던 관리자 비밀번호 입력합니다.
+![4  비밀번호 입력](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/72c9ec2f-ae5b-4078-825a-23574182a6ef)
+
+<br>
+
+5) 접속 성공
+![5  접속 성공](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/535a5244-ab0e-4e33-b633-121ed82b614b)
+
+<br>
+
+6) 관리자 비밀번호를 확인하여 접속해도 상관없지만 비밀번호를 변경하여 편하게 접속할 수도 있습니다. `passwd` 명령어를 사용합니다.
+![비밀번호 변경](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/cfe01d6b-c6c9-4999-a6c8-ad7a40bd96cf)
+
+
+<br>
+<br>
+
+
+# 2. FileZilla
+
+1) [>>> FileZilla 다운로드](https://filezilla-project.org/)
+![1  파일질라 다운로드 페이지](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/39d1a198-4a58-4a14-97e9-53125e31b40e)
+
+<br>
+
+2) 파일 > 사이트 관리자 선택합니다.
+![2  파일 선택](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/08564f62-889e-4254-9fc8-42264237ec5f)
+
+<br>
+
+3) 프로토콜에 ssh선택 후 포트에 22입력, 호스트에 공인 IP입력합니다.
+![3  프로필 작성](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/3df4b08b-3262-4109-a1a1-3e3db340a1b6)
+
+<br>
+
+4) 비밀번호 묻기를 선택하였기에 연결 시 비밀번호를 물어봅니다.
+![접속](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/f0ae7d99-0832-4979-b9b6-347584a1ebda)
+
+<br>
+
+5) FileZilla 접속 성공
+ ![FileZilla 접속](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/f0f309fc-10fd-4279-93fb-686fe7a16c28)
+
+
+<br>
+
+**(참고)** FileZilla 접속 시 가끔 공인 IP주소를 입력했는데도 페이지 변경 등이 이루어 지지 않는다면 `포트번호 누락의 가능성이 있습니다.`
+포트 번호를 누락하여 접속하더라도 접속에는 문제가 없기 때문에 접속은 되지만, 페이지 변경 요소가 반영되지 않습니다. 포트번호를 꼭 입력하도록 합니다.
+
+<br>
+<br>
+
+
+ # 3. Apache 설치
+
+ 작성한 코드들을 보여지게 만들기 위해서는 웹서버에 띄워야 합니다.
+ FileZilla까지만 설치하면 웹서버에 파일을 올릴 수 있는 디렉토리가 보이지 않습니다. 웹서버가 아직 없기 때문입니다. 웹서버를 만들기 위해 Apache를 설치해 줍니다.
+
+ 1. PUTTY 에 접속하여 설치 가능한 리스트를 업데이트 합니다.
+ ![aptgetupdate](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/a4551334-d71c-4902-900a-ff91894fbfe0)
+ 
+<br>
+
+2. apt-get install apache2 명령어를 사용하여 apache를 설치합니다.
+![apache 설치](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/b6310c1f-682a-4aa6-9bab-f22618cc5432)
+
+<br>
+
+3. Y를 입력합니다.
+![apache 설치2](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/7ca1cd20-10e4-407b-93a2-39582b32ff7a)
+
+<br>
+
+4. 기존에 보이지 않던 www 디렉토리가 생성 되었습니다.
+![www 접속](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/6f446fd0-b86e-4a93-bc7e-26df04aa88f5)
+
+<br>
+
+5. apache 설치 후 생성된 www/html 디렉토리를 확인해보면 index.html 파일이 있습니다.
+![www 디렉토리 확인](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/c29504af-32be-4b38-8647-bb5cc241e098)
+
+<br>
+
+6. 공인 IP주소를 브라우저를 통해 접속하면 apache 기본 화면이 보여지게 됩니다. (연결 성공) 이제 공인 IP 주소로 서버에 접속이 가능하고 작성한 코드를 www 디렉토리에 업로드하면 보여지게 됩니다. 
+![apache 기본페이지](https://github.com/ymind14563/SeSAC_YDP_6/assets/163737600/b5af13df-95a5-4eaa-bc83-1a9dcfc95a15)
+
+
+<br>
+<br>
+<br>
+
+**(참고)** Mac에서는 모든 단계가 동일하나, PUTTY 부분만 다릅니다.
+Mac은 Open SSH Client가 기본으로 설치 되어 있기 때문에 PUTTY 설치 대신에 termial에서 바로 가능합니다.
+명령어 `ssh root@공인IP주소` 를 입력하고 설정한 비밀번호를 입력하면 바로 접속할 수 있습니다.
