@@ -1,0 +1,164 @@
+---
+layout: post
+title: "[새싹x코딩온] http(서버 생성하기)"
+date: 2024-06-18
+categories: Node.js
+---
+
+# HTTP 서버 생성하기
+
+<hr>
+<br>
+
+
+## Node.js HTTP 모듈로 서버 시작하기
+
+Node.js에서 HTTP 서버를 만들기 위해 `http` 모듈을 사용합니다. 가장 기초적인 서버를 만들어 보겠습니다.
+```js
+const http = require('http');
+
+// http 모듈을 사용해 서버를 생성합니다.
+const server = http.createServer();
+server.listen(8000, function() {
+    console.log('8000 포트에서 서버 실행 중');
+});
+```
+
+위 코드는 `http` 모듈을 불러와서 `createServer` 메서드로 서버를 생성한 후, `8000` 포트에서 서버를 실행합니다.
+
+<br>
+
+
+## 요청과 응답 처리하기
+
+요청을 받고, 응답을 보내는 서버를 만들어 보겠습니다.
+
+```js
+const http = require('http');
+
+http.createServer(function(req, res) {
+    // HTTP 상태 코드 200은 정상 응답을 의미.
+    // 'Content-Type' 헤더를 설정하여 응답이 텍스트 형태임을 명시.
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<h2> Hello World </h2>');
+}).listen(8080, () => {
+    console.log('8080포트에서 실행 중');
+});
+```
+
+여기서는 `createServer` 메서드에 콜백 함수를 전달하여, 클라이언트 요청이 올 때마다 실행되게 합니다. `req` (request) 객체는 요청 정보를 담고 있고, `res` (response) 객체는 응답 정보를 담고 있습니다. `res.writeHead` 메서드를 사용해 응답 헤더를 설정하고, `res.end` 메서드를 사용해 응답 본문을 보냅니다.
+
+<br>
+
+
+## URL 활용하기
+
+클라이언트가 요청한 URL에 따라 다른 응답을 보내보겠습니다.
+
+```js
+const http = require('http');
+
+http.createServer((req, res) =>  {
+    let _url = req.url;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.write('<h2> Hello2 World2 </h2>');
+    res.end(`<p> ${_url} </p>`);    
+}).listen(3000, () => {
+    console.log('3000 포트에서 실행 중');
+});
+```
+
+여기서는 `req.url` 속성을 사용해 클라이언트가 요청한 URL을 가져오고, 이를 응답 본문에 포함시킵니다. `writeHead` 메서드로 응답의 헤더를 설정할 때 `charset=utf-8`을 추가하여, 한글이 깨지지 않도록 합니다.
+
+<br>
+
+
+## 여러 페이지 응답하기
+
+이제 여러 페이지를 처리할 수 있는 서버를 만들어 보겠습니다. 파일 시스템 모듈(`fs`)을 사용하여 HTML 파일을 읽고, 요청된 URL에 따라 다른 페이지를 응답합니다.
+
+```js
+const http = require('http');
+const fs = require('fs');
+
+const server = http.createServer((req, res) => {
+    let path = './views/';
+    switch(req.url) {
+        case '/': 
+            path += 'index.html'; // ./views/index.html
+            res.statusCode = 200;
+            break;
+
+        case '/about':
+            path += 'about.html'; // ./views/about.html
+            res.statusCode = 200;
+            break;
+
+        default: 
+            res.statusCode = 404;
+            break;
+    }
+
+    fs.readFile(path, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.end();
+        } else {
+            res.end(data);
+        }
+    });
+});
+
+server.listen(8000, () => {
+    console.log('8000 포트에서 서버 실행 중');
+});
+```
+
+여기서는 `fs` 모듈을 사용하여 파일을 읽고, 해당 내용을 클라이언트에 응답합니다. `req.url`에 따라 읽어야 할 파일 경로를 설정하고, `fs.readFile` 메서드를 사용해 파일을 읽습니다. 파일 읽기에 실패하면 에러를 출력하고, 성공하면 파일 내용을 응답합니다.
+
+<br>
+
+
+### HTML 파일
+
+서버에서 응답할 HTML 파일입니다. 위 코드 실행 시 요청에 따른 응답으로 `index.html`과 `about.html` 파일이 적용되게 됩니다.
+
+index.html
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    <h1>home</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">about</a>
+    </nav>
+</body>
+</html>
+```
+
+about.html
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+</head>
+<body>
+    <h1>about</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">about</a>
+    </nav>
+</body>
+</html>
+```
