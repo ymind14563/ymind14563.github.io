@@ -1,0 +1,100 @@
+---
+
+layout: post
+title: "[새싹x코딩온] Express와 EJS"
+date: 2024-06-22
+categories: Node.js
+---
+
+# Express와 EJS
+
+<hr>
+<br>
+
+## 1. Express와 EJS
+
+### 1) Express 란?
+
+Express는 Node.js 환경에서 웹 애플리케이션을 개발할 때 주로 사용되는 웹 프레임워크입니다. Express는 API를 제공하여 HTTP 요청과 응답을 처리할 수 있게 합니다. 
+
+<br>
+
+
+#### (1) 간단한 라우팅
+   Express는 HTTP 메서드(GET, POST 등)와 URL 경로에 따라 요청을 처리할 수 있습니다.
+   
+   ```js
+   app.get('/', (req, res) => {
+       res.send('Hello, World!');
+   });
+   ```
+
+#### (2) 미들웨어 지원
+   미들웨어는 요청과 응답 사이에 실행되는 함수로, 유연성과 모듈화를 높입니다.<br> 미들웨어를 통해 요청 데이터의 처리, 인증, 로깅 등을 쉽게 할 수 있습니다.
+
+   ```js
+   app.use((req, res, next) => {
+       console.log('Request URL:', req.originalUrl);
+       next();
+   });
+   ```
+
+#### (3) 템플릿 엔진 통합
+   Express는 EJS와 같은 템플릿 엔진을 통합할 수 있어, 동적인 HTML 페이지를 생성할 수 있습니다.
+
+   ```js
+   app.set('view engine', 'ejs');
+   app.set('views', './views');
+   ```
+
+#### (4) 정적 파일 서비스
+   Express는 정적 파일(CSS, JavaScript, 이미지 등)을 제공할 수 있는 기능을 가지고 있습니다.
+
+   ```js
+   app.use(express.static('public'));
+   ```
+
+<br>
+<br>
+
+### 2) EJS 란?
+
+EJS(Embedded JavaScript)는 JavaScript 코드를 HTML에 삽입할 수 있는 템플릿 엔진입니다. EJS를 사용하면 서버 사이드에서 동적으로 HTML을 생성할 수 있어, 반복문, 조건문 등 JavaScript 문법을 그대로 사용하여 유연한 웹 페이지를 만들 수 있습니다.
+
+<br>
+
+#### (1) 간결한 문법
+   EJS는 `<%= %>`와 같은 간단한 구문을 사용하여 데이터를 출력할 수 있습니다. 
+
+   ```html
+   <h1><%= title %></h1>
+   ```
+
+#### (2) 조건부 렌더링
+   JavaScript의 조건문을 활용하여 특정 조건에 따라 HTML을 동적으로 렌더링할 수 있습니다.
+
+   ```html
+   <% if(user) { %>
+       <h1>Welcome, <%= user.name %></h1>
+   <% } else { %>
+       <h1>Welcome, Guest</h1>
+   <% } %>
+   ```
+
+#### (3) 반복문 지원
+   JavaScript의 반복문을 사용하여 리스트 형태의 데이터를 쉽게 출력할 수 있습니다.
+
+   ```html
+   <ul>
+       <% items.forEach(function(item) { %>
+           <li><%= item %></li>
+       <% }); %>
+   </ul>
+   ```
+
+#### (4) 재사용 가능한 템플릿
+   EJS는 템플릿을 재사용할 수 있어 코드의 중복을 줄이고 유지보수를 쉽게 할 수 있습니다. `include` 문법을 사용하여 다른 EJS 파일을 포함할 수 있습니다.
+
+   ```html
+   <%- include('header') %>
+   ```
