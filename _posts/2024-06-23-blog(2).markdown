@@ -1,0 +1,147 @@
+---
+layout: post
+title: "클래스와 상속"
+date: 2024-06-23
+categories: JavaScript
+---
+
+# 클래스와 상속 (Class와 Inheritance)
+
+<hr>
+<br>
+
+## 1. 클래스의 기본 개념
+
+### 1) 클래스 정의와 인스턴스 생성
+
+클래스는 `class` 키워드를 사용하여 정의합니다. <br>
+클래스는 생성자 메서드(`constructor`)를 통해 객체의 초기 상태를 설정하며 여러 메서드를 정의할 수 있습니다.
+
+```js
+class House {
+    constructor (year, name, window) { // 생성자
+       this.year = year;
+       this.name = name;
+       this.window = window;
+    }
+
+    getAge() {
+        console.log(`${this.name}는 건축한지 ${2024 - this.year}년 되었어요!`);
+    }
+    getWindow() {
+        console.log(`${this.name}의 창문은 ${this.window}개 입니다!`);
+    }
+}
+
+// 클래스를 이용해 인스턴스를 생성할 때는 
+// 생성자에 정의된 매개변수대로 값을 전달해야함. (year, name, window 순서)
+const house1 = new House(1990, '롯데', 1);
+
+house1.getAge(); // 롯데는 건축한지 34년 되었어요!
+house1.getWindow(); // 롯데의 창문은 1개 입니다!
+```
+
+<br>
+
+### 2) `this` 키워드의 사용
+
+```javascript
+constructor (year, name, window) { // 생성자 메서드
+    this.year = year;
+    this.name = name;
+    this.window = window;
+}
+```
+
+클래스 내에서 `this` 키워드는 현재 인스턴스를 가리킵니다. 즉, 생성된 객체의 속성에 접근하거나 메소드를 호출할 때
+사용합니다.
+예를 들어, `this.year`는 현재 인스턴스의 `year` 속성을 의미합니다. <br>
+코드에서 `this.year = year`는 생성된 객체의 `year` 속성을 초기화합니다.  <br>
+만약 `this` 키워드를 사용하지 않으면, 클래스 외부에서 해당 속성에 접근할 수 없습니다.
+
+
+
+<br>
+
+## 2. 클래스 상속
+
+### 1) 클래스 상속의 이점
+
+상속을 통해 기존 클래스를 확장함으로써 중복 코드를 줄이고, 구조화된 코드 작성을 통해 코드의 재사용성과 유지보수성을 향상시킬 수 있습니다. <br>
+예를 들어, 아래 코드에서 `House` 클래스를 상속받은 `Apartment` 클래스는 부모 클래스의 기능을 그대로 활용하면서도 새로운 기능을 추가할 수 있습니다. 
+
+<br>
+
+### 2) 클래스 상속을 통한 확장
+
+#### (1) 클래스 상속의 기본 구조
+
+클래스는 `extends` 키워드를 사용하여 다른 클래스를 상속받을 수 있습니다. 기존 클래스의 기능을 확장하거나 변경할 수 있습니다.
+
+```js
+class Apartment extends House {
+    constructor(year, name, window, floor, windowMaker) {
+
+        // super 키워드를 사용, 부모 클래스의 생성자를 호출하여 상속받은 속성을 초기화함.
+        super(year, name, window);
+
+        this.floor = floor;
+        this.windowMaker = windowMaker;
+    }
+
+    getAptInfo() {
+        return `${this.year}년에 지어진 ${this.name} 아파트의 
+            총 층수는 ${this.floor}이며, 창문의 개수는 ${this.window}입니다.`;
+    }
+
+    // 부모 클래스의 `getWindows()` 메서드를 오버라이드(override)하여 재정의함.
+    getWindow() {
+        return `${this.name} 아파트의 ${this.window}개의 창문은 
+            ${this.windowMaker} 회사에서 생산되었습니다.`;
+    }
+}
+
+const apt1 = new Apartment(2022, '래미안', 3, 20, 'KCC');
+console.log(apt1.getAptInfo()); 
+// 2022년에 지어진 래미안 아파트의 총 층수는 20이며, 창문의 개수는 3입니다.
+console.log(apt1.getWindow());
+// 래미안 아파트의 3개의 창문은 KCC 회사에서 생산되었습니다.
+```
+
+
+<br>
+
+#### (2) `super` 키워드의 역할
+
+```js
+class House {
+    constructor (year, name, window) {
+       this.year = year;
+       this.name = name;
+       this.window = window;
+    }
+}
+
+class Apartment extends House {
+    constructor(year, name, window, floor, windowMaker) {
+
+        super(year, name, window);
+
+        this.floor = floor;
+        this.windowMaker = windowMaker;
+    }
+```
+
+상속받은 클래스에서 부모 클래스의 생성자와 메서드를 호출할 때는 `super` 키워드를 사용합니다. `super`를 통해 부모 클래스의 속성과 메서드를 참조할 수 있습니다.
+
+<br>
+
+`super(year, name, window)`는 `House` 클래스의 생성자를 호출하여 `year`, `name`, `window` 속성을 초기화합니다. 이렇게 하면 중복된 초기화 코드 없이 부모 클래스의 기능을 활용할 수 있습니다. <br>
+`Apartment` 클래스는 `House` 클래스를 상속받아 새로운 속성(`floor`, `windowMaker`)을 추가하였습니다.
+
+
+
+<br>
+
+**참고**
+[MDN Web Docs: Classes](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Classes)
