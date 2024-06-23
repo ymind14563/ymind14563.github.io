@@ -1,7 +1,7 @@
 ---
 
 layout: post
-title: "[새싹x코딩온] Express 활용"
+title: "[SeSACx코딩온] Express 활용"
 date: 2024-06-22
 categories: Node.js
 ---

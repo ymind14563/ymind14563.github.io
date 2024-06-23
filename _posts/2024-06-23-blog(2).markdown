@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "클래스와 상속"
+title: "[SeSACx코딩온] 클래스와 상속"
 date: 2024-06-23
 categories: JavaScript
 ---

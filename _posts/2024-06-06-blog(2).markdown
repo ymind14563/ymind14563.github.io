@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] JS DOM 요소 가져오기"
+title: "[SeSACx코딩온] JS DOM 요소 가져오기"
 date: 2024-06-06
 categories: JS_DOM
 ---

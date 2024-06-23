@@ -1,7 +1,6 @@
 ---
-
 layout: post
-title: "[새싹x코딩온] Static"
+title: "[SeSACx코딩온] Static"
 date: 2024-06-22
 categories: Node.js
 ---

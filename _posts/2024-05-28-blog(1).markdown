@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] CSS Flex"
+title: "[SeSACx코딩온] CSS Flex"
 date: 2024-05-28
 categories: CSS
 ---

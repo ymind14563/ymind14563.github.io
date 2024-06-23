@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] 서버 접속(PUTTY와 FileZilla)"
+title: "[SeSACx코딩온] 서버 접속(PUTTY와 FileZilla)"
 date: 2024-06-16
 categories: 서버접속
 ---

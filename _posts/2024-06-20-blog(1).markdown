@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] 모듈(Module) 종류"
+title: "[SeSACx코딩온] 모듈(Module) 종류"
 date: 2024-06-20
 categories: Node.js
 ---

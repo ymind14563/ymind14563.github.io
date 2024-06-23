@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] CSS 숨기는 속성 3가지"
+title: "[SeSACx코딩온] CSS 숨기는 속성 3가지"
 date: 2024-05-28
 categories: CSS
 ---

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "구조 분해 할당, 스프레드 연산자(...), 논리 연산자(&&, ||)"
+title: "[SeSACx코딩온] 구조 분해 할당, 스프레드 연산자(...), 논리 연산자(&&, ||)"
 date: 2024-06-23
 categories: JavaScript
 ---

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] GIT 기본 명령어"
+title: "[SeSACx코딩온] GIT 기본 명령어"
 date: 2024-05-13
 categories: GIT
 ---

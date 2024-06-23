@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] HTML Tag 종류와 사용법"
+title: "[SeSACx코딩온] HTML Tag 종류와 사용법"
 date: 2024-05-18
 categories: HTML
 ---

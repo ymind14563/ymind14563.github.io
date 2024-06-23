@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] 웹 폰트와 CSS 색상"
+title: "[SeSACx코딩온] 웹 폰트와 CSS 색상"
 date: 2024-05-25
 categories: CSS
 ---

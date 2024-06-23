@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] JS 연산자"
+title: "[SeSACx코딩온] JS 연산자"
 date: 2024-06-01
 categories: JS
 ---

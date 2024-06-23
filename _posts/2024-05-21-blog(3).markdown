@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] CSS 참조방식"
+title: "[SeSACx코딩온] CSS 참조방식"
 date: 2024-05-21
 categories: CSS
 ---

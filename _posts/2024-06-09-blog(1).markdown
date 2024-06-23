@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[새싹x코딩온] JS DOM 이벤트리스너"
+title: "[SeSACx코딩온] JS DOM 이벤트리스너"
 date: 2024-06-09
 categories: JS_DOM
 ---
