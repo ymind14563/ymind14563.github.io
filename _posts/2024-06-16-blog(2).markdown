@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] 서버 접속(PUTTY와 FileZilla)"
 date: 2024-06-16
-categories: 서버접속
+categories: 서버
 ---
 
 <br>

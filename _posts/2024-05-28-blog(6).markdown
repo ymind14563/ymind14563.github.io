@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] JS 변수 선언과 할당"
 date: 2024-05-28
-categories: JS
+categories: JavaScript
 ---
 
 # JS 변수 선언과 할당

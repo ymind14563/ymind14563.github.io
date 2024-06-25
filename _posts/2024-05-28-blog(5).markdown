@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] JS 참조 방식"
 date: 2024-05-28
-categories: JS
+categories: JavaScript
 ---
 
 # JS 참조 방식

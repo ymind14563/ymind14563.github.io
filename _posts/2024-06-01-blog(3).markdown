@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] JS 함수"
 date: 2024-06-01
-categories: JS
+categories: JavaScript
 ---
 
 # JS 함수

@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] JS 배열에서의 반복문"
 date: 2024-06-02
-categories: JS
+categories: JavaScript
 ---
 
 # JS 배열에서의 반복문
