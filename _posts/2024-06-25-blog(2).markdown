@@ -37,7 +37,14 @@ function pickDrink() {
             console.log('고민 끝');
             const product = '제로콜라';
             const price = 3000;
-            resolve({ product, price });
+            if (product) {
+                resolve({ product, price });
+            }
+
+            // reject 예시, 현재 코드에서는 product가 항상 있으므로 굳이 필요없음.
+            // else {
+            //     reject(new Error('제품을 찾을 수 없습니다.')); 
+            // }
         }, 3000);
     });
 }
@@ -52,6 +59,7 @@ pickDrink()
     .catch(function(err) {
         console.error(err);
     });
+
 ```
 
 ### 4. 분석
