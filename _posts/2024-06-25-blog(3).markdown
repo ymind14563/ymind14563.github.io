@@ -1,0 +1,86 @@
+---
+layout: post
+title: "[SeSACx코딩온] 비동기 처리: async/await"
+date: 2024-06-25
+categories: JavaScript
+---
+
+# 비동기 처리: async/await
+
+<hr>
+<br>
+
+## async/await
+
+### 1. 개념
+
+`async/await`는 Promise를 더 간결하고 동기적으로 보이게 작성할 수 있는 문법입니다. `async` 키워드는 함수 앞에 붙여 해당 함수가 Promise를 반환하도록 하고, `await` 키워드는 Promise가 해결될 때까지 기다립니다. `await` 키워드는 `async` 함수 내에서만 사용할 수 있습니다.
+
+### 2. 실행 순서
+
+- `async` 함수가 호출됩니다.
+- 함수 내에서 `await` 키워드로 비동기 작업을 기다립니다.
+- 비동기 작업이 완료되면 다음 코드가 실행됩니다.
+
+### 3. 예제 코드
+
+```js
+function goMart() {
+    console.log('마트에 가서 어떤 음료를 살지 고민한다..');
+}
+
+function pickDrink() {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            console.log('고민 끝');
+            const product = '제로콜라';
+            const price = 3000;
+            resolve({ product, price });
+        }, 3000);
+    });
+}
+
+function pay({ product, price }) {
+    console.log(`상품명: ${product} // 가격: ${price}`);
+}
+
+async function exec() {
+    goMart();
+    try {
+        const result = await pickDrink();
+        pay(result);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+exec();
+
+// 아래 코드처럼 더 직관적으로 작성도 가능함.
+// async function exec() {
+//     try {
+//         goMart();
+//         await pickDrink();
+//         pay();
+//     }
+//     catch(err) {
+//         console.error(err);
+//     }
+// }
+
+// exec();
+```
+
+### 4. 분석
+
+- (1) `exec` 함수는 `async` 키워드로 정의되어 있습니다. 이 함수는 Promise를 반환하는 비동기 함수가 됩니다.
+- (2) `exec` 함수가 호출되면 먼저 `goMart` 함수가 실행되어 "마트에 가서 어떤 음료를 살지 고민한다.."라는 메시지를 출력합니다.
+- (3) `await` 키워드가 `pickDrink` 함수 앞에 붙어 있으므로 이 함수가 반환하는 Promise가 해결될 때까지 기다립니다. 3초 후 "고민 끝"이라는 메시지가 출력되고, `product`와 `price`가 설정된 객체가 반환됩니다.
+- (4) `await` 뒤의 Promise가 해결되면 `pay` 함수가 호출되어 "상품명: 제로콜라 // 가격: 3000"이라는 메시지를 출력합니다.
+- (5) `try...catch` 블록을 사용하여 비동기 작업 중 발생할 수 있는 에러를 처리합니다. 이 예제에서는 `reject`가 호출되지 않으므로 `catch` 블록은 실행되지 않습니다.
+
+
+### 5. 장단점
+
+- **장점**: 가독성이 매우 좋고, 동기 코드처럼 작성할 수 있습니다. 비동기 작업의 흐름을 쉽게 이해할 수 있습니다.
+- **단점**: 최신 문법이므로 오래된 브라우저에서는 지원되지 않을 수 있습니다.
