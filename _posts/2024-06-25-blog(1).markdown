@@ -1,0 +1,61 @@
+---
+layout: post
+title: "[SeSACx코딩온] 비동기 처리: callback"
+date: 2024-06-25
+categories: JavaScript
+---
+
+# 비동기 처리: callback
+
+<hr>
+<br>
+
+## 콜백 함수 (Callback Function)
+
+### 1. 개념
+
+콜백 함수는 다른 함수의 인수로 전달되어 특정 작업이 완료된 후 실행되는 함수입니다. 비동기 작업이 끝난 후에 어떤 작업을 수행하도록 콜백 함수를 전달합니다. 콜백 함수는 비동기 작업이 완료되었을 때 호출되어 그 결과를 처리합니다.
+
+### 2. 실행 순서
+
+- 주 함수가 실행됩니다.
+- 콜백 함수를 인수로 받는 비동기 함수가 호출됩니다.
+- 비동기 함수는 작업이 완료되면 콜백 함수를 호출합니다.
+- 콜백 함수가 실행됩니다.
+
+### 3. 예제 코드
+
+```js
+function goMart() {
+    console.log('마트에 가서 어떤 음료를 살지 고민한다..');
+}
+
+function pickDrink(callback) {
+    setTimeout(function() {
+        console.log('고민 끝');
+        const product = '제로콜라';
+        const price = 3000;
+        callback(product, price);
+    }, 3000);
+}
+
+function pay(product, price) {
+    console.log(`상품명: ${product} // 가격: ${price}`);
+}
+
+goMart();
+pickDrink(pay);
+```
+
+### 4. 분석
+
+- (1) `goMart` 함수가 호출되어 "마트에 가서 어떤 음료를 살지 고민한다.."라는 메시지가 출력됩니다.
+- (2) `pickDrink` 함수가 호출됩니다. 이 함수는 3초 후에 내부의 `setTimeout` 콜백 함수를 실행합니다.
+- (3) `setTimeout` 콜백 함수에서는 "고민 끝"이라는 메시지를 출력하고, `product` 변수에 '제로콜라', `price` 변수에 3000을 할당합니다.
+- (4) `pickDrink` 함수의 콜백으로 전달된 `pay` 함수가 호출됩니다. 이때 `product`와 `price` 인자로 '제로콜라'와 3000이 전달됩니다.
+- (5)  `pay` 함수가 실행되어 "상품명: 제로콜라 // 가격: 3000"이라는 메시지가 출력됩니다.
+
+###  5. 장단점
+
+- **장점**: 간단하고 직관적입니다. 작은 비동기 작업에는 적합합니다.
+- **단점**: 콜백 지옥(Callback Hell)으로 불리는 중첩 구조가 생기기 쉬워 가독성이 떨어지고, 코드가 복잡해질 수 있습니다.
