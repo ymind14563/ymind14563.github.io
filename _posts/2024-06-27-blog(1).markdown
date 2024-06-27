@@ -38,7 +38,7 @@ app.set('views', './views'); // 뷰 파일들이 위치하는 폴더 설정
 #### (2) body-parser 미들웨어 설정
 
 ```js
-// body-parser 미들웨어 설정
+// body-parser 미들웨어 설정 (body 내용이 보일 수 있게 해줌)
 app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터 파싱
 app.use(express.json()); // JSON 데이터 파싱
 ```
