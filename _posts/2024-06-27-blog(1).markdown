@@ -1,0 +1,257 @@
+---
+layout: post
+title: "[SeSACx코딩온] body-parser와 폼 데이터 처리"
+date: 2024-06-27
+categories: Node.js
+---
+
+# Express에서 body-parser와 폼 데이터 처리하기
+
+<hr>
+<br>
+
+## 1. body-parser란?
+
+`body-parser`는 Express에서 요청(request) 객체의 본문(body) 데이터를 쉽게 추출할 수 있도록 도와주는 미들웨어입니다. 클라이언트가 폼을 제출하면 데이터는 서버로 전송되고, 이 데이터를 파싱하여 쉽게 접근할 수 있도록 해줍니다. 요청(request)과 응답(response)의 중간에서 작업합니다. express에서는 app.use()로 등록해야 합니다.
+
+
+### 1) 주요 기능
+
+- **URL-encoded 데이터 파싱**: HTML 폼에서 보내는 urlencoded로 파싱된 body를 요청합니다.   
+- **JSON 데이터 파싱**: JSON 형식의 요청한 body 객체가 파싱됩니다.
+
+<br>
+
+### 2) Express 설정
+
+#### (1) 기본 설정
+
+```js
+const express = require('express'); // Express 모듈 가져오기
+const app = express(); // Express 애플리케이션 객체 생성
+const PORT = 8888; // 서버가 실행될 포트 번호
+
+app.set('view engine', 'ejs'); // 뷰 엔진을 EJS로 설정
+app.set('views', './views'); // 뷰 파일들이 위치하는 폴더 설정
+```
+
+#### (2) body-parser 미들웨어 설정
+
+```js
+// body-parser 미들웨어 설정
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터 파싱
+app.use(express.json()); // JSON 데이터 파싱
+```
+<br>
+
+<br>
+
+## 2. 폼 태그와 속성
+
+### 1) form 요소
+
+`form` 요소는 사용자의 입력 값을 서버로 전송하는 역할을 합니다. `form` 태그 안에는 다양한 입력 요소들이 포함될 수 있습니다.
+
+
+
+- `action`: 데이터를 전송할 서버의 URL을 지정합니다.
+- `method`: 데이터를 전송하는 방법을 지정합니다. 일반적으로 `GET` 또는 `POST`를 사용합니다.
+
+```js
+<form action="/getForm" method="get">
+```
+
+<br>
+
+### 2) input 요소
+
+- `type`: 입력 필드의 유형을 지정합니다. 예: `text`, `password`, `submit`, `button` 등
+- `name`: 서버로 전송될 때 각 입력 필드를 식별하기 위한 이름을 지정합니다.
+- `placeholder`: 입력 필드에 표시되는 안내 문구를 지정합니다.
+- `autofocus`: 페이지 로드 시 자동으로 입력 필드에 포커스를 줍니다.
+- `disabled`: 입력 필드를 비활성화하여 편집할 수 없도록 합니다.
+- `readonly`: 입력 필드를 읽기 전용으로 설정하여 수정할 수 없도록 합니다.
+
+**참고** disabled와 readonly의 차이점
+
+- disabled : 비활성화되어 사용자가 입력하거나 수정할 수 없습니다. 폼이 제출될 때 이 필드의 값은 전송되지 않습니다.
+- readonly : 읽기 전용으로 설정되어 사용자가 수정할 수 없습니다. 하지만 폼이 제출될 때 이 필드의 값은 전송됩니다.
+
+```html
+<!-- 다양한 input 요소 예제 -->
+<input type="text"> <br>
+<input type="text" disabled> <br>
+<input type="text" autofocus> <br> 
+<input type="text" readonly value="안녕"> <br>
+```
+<br>
+
+### 3) label 요소
+
+`label` 요소는 `for` 속성을 사용하여 `input` 요소의 `id`와 연결할 수 있습니다.
+
+```html
+<!-- label과 input 요소의 연결 예제 -->
+<label for="username">사용자 이름: </label>
+<input type="text" id="username" name="username">
+```
+<br>
+
+### 4) fieldset과 legend 요소
+
+`fieldset` 요소는 관련된 폼 요소들을 그룹화하는 데 사용됩니다. `legend` 요소는 그룹화된 폼 요소들의 제목입니다.
+
+```html
+<!-- fieldset과 legend 요소 예제 -->
+<fieldset>
+    <legend>개인 정보</legend>
+    <label for="name">이름: </label>
+    <input type="text" id="name" name="name"><br>
+    <label for="age">나이: </label>
+    <input type="text" id="age" name="age">
+</fieldset>
+```
+<br>
+
+### 5) button 요소와 input 요소의 차이점
+
+폼에서 사용하는 버튼에는 `input` 요소와 `button` 요소가 있습니다.
+- `input[type="button"]`과 `button[type="button"]`: 둘 다 클릭 가능한 단순 버튼을 생성하지만, `button` 요소는 태그 내에 텍스트나 HTML을 포함할 수 있습니다.
+- `input[type="submit"]`과 `button[type="submit"]`: 둘 다 폼 제출 버튼을 생성하지만, `button` 요소는 태그 내에 텍스트나 HTML을 포함할 수 있습니다.
+
+```html
+<!-- value 속성으로 값 지정 -->
+<input type="button" value="단순 버튼 1">
+<!-- 태그 내 택스트 포함 가능 -->
+<button type="button">단순 버튼 2</button>  
+<br>
+<input type="submit" value="제출 버튼 1">
+<button type="submit">제출 버튼 2</button>
+```
+- `type="button"`: 단순 버튼으로, 폼 제출과는 관련이 없습니다.
+- `type="submit"`: 폼을 제출하는 버튼입니다.
+
+<br>
+
+<br>
+
+## 3. 폼에서 name 속성의 중요성
+
+`name` 속성은 폼 요소에서 매우 중요합니다. 서버로 전송될 때 각 입력 필드를 식별하기 위한 키(key) 역할을 하며, 서버는 `name` 속성을 통해 어떤 데이터가 어떤 입력 필드에서 왔는지 알 수 있습니다. `name` 속성이 없으면 서버는 해당 데이터를 처리할 수 없습니다.
+
+예제에서, `name="id"`와 `name="pw"`는 서버로 전송될 때 키로 사용됩니다. 서버는 이 키를 통해 어떤 데이터가 전달되었는지 식별할 수 있습니다.
+
+```html
+<form action="/getForm" method="get">
+
+    <!-- 폼 요소에서는 name이 아주 중요합니다. -->
+    <input type="text" name="id" placeholder="아이디">
+    <input type="password" name="pw" placeholder="패스워드">
+    <button type="submit">GET 방식으로 폼 제출</button>
+</form>
+```
+
+<br>
+
+## 4. 폼 데이터 처리
+
+### (1) GET 요청으로 폼 데이터 처리
+
+GET 요청은 URL에 데이터를 포함시켜 전송합니다. 폼 데이터를 쿼리 문자열로 전달하므로 보안에 취약할 수 있습니다. 예를 들어, URL이 `http://example.com/getForm?id=example&pw=1234`처럼 됩니다.
+
+```html
+<!-- GET 요청으로 폼 제출 -->
+<h2>GET 방식으로 요청하는 폼</h2>
+<form action="/getForm" method="get">
+    <input type="text" name="id" placeholder="아이디">
+    <input type="password" name="pw" placeholder="패스워드">
+    <button type="submit">GET 방식으로 폼 제출</button>
+</form>
+```
+<br>
+
+### (2) POST 요청으로 폼 데이터 처리
+
+POST 요청은 폼 데이터를 요청 본문(body)에 포함시켜 전송합니다. 이는 URL에 데이터가 노출되지 않아 GET 요청보다 보안이 더 좋습니다. 예를 들어, URL이 `http://example.com/postForm`이고, 데이터는 본문에 포함됩니다.
+
+```html
+<!-- POST 요청으로 폼 제출 -->
+<h2>POST 방식으로 요청하는 폼</h2>
+<form action="/postForm" method="post">
+    <input type="text" name="id" placeholder="아이디">
+    <input type="password" name="pw" placeholder="패스워드">
+    <button type="submit">POST 방식으로 폼 제출</button>
+</form>
+```
+<br>
+
+### (3) GET 요청과 POST 요청의 차이점
+
+- GET 요청 : 데이터를 URL의 쿼리 문자열로 전송합니다. 보안에 취약하며, 데이터 크기에 제한이 있습니다.
+- POST 요청 : 데이터를 요청 본문(body)에 전송합니다. 보다 안전하고, 데이터 크기 제한이 상대적으로 적습니다.
+
+<br>
+<br>
+
+## 5. 라우팅 설정 및 데이터 처리
+
+### (1) GET 요청 처리
+
+GET 요청으로 전달된 폼 데이터를 처리하여 결과를 렌더링합니다.
+
+```js
+app.get('/getForm', (req, res) => {
+    console.log(req.query); // { id: 'example', pw: '1234' } // query 사용
+    res.render('result', { title: 'GET 요청 결과', userInfo: req.query });
+});
+```
+<br>
+
+### (2) POST 요청 처리
+
+POST 요청으로 전달된 폼 데이터를 처리하여 결과를 렌더링합니다.
+
+```js
+app.post('/postForm', (req, res) => {
+    console.log(req.body); // { id: 'example', pw: '1234' } // body 사용
+    res.render('result', { title: 'POST 요청 결과', userInfo: req.body });
+});
+```
+<br>
+
+### (3) req.query와 req.body의 차이점
+
+- req.query : URL의 쿼리 문자열에 포함된 데이터를 가져옵니다. 주로 GET 요청에서 사용됩니다.
+- req.body : 요청 본문(body)에 포함된 데이터를 가져옵니다. 주로 POST 요청에서 사용됩니다.
+
+<br>
+<br>
+
+## 6. 결과 페이지
+
+사용자에게 폼 데이터를 출력합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        span {
+          color: blue;
+          font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <div><span><%= userInfo.id %></span>님 환영합니다!</div>
+    <div>비밀번호는 <span><%= userInfo.pw %></span>이군요!!</div>
+    <a href="/">홈으로 이동하기</a>
+</body>
+</html>
+```
+
+<br>
