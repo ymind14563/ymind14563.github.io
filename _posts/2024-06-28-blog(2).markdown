@@ -1,0 +1,267 @@
+---
+layout: post
+title: "[SeSACx코딩온] AJAX"
+date: 2024-06-28
+categories: Node.js
+---
+
+# AJAX
+
+<hr>
+<br>
+
+## 1. AJAX란?
+
+AJAX(Asynchronous JavaScript and XML)는 웹 페이지를 새로 고침하지 않고도 서버와 비동기적으로 데이터를 주고받을 수 있게 만들어 줍니다.
+
+<br>
+
+## 2. 동적 폼 작성 (EJS 템플릿 구성)
+
+AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX 동적 폼</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <h1><%= title %></h1>
+
+    <form name="register">
+        <label for="name">이름</label>
+        <input type="text" name="name" id="name">
+        <br>
+
+        <span>성별</span>
+        <input type="radio" name="gender" value="남자" id="male">
+        <label for="male">남자</label>
+        <input type="radio" name="gender" value="여자" id="female">
+        <label for="female">여자</label>
+        <br>
+
+        <button type="button" onclick="ajaxGet();">AJAX GET 요청</button>
+        <button type="button" onclick="ajaxPost();">AJAX POST 요청</button>
+    </form>
+
+    <div class="result"></div>
+</body>
+</html>
+```
+
+- `<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>`
+- jQuery 라이브러리를 사용하여 AJAX 요청을 처리합니다. (jQuery CDN minified)
+- `<%= title %>`: EJS 템플릿 문법을 사용하여 동적으로 데이터를 삽입합니다. 서버에서 `title` 변수를 전달하면 해당 위치에 값이 출력됩니다.
+- 버튼을 클릭하면 `ajaxGet` 또는 `ajaxPost` 함수가 호출됩니다.
+- 결과는 `.result` 클래스의 `div`에 표시되게 됩니다.
+
+<br>
+
+## 3. AJAX 요청
+
+AJAX 요청은 비동기적으로 서버와 통신합니다. GET 요청과 POST 요청을 처리하는 함수를 작성합니다.
+
+### 1) GET 요청 처리
+
+```js
+const resultBox = document.querySelector(`.result`);
+
+function ajaxGet() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+    $.ajax({
+        type: 'GET',
+        url: '/ajax',
+        data,
+        success: function(response) {
+            resultBox.textContent = `GET 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
+            resultBox.style.color = 'blue';
+        },
+        error: function(error) {
+            resultBox.textContent = `GET 요청 실패: ${error.statusText}`;
+            resultBox.style.color = 'red';
+        }
+    });
+}
+```
+
+- `document.forms['register']`: 폼 요소를 선택합니다.
+- `form.name.value` 및 `form.gender.value`: 폼의 입력 값을 추출합니다.
+- `$.ajax` 메서드를 사용하여 GET 요청을 서버에 보냅니다.
+- `type: 'GET'`: 요청 유형을 지정합니다.
+- `url: '/ajax'`: 요청할 서버의 URL을 지정합니다.
+- `data`: 서버로 보낼 데이터를 객체로 설정합니다.
+
+<br>
+
+- `success`: 요청이 성공했을 때 실행할 콜백 함수를 지정합니다.
+- `error`: 요청이 실패했을 때 실행할 콜백 함수를 지정합니다.
+
+<br>
+
+### 2) POST 요청 처리
+
+```js
+function ajaxPost() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+    $.ajax({
+        type: 'POST',
+        url: '/ajax',
+        data,
+        success: function(response) {
+            resultBox.textContent = `POST 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
+            resultBox.style.color = 'blue';
+        },
+        error: function(error) {
+            resultBox.textContent = `POST 요청 실패: ${error.statusText}`;
+            resultBox.style.color = 'red';
+        }
+    });
+}
+```
+
+- `type: 'POST'`: 요청 유형을 POST로 지정합니다.
+- 나머지는 `ajaxGet()` 의 설명과 같습니다.
+
+<br>
+<br>
+
+## 4. 서버에서 AJAX 요청 처리하기
+
+서버는 클라이언트로부터 GET 및 POST 요청을 받아 해당 데이터를 응답합니다.
+
+### 1) GET 요청 처리
+
+```js
+app.get('/ajax', (req, res) => {
+    res.send(req.query);
+});
+```
+
+- `req.query`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 GET 요청으로 보낸 데이터는 URL 쿼리 매개변수로 전달됩니다.
+- query를 사용하기 때문에 브라우저에서 URL 쿼리까지 직접 입력해도 값을 확인 가능합니다.
+- ex) http://localhost:8080/ajax?name=이름&gender=남자
+
+
+### 2) POST 요청 처리
+
+```js
+app.post('/ajax', (req, res) => {
+    res.send(req.body);
+});
+```
+
+- `req.body`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 POST 요청으로 보낸 데이터는 요청 본문에 포함됩니다.
+- body를 사용하기 때문에 query처럼 직접 확인할 수 없고 body-parser를 사용하여 값을 가져올 수 있습니다.
+
+<br>
+<br>
+
+## 5. 보안 및 에러 핸들링
+
+### 1) CSRF 방지
+
+#### (1) CSRF 공격이란?
+- CSRF(Cross-Site Request Forgery) 공격은 사용자가 특정 사이트에 로그인한 상태에서 악의적인 사이트에 접속하면, 그 사이트에서 사용자의 권한을 이용해 요청을 보내는 방식입니다.
+
+#### (2) CSRF 방지를 위한 CSRF 토큰 사용
+- CSRF 공격을 방지하기 위해 CSRF 토큰을 사용합니다. CSRF 토큰은 서버가 생성하여 클라이언트에 전달하는 고유한 값입니다. 클라이언트는 요청 시 이 토큰을 함께 전송하며, 서버는 이 토큰을 검증하여 요청의 유효성을 확인합니다.
+
+```js
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+app.use(csrf({ cookie: true }));
+
+app.get('/', (req, res) => {
+    res.render('dynamic', { title: '동적 폼을 배워보자', csrfToken: req.csrfToken() });
+});
+```
+
+- `cookieParser`를 사용하여 쿠키를 파싱합니다.
+- `csrf` 미들웨어를 사용하여 CSRF 토큰을 생성하고 쿠키에 저장합니다.
+- EJS 템플릿에서 CSRF 토큰을 폼에 포함시켜 서버로 전송합니다. (`<%= csrfToken %>`)
+
+```html
+<form name="register">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <!-- 나머지 폼 요소들 -->
+</form>
+```
+
+<br>
+
+### 2) 에러 핸들링
+
+AJAX 요청에서 에러가 발생했을 때 실행할 콜백 함수를 지정합니다.
+
+```js
+function ajaxGet() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+    $.ajax({
+        type: 'GET',
+        url: '/ajax',
+        data,
+        success: function(response) {
+            resultBox.textContent = `GET 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
+            resultBox.style.color = 'blue';
+        },
+        error: function(error) {
+            resultBox.textContent = `GET 요청 실패: ${error.statusText}`;
+            resultBox.style.color = 'red';
+        }
+    });
+}
+
+function ajaxPost() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+    $.ajax({
+        type: 'POST',
+        url: '/ajax',
+        data,
+        success: function(response) {
+            resultBox.textContent = `POST 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
+            resultBox.style.color = 'blue';
+        },
+        error: function(error) {
+            resultBox.textContent = `POST 요청 실패: ${error.statusText}`;
+            resultBox.style.color = 'red';
+        }
+    });
+}
+```
+
+- `success` 콜백 함수: 요청이 성공했을 때 실행됩니다. 성공 메시지와 데이터를 사용자에게 표시합니다.
+- `error` 콜백 함수: 요청이 실패했을 때 실행됩니다. 실패 메시지와 에러 상태를 사용자에게 표시합니다.
+
+<br>
+
+## 6. 전체 동작 과정 요약
+
+1. Express 서버를 설정하고, `ejs`를 뷰 엔진으로 사용하며, `body-parser`를 설정하여 요청 본문을 파싱할 수 있도록 합니다.
+2. EJS 템플릿을 작성하여 동적 폼을 만듭니다. 예시에서는 이름과 성별을 입력할 수 있는 필드와 AJAX 요청을 보낼 수 있는 버튼이 있습니다.
+3. JS 코드에서 `$.ajax` 메서드를 사용하여 GET 및 POST 요청을 서버에 보냅니다. 이 요청에는 폼의 입력 값이 포함됩니다.
+4. 서버는 클라이언트로부터 GET 및 POST 요청을 받아 해당 데이터를 응답합니다. 응답된 데이터는 클라이언트에서 처리되어 결과가 화면에 표시됩니다.
+5. CSRF 방지를 위해 `csurf` 미들웨어를 사용하고, AJAX 요청에서 발생할 수 있는 에러를 처리합니다.
