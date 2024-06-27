@@ -18,6 +18,13 @@ AJAX(Asynchronous JavaScript and XML)는 웹 페이지를 새로 고침하지 �
 
 ## 2. 동적 폼 작성 (EJS 템플릿 구성)
 
+### - AJAX CDN 사용
+
+> `<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>` <br>
+> jQuery 라이브러리를 사용하여 AJAX 요청을 처리합니다. (jQuery CDN minified)
+
+<br>
+
 AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니다.
 
 ```html
@@ -27,6 +34,8 @@ AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니�
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AJAX 동적 폼</title>
+
+    <!-- jQuery CDN minified (ajax 간편하게 사용하고자 불러옴) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
@@ -53,8 +62,7 @@ AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니�
 </html>
 ```
 
-- `<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>`
-- jQuery 라이브러리를 사용하여 AJAX 요청을 처리합니다. (jQuery CDN minified)
+
 - `<%= title %>`: EJS 템플릿 문법을 사용하여 동적으로 데이터를 삽입합니다. 서버에서 `title` 변수를 전달하면 해당 위치에 값이 출력됩니다.
 - 버튼을 클릭하면 `ajaxGet` 또는 `ajaxPost` 함수가 호출됩니다.
 - 결과는 `.result` 클래스의 `div`에 표시되게 됩니다.
