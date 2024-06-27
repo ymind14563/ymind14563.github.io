@@ -1,0 +1,161 @@
+---
+layout: post
+title: "[SeSACx코딩온] 직렬화와 역직렬화"
+date: 2024-06-28
+categories: JavaScript
+---
+
+# 직렬화와 역직렬화
+
+<hr>
+<br>
+
+## 1. 직렬화와 역직렬화
+
+### (1) 직렬화(Serialization)
+
+직렬화는 객체나 데이터를 통신에 적합한 형식으로 변환하는 과정입니다. JavaScript 객체를 JSON 형식의 문자열로 변환하는 것이 대표적인 예입니다. 이를 통해 데이터를 쉽게 전송하거나 저장할 수 있습니다.
+
+<br>
+
+### (2) 역직렬화(Deserialization)
+
+역직렬화는 직렬화된 데이터를 다시 원래의 객체나 데이터 구조로 변환하는 과정입니다. 서버로부터 받은 JSON 데이터를 JavaScript 객체로 변환하여 사용할 수 있게 합니다.
+
+<br>
+<br>
+
+## 2. 직렬화와 역직렬화 처리
+
+<br>
+
+### (1) 객체와 JSON 예제
+
+```js
+// Obj
+const car = {
+    model: "IONIQ 5",
+    company: "HYUNDAI",
+    price: 50000000,
+    year: 2023,
+    isElectricCar: true,
+    options: ["side mirror", "smart sensor", "built-in cam"]
+};
+
+// JSON
+const carJson = `{
+    "model": "IONIQ 5",
+    "company": "HYUNDAI",
+    "price": 50000000,
+    "year": 2023,
+    "isElectricCar": true,
+    "options": ["side mirror", "smart sensor", "built-in cam"]
+}`;
+
+```
+<br>
+
+### (2) 직렬화 ( JSON.stringify() )
+
+직렬화는 JavaScript 객체를 JSON 형식의 문자열로 변환하는 과정입니다. `JSON.stringify()` 메서드를 사용합니다.
+
+```js
+const car = {
+    "model": "IONIQ 5",
+    "company": "HYUNDAI",
+    "price": 50000000,
+    "year": 2023,
+    "isElectricCar": true,
+    "options": ["side mirror", "smart sensor", "built-in cam"]
+};
+
+console.log(car); // object
+const carJson = JSON.stringify(car);
+console.log(carJson, typeof carJson); // JSON 형식의 문자열, string
+```
+
+- 직렬화된 JSON 문자열은 객체가 아니므로 점(dot) 표기법이나 대괄호 표기법으로 속성에 접근할 수 없습니다.
+
+```js
+console.log(carJsonString.model); // undefined
+console.log(carJsonString["price"]); // undefined
+```
+
+- 그러나 직렬화된 JSON 문자열은 일반 문자열이므로, JS에 내장된 문자열 메서드를 사용할 수 있습니다.
+
+```js
+console.log(carJsonString.split(""));
+console.log(carJsonString.toUpperCase());
+```
+<br>
+
+### (3) 역직렬화 ( JSON.parse() )
+
+- 역직렬화는 JSON 형식의 문자열을 JavaScript 객체로 변환하는 과정입니다. `JSON.parse()` 메서드를 사용합니다.
+
+```js
+const carJson = `{
+    "model": "IONIQ 5",
+    "company": "HYUNDAI",
+    "price": 50000000,
+    "year": 2023,
+    "isElectricCar": true,
+    "options": ["side mirror", "smart sensor", "built-in cam"]
+}`;
+
+const carObj = JSON.parse(carJson);
+console.log(carObj); // object
+```
+
+- 역직렬화된 JavaScript 객체는 원래 객체처럼 점(dot) 표기법이나 대괄호 표기법을 사용하여 속성에 접근할 수 있습니다.
+
+```js
+console.log(carObj.model); // "IONIQ 5"
+console.log(carObj.price); // 50000000
+console.log(carObj.hello); // undefined (존재하지 않는 속성)
+```
+
+<br>
+<br>
+
+
+## 3. 객체 비교 (참고)
+
+두 객체를 비교할 때 `JSON.stringify`를 사용하는 이유는 JavaScript에서 객체를 직접 비교할 때는 객체의 참조를 비교하기 때문입니다. 즉, 두 객체가 같은 데이터를 갖고 있더라도 다른 메모리 위치에 저장되어 있다면 동일하지 않다고 판단합니다. 이를 해결하기 위해 객체를 문자열로 변환하여 비교하는 것입니다.
+
+```js
+const carJson = `{
+    "model": "IONIQ 5",
+    "company": "HYUNDAI",
+    "price": 50000000,
+    "year": 2023,
+    "isElectricCar": true,
+    "options": ["side mirror", "smart sensor", "built-in cam"]
+}`;
+
+// JSON 문자열을 파싱하여 객체 생성
+const carObject = JSON.parse(carJson);
+
+// 직접 객체 리터럴을 사용하여 객체 생성
+const carObjectExample = {
+    model: "IONIQ 5",
+    company: "HYUNDAI",
+    price: 50000000,
+    year: 2023,
+    isElectricCar: true,
+    options: ["side mirror", "smart sensor", "built-in cam"]
+};
+
+// 두 객체를 비교
+console.log(carObject === carObjectExample); // false : 객체는 메모리 참조를 비교하기 때문에 false를 반환합니다.
+
+// JSON.stringify로 문자열로 변환하여 비교
+console.log(JSON.stringify(carObject) === JSON.stringify(carObjectExample)); // true
+```
+
+### (1) **직접 비교 (`===`)**:
+   - `carObject === carObjectExample`는 `false`를 반환합니다. 이는 두 객체가 서로 다른 메모리 위치에 저장되어 있는 다른 객체이기 때문입니다.
+
+### (2) **`JSON.stringify`를 사용한 비교**:
+   - `JSON.stringify(carObject)`와 `JSON.stringify(carObjectExample)`는 각각의 객체를 JSON 문자열로 변환합니다.
+   - 이 문자열들은 동일한 형식을 가지므로, 이들을 비교하면 `true`를 반환합니다. 즉, 두 객체의 내용이 동일하다는 것을 의미합니다.
