@@ -1,0 +1,284 @@
+---
+layout: post
+title: "[SeSACx코딩온] Axios"
+date: 2024-06-29
+categories: Node.js
+---
+
+# Axios
+
+<hr>
+<br>
+
+## 1. Axios 란?
+
+Axios는 브라우저와 Node.js에서 사용할 수 있는 Promise 기반의 HTTP 클라이언트입니다. 비동기적으로 데이터를 주고받을 때 주로 사용됩니다.
+
+<br>
+
+## 2. 동적 폼 작성 (EJS 템플릿 구성)
+
+### - Axios CDN 사용
+
+> <b>`<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>` </b>
+
+<br>
+
+AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axios 동적 폼</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1><%= title %></h1>
+
+    <form name="register">
+        <label for="name">이름</label>
+        <input type="text" name="name" id="name" required>
+        <br>
+
+        <span>성별</span>
+        <input type="radio" name="gender" value="남자" id="male" required>
+        <label for="male">남자</label>
+        <input type="radio" name="gender" value="여자" id="female">
+        <label for="female">여자</label>
+        <br>
+
+        <button type="button" onclick="axiosGet();">Axios GET 요청</button>
+        <button type="button" onclick="axiosPost();">Axios POST 요청</button>
+    </form>
+
+    <div class="result"></div>
+</body>
+</html>
+```
+
+- `<%= title %>`: EJS 템플릿 문법을 사용하여 동적으로 데이터를 삽입합니다. 서버에서 `title` 변수를 전달하면 해당 위치에 값이 출력됩니다.
+- 버튼을 클릭하면 `axiosGet` 또는 `axiosPost` 함수가 호출됩니다.
+- 결과는 `.result` 클래스의 `div`에 표시되게 됩니다.
+
+<br>
+
+## 3. Axios 요청
+
+Axios 요청은 비동기적으로 서버와 통신합니다. GET 요청과 POST 요청을 처리하는 함수를 작성합니다.
+
+### 1) GET 요청 처리
+
+```js
+// 결과를 표시할 HTML 요소 선택
+const resultBox = document.querySelector(`.result`);
+
+function axiosGet() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
+    const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 가져와서 data 객체 만듦
+    const data = {
+        name: form.name.value,    // 폼의 name 필드 값 가져옴
+        gender: form.gender.value // 폼의 gender 필드 값 가져옴
+    };
+
+    // axios 라이브러리를 사용하여 GET 요청 보냄
+    axios({
+        method: "GET",   // HTTP 메서드로 GET 사용
+        url: `/axios`,   // 요청 보낼 URL
+        params: data,    // 요청의 쿼리 파라미터로 보낼 데이터 설정
+    }).then(function (res) {
+        // 요청 성공 시 실행됨
+        console.log(res); // 응답 객체 콘솔에 출력
+        const { name, gender } = res.data; // 응답 데이터에서 name과 gender 추출
+        resultBox.textContent = `GET /axios 요청에 대한 응답 완료! ${name} 님은 ${gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+        resultBox.style.color = `green`; // resultBox 요소의 텍스트 색상 녹색으로 변경
+    }).catch(err => {
+        // 요청 실패 시 실행됨
+        console.error(`Error`, err); // 에러 콘솔에 출력
+        resultBox.textContent = `에러 발생.. 다시 시도해주세요..`; // 에러 메시지 표시
+    });
+}
+
+```
+
+- `document.forms['register']`: 폼 요소를 선택합니다.
+- `form.name.value` 및 `form.gender.value`: 폼의 입력 값을 추출합니다.
+- `axios` 메서드를 사용하여 GET 요청을 서버에 보냅니다.
+- `method: 'GET'`: 요청 유형을 지정합니다.
+- `url: '/axios'`: 요청할 서버의 URL을 지정합니다.
+- `params`: 서버로 보낼 데이터를 객체로 설정합니다.
+
+<br>
+
+- `then`: 요청이 성공했을 때 실행할 콜백 함수를 지정합니다.
+- `catch`: 요청이 실패했을 때 실행할 콜백 함수를 지정합니다.
+
+### 2) POST 요청 처리
+
+```js
+function axiosPost() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
+    const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 가져와서 data 객체 만듦
+    const data = {
+        name: form.name.value,    // 폼의 name 필드 값 가져옴
+        gender: form.gender.value // 폼의 gender 필드 값 가져옴
+    };
+
+    // axios 라이브러리를 사용하여 POST 요청 보냄
+    axios({
+        method: "POST",  // HTTP 메서드로 POST 사용
+        url: "/axios",   // 요청 보낼 URL
+        data,            // 요청의 본문에 보낼 데이터 설정 (get과 다른 부분)
+    }).then(function (res) {
+        // 요청 성공 시 실행됨
+        console.log(res); // 응답 객체 콘솔에 출력
+        const { name, gender } = res.data; // 응답 데이터에서 name과 gender 추출
+        resultBox.textContent = `POST /axios 요청에 대한 응답 완료! ${name} 님은 ${gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+        resultBox.style.color = `gold`; // resultBox 요소의 텍스트 색상 금색으로 변경
+    }).catch(err => {
+        // 요청 실패 시 실행됨
+        console.error(`Error`, err); // 에러 콘솔에 출력
+        resultBox.textContent = `에러 발생.. 다시 시도해주세요..`; // 에러 메시지 표시
+    });
+}
+```
+
+- `method: 'POST'`: 요청 유형을 POST로 지정합니다.
+- `axiosGet()` 에서는 `params`을 통해 서버로 보낼 데이터를 객체로 설정했지만, 
+- `axiosPost()`에서는 data 객체를 바로 설정하였습니다.
+
+- 나머지는 `axiosGet()`의 설명과 같습니다.
+
+<br>
+
+## 4. 서버에서 Axios 요청 처리하기
+
+서버는 클라이언트로부터 GET 및 POST 요청을 받아 해당 데이터를 응답합니다.
+
+### 1) GET 요청 처리
+
+```js
+// GET 요청에 대한 라우트 처리
+app.get('/axios', (req, res) => {
+    // 요청 쿼리 파라미터를 콘솔에 출력
+    console.log(req.query);
+    // 요청 쿼리 파라미터를 응답으로 보냄
+    res.send(req.query);
+});
+
+```
+
+- `req.query`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 GET 요청으로 보낸 데이터는 URL 쿼리 매개변수로 전달됩니다.
+
+### 2) POST 요청 처리
+
+```js
+// POST 요청에 대한 라우트 처리
+app.post('/axios', (req, res) => {
+    // 요청 본문 데이터를 콘솔에 출력
+    console.log(req.body);
+    // 요청 본문 데이터를 응답으로 보냄
+    res.send(req.body);
+});
+
+```
+
+- `req.body`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 POST 요청으로 보낸 데이터는 요청 본문에 포함됩니다.
+
+<br>
+
+## 5. 보안 및 에러 핸들링
+
+### 1) CSRF 방지
+
+#### (1) CSRF 공격이란?
+
+CSRF(Cross-Site Request Forgery) 공격은 사용자가 특정 사이트에 로그인한 상태에서 악의적인 사이트에 접속하면, 그 사이트에서 사용자의 권한을 이용해 요청을 보내는 방식입니다.
+
+#### (2) CSRF 방지를 위한 CSRF 토큰 사용
+
+CSRF 공격을 방지하기 위해 CSRF 토큰을 사용합니다. CSRF 토큰은 서버가 생성하여 클라이언트에 전달하는 고유한 값입니다. 클라이언트는 요청 시 이 토큰을 함께 전송하며, 서버는 이 토큰을 검증하여 요청의 유효성을 확인합니다.
+
+```js
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+app.use(csrf({ cookie: true }));
+
+app.get('/', (req, res) => {
+    res.render('dynamic', { title: '동적 폼을 배워보자', csrfToken: req.csrfToken() });
+});
+```
+
+- `cookieParser`를 사용하여 쿠키를 파싱합니다.
+- `csrf` 미들웨어를 사용하여 CSRF 토큰을 생성하고 쿠키에 저장합니다.
+- EJS 템플릿에서 CSRF 토큰을 폼에 포함시켜 서버로 전송합니다.
+
+```html
+<form name="register">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <!-- 나머지 폼 요소들 -->
+</form>
+```
+
+### 2) 에러 핸들링
+
+Axios 요청에서 에러가 발생했을 때 실행할 콜백 함수를 지정합니다.
+
+```js
+function axiosGet() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+
+    axios({
+        method: "GET",
+        url: `/axios`,
+        params: data,
+    }).then(function (res) {
+        console.log(res);
+        const { name, gender } = res.data;
+        resultBox.textContent = `GET /axios 요청에 대한 응답 완료! ${name} 님은 ${gender} 입니다.`;
+        resultBox.style.color = `green`;
+    }).catch(err => {
+        console.error(`Error`, err);
+        resultBox.textContent = `에러 발생.. 다시 시도해주세요..`;
+    });
+}
+
+function axiosPost() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+
+    axios({
+        method: "POST",
+        url: "/axios",
+        data,
+    }).then(function (res) {
+        console.log(res);
+        const { name, gender } = res.data;
+        resultBox.textContent = `POST /axios 요청에 대한 응답 완료! ${name} 님은 ${gender} 입니다.`;
+        resultBox.style.color = `gold`;
+    }).catch(err => {
+        console.error(`Error`, err);
+        resultBox.textContent = `에러 발생.. 다시 시도해주세요..`;
+    });
+}
+```
+
+- `then`: 요청이 성공했을 때 실행됩니다. 성공 메시지와 데이터를 사용자에게 표시합니다.
+- `catch`: 요청이 실패했을 때 실행됩니다. 실패 메시지와 에러 상태를 사용자에게 표시합니다.
+
+<br>
