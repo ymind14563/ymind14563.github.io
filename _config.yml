@@ -56,3 +56,6 @@ plainwhite:
 plugins:
   - jekyll-seo-tag
 #  - jekyll-feed
+
+future: true
+
