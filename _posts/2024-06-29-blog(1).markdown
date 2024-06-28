@@ -1,0 +1,295 @@
+---
+layout: post
+title: "[SeSACx코딩온] Fetch"
+date: 2024-06-29
+categories: Node.js
+---
+
+# Fetch API
+
+<hr>
+<br>
+
+## 1. Fetch API란?
+
+Fetch API는 네트워크 요청을 처리하기 위해 브라우저에서 제공하는 표준 API입니다. `XMLHttpRequest`의 대체로, Promise 기반으로 작동하여 비동기적으로 데이터를 주고받을 수 있습니다.
+
+<br>
+
+## 2. 동적 폼 작성 (EJS 템플릿 구성)
+
+### - Fetch API CDN 사용 여부
+
+> <b>Fetch API는 브라우저 내장 API이기 때문에 별도의 CDN을 사용하지 않습니다.</b>
+
+> jQuery나 Axios와는 달리, Fetch API를 사용하기 위해 추가적인 라이브러리를 로드할 필요가 없습니다. <br>모든 최신 브라우저에서  기본적으로 지원합니다. 
+
+<br>
+
+Fetch API를 사용하여 AJAX 요청을 보내기 위한 동적 폼을 EJS 템플릿으로 작성합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API 동적 폼</title>
+</head>
+<body>
+    <h1><%= title %></h1>
+
+    <form name="register">
+        <label for="name">이름</label>
+        <input type="text" name="name" id="name" required>
+        <br>
+
+        <span>성별</span>
+        <input type="radio" name="gender" value="남자" id="male" required>
+        <label for="male">남자</label>
+        <input type="radio" name="gender" value="여자" id="female">
+        <label for="female">여자</label>
+        <br>
+
+        <button type="button" onclick="fetchGet();">Fetch GET 요청</button>
+        <button type="button" onclick="fetchPost();">Fetch POST 요청</button>
+    </form>
+
+    <div class="result"></div>
+</body>
+</html>
+```
+
+- `<%= title %>`: EJS 템플릿 문법을 사용하여 동적으로 데이터를 삽입합니다. 서버에서 `title` 변수를 전달하면 해당 위치에 값이 출력됩니다.
+- 버튼을 클릭하면 `fetchGet` 또는 `fetchPost` 함수가 호출됩니다.
+- 결과는 `.result` 클래스의 `div`에 표시되게 됩니다.
+
+<br>
+
+## 3. Fetch API 요청
+
+Fetch API 요청은 비동기적으로 서버와 통신합니다. GET 요청과 POST 요청을 처리하는 함수를 작성합니다.
+
+
+### 1) GET 요청 처리
+
+```js
+// 결과를 표시할 HTML 요소 선택
+const resultBox = document.querySelector(`.result`);
+
+function fetchGet() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
+    const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 쿼리 문자열로 만듦
+    const urlQuery = `?name=${form.name.value}&gender=${form.gender.value}`;
+
+    // fetch 메서드를 사용하여 GET 요청 보냄
+    fetch(`/fetch${urlQuery}`)
+        // 서버로부터의 응답을 받음
+        .then((res) => {
+            // 응답 객체를 JSON으로 변환
+            return res.json();
+        })
+        .then((data) => {
+            // 변환된 JSON 데이터를 처리
+            console.log(data); // 응답 데이터 콘솔에 출력
+            resultBox.textContent = `GET /fetch 요청에 대한 응답 완료! ${data.name} 님은 ${data.gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+            resultBox.style.color = `limegreen`; // resultBox 요소의 텍스트 색상 라임그린으로 변경
+        })
+        .catch(err => {
+            // 에러 처리
+            console.error(`Error`, err); // 에러 콘솔에 출력
+            resultBox.textContent = `에러 발생.. 다시 시도해주세요..`; // 에러 메시지 표시
+        });
+}
+
+```
+
+- `fetch('/fetch${urlQuery}')`: Fetch API를 사용하여 GET 요청을 서버에 보냅니다.
+
+<br>
+
+- 첫 번째 `then`: 서버로부터 응답을 받은 후, 응답 객체를 JSON 형태로 변환합니다. 이 단계가 필요한 이유는 Fetch API가 응답을 직접적으로 JSON 객체로 반환하지 않고, 응답 스트림을 제공하기 때문입니다.
+- 두 번째 `then`: 변환된 JSON 데이터를 처리합니다. 이 단계에서는 변환된 JSON 데이터에 접근하여 원하는 작업을 수행할 수 있습니다.
+- `catch`: 요청이 실패했을 때 실행할 콜백 함수를 지정하여 에러를 처리합니다.
+
+<br>
+
+### 2) POST 요청 처리
+
+```js
+function fetchPost() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
+    const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 가져와서 data 객체 만듦
+    const data = {
+        name: form.name.value,    // 폼의 name 필드 값 가져옴
+        gender: form.gender.value // 폼의 gender 필드 값 가져옴
+    };
+
+    // fetch 메서드를 사용하여 POST 요청 보냄
+    fetch(`/fetch`, {
+        method: 'POST', // HTTP 메서드로 POST 사용
+        headers: {
+            'Content-Type': 'application/json', // 요청 헤더에 Content-Type 설정
+        },
+        body: JSON.stringify(data), // 요청 본문에 JSON 형태로 데이터 설정
+    })
+        // 서버로부터의 응답을 받음
+        .then((res) => {
+            // 응답 객체를 JSON으로 변환
+            return res.json();
+        })
+        .then((data) => {
+            // 변환된 JSON 데이터를 처리
+            console.log(data); // 응답 데이터 콘솔에 출력
+            resultBox.textContent = `POST /fetch 요청에 대한 응답 완료! ${data.name} 님은 ${data.gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+            resultBox.style.color = `hotpink`; // resultBox 요소의 텍스트 색상 핫핑크로 변경
+        })
+        .catch(err => {
+            // 에러 처리
+            console.error(`Error`, err); // 에러 콘솔에 출력
+            resultBox.textContent = `에러 발생.. 다시 시도해주세요..`; // 에러 메시지 표시
+        });
+}
+
+```
+
+- `method: 'POST'`: 요청 유형을 POST로 지정합니다.
+- `headers`: 서버에 전송할 데이터의 형식을 지정합니다. 여기서는 'Content-Type'을 'application/json'으로 설정하여 서버가 JSON 형식의 데이터를 받을 준비를 하도록 합니다.
+- `body`: 서버로 보낼 데이터를 JSON 문자열로 변환하여 설정합니다. `JSON.stringify(data)`는 JavaScript 객체를 JSON 문자열로 변환합니다. Fetch API는 요청 본문을 문자열 형태로 받아야 하므로, 이를 통해 데이터를 JSON 형태로 전송할 수 있습니다.
+
+<br>
+
+- 첫 번째 `then`: 서버로부터 응답을 받은 후, 응답 객체를 JSON 형태로 변환합니다. Fetch API는 응답을 직접적으로 JSON 객체로 반환하지 않기 때문에 응답 스트림을 JSON으로 변환하는 작업이 필요합니다.
+- 두 번째 `then`: 변환된 JSON 데이터를 처리합니다. 변환된 JSON 데이터에 접근하여 원하는 작업을 수행할 수 있습니다.
+- `catch`: 요청이 실패했을 때 실행할 콜백 함수를 지정하여 에러를 처리합니다.
+
+<br>
+
+## 4. 서버에서 Fetch API 요청 처리하기
+
+서버는 클라이언트로부터 GET 및 POST 요청을 받아 해당 데이터를 응답합니다.
+
+### 1) GET 요청 처리
+
+```js
+// GET 요청에 대한 라우트 처리
+app.get('/fetch', (req, res) => {
+    // 요청 쿼리 파라미터를 응답으로 보냄
+    res.send(req.query);
+});
+```
+
+- `req.query`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 GET 요청으로 보낸 데이터는 URL 쿼리 매개변수로 전달됩니다.
+
+### 2) POST 요청 처리
+
+```js
+// POST 요청에 대한 라우트 처리
+app.post('/fetch', (req, res) => {
+    // 요청 본문 데이터를 응답으로 보냄
+    res.send(req.body);
+});
+```
+
+- `req.body`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
+- 클라이언트가 POST 요청으로 보낸 데이터는 요청 본문에 포함됩니다.
+
+<br>
+
+## 5. 보안 및 에러 핸들링
+
+### 1) CSRF 방지
+
+#### (1) CSRF 공격이란?
+
+CSRF(Cross-Site Request Forgery) 공격은 사용자가 특정 사이트에 로그인한 상태에서 악의적인 사이트에 접속하면, 그 사이트에서 사용자의 권한을 이용해 요청을 보내는 방식입니다.
+
+#### (2) CSRF 방지를 위한 CSRF 토큰 사용
+
+CSRF 공격을 방지하기 위해 CSRF 토큰을 사용합니다. CSRF 토큰은 서버가 생성하여 클라이언트에 전달하는 고유한 값입니다. 클라이언트는 요청 시 이 토큰을 함께 전송하며, 서버는 이 토큰을 검증하여 요청의 유효성을 확인합니다.
+
+```js
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+app.use(csrf({ cookie: true }));
+
+app.get('/', (req, res) => {
+    res.render('dynamic', { title: '동적 폼을 배워보자', csrfToken: req.csrfToken() });
+});
+```
+
+- `cookieParser`를 사용하여 쿠키를 파싱합니다.
+- `csrf` 미들웨어를 사용하여 CSRF 토큰을 생성하고 쿠키에 저장합니다.
+- EJS 템플릿에서 CSRF 토큰을 폼에 포함시켜 서버로 전송합니다.
+
+```html
+<form name="register">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <!-- 나머지 폼 요소들 -->
+</form>
+```
+
+### 2) 에러 핸들링
+
+Fetch API 요청에서 에러가 발생했을 때 실행할 콜백 함수를 지정합니다.
+
+```js
+function fetchGet() {
+    const form = document.forms['register'];
+    const urlQuery = `?name=${form.name.value}&gender=${form.gender.value}`;
+
+    fetch(`/fetch${urlQuery}`)
+        .then((res) => {
+            console.log(res);
+            return res.json();
+        })
+        .then((data) => {
+            console.log(data);
+            resultBox.textContent = `GET /fetch 요청에 대한 응답 완료! ${data.name} 님은 ${data.gender} 입니다.`;
+            resultBox.style.color = `limegreen`;
+        })
+        .catch(err => {
+            console.error(`Error`, err);
+            resultBox.textContent = `에러 발생.. 다시 시도해주세요..`;
+        });
+}
+
+function fetchPost() {
+    const form = document.forms['register'];
+    const data = {
+        name: form.name.value,
+        gender: form.gender.value
+    };
+
+    fetch(`/fetch`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+        .then((res) => {
+            console.log(res);
+            return res.json();
+        })
+        .then((data) => {
+            console.log(data);
+            resultBox.textContent = `POST /fetch 요청에 대한 응답 완료! ${data.name} 님은 ${data.gender} 입니다.`;
+            resultBox.style.color = `hotpink`;
+        })
+        .catch(err => {
+            console.error(`Error`, err);
+            resultBox.textContent = `에러 발생.. 다시 시도해주세요..`;
+        });
+}
+```
+
+- `then`: 요청이 성공했을 때 실행됩니다. 성공 메시지와 데이터를 사용자에게 표시합니다.
+- `catch`: 요청이 실패했을 때 실행됩니다. 실패 메시지와 에러 상태를 사용자에게 표시합니다.
+
+<br>
