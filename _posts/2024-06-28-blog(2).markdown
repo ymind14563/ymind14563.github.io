@@ -76,28 +76,36 @@ AJAX 요청은 비동기적으로 서버와 통신합니다. GET 요청과 POST 
 ### 1) GET 요청 처리
 
 ```js
+// 결과를 표시할 HTML 요소 선택
 const resultBox = document.querySelector(`.result`);
 
 function ajaxGet() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
     const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 가져와서 data 객체 만듦
     const data = {
-        name: form.name.value,
-        gender: form.gender.value
+        name: form.name.value,    // 폼의 name 필드 값 가져옴
+        gender: form.gender.value // 폼의 gender 필드 값 가져옴
     };
+
+    // jQuery의 ajax 메서드 사용하여 GET 요청 보냄
     $.ajax({
-        type: 'GET',
-        url: '/ajax',
-        data,
+        type: 'GET',       // HTTP 메서드로 GET 사용
+        url: '/ajax',      // 요청 보낼 URL
+        data,              // 요청의 쿼리 문자열로 보낼 데이터 설정
         success: function(response) {
-            resultBox.textContent = `GET 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
-            resultBox.style.color = 'blue';
+            // 요청 성공 시 실행됨
+            resultBox.textContent = `GET 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+            resultBox.style.color = 'blue'; // resultBox 요소의 텍스트 색상 파란색으로 변경
         },
         error: function(error) {
-            resultBox.textContent = `GET 요청 실패: ${error.statusText}`;
-            resultBox.style.color = 'red';
+            // 요청 실패 시 실행됨
+            resultBox.textContent = `GET 요청 실패: ${error.statusText}`; // 에러 메시지 표시
+            resultBox.style.color = 'red'; // resultBox 요소의 텍스트 색상 빨간색으로 변경
         }
     });
 }
+
 ```
 
 - `document.forms['register']`: 폼 요소를 선택합니다.
@@ -118,25 +126,32 @@ function ajaxGet() {
 
 ```js
 function ajaxPost() {
+    // HTML 폼에서 'register'라는 이름의 폼 가져옴
     const form = document.forms['register'];
+    // 폼에서 입력된 이름과 성별 값을 가져와서 data 객체 만듦
     const data = {
-        name: form.name.value,
-        gender: form.gender.value
+        name: form.name.value,    // 폼의 name 필드 값 가져옴
+        gender: form.gender.value // 폼의 gender 필드 값 가져옴
     };
+
+    // jQuery의 ajax 메서드 사용하여 POST 요청 보냄
     $.ajax({
-        type: 'POST',
-        url: '/ajax',
-        data,
+        type: 'POST',     // HTTP 메서드로 POST 사용
+        url: '/ajax',     // 요청 보낼 URL
+        data,             // 요청의 본문에 보낼 데이터 설정
         success: function(response) {
-            resultBox.textContent = `POST 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`;
-            resultBox.style.color = 'blue';
+            // 요청 성공 시 실행됨
+            resultBox.textContent = `POST 요청 완료! ${response.name} 님은 ${response.gender} 입니다.`; // 응답 데이터 사용하여 결과 표시
+            resultBox.style.color = 'blue'; // resultBox 요소의 텍스트 색상 파란색으로 변경
         },
         error: function(error) {
-            resultBox.textContent = `POST 요청 실패: ${error.statusText}`;
-            resultBox.style.color = 'red';
+            // 요청 실패 시 실행됨
+            resultBox.textContent = `POST 요청 실패: ${error.statusText}`; // 에러 메시지 표시
+            resultBox.style.color = 'red'; // resultBox 요소의 텍스트 색상 빨간색으로 변경
         }
     });
 }
+
 ```
 
 - `type: 'POST'`: 요청 유형을 POST로 지정합니다.
@@ -152,9 +167,12 @@ function ajaxPost() {
 ### 1) GET 요청 처리
 
 ```js
+// GET 요청에 대한 라우트 처리
 app.get('/ajax', (req, res) => {
+    // 요청 쿼리 파라미터를 응답으로 보냄
     res.send(req.query);
 });
+
 ```
 
 - `req.query`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
@@ -166,9 +184,12 @@ app.get('/ajax', (req, res) => {
 ### 2) POST 요청 처리
 
 ```js
+// POST 요청에 대한 라우트 처리
 app.post('/ajax', (req, res) => {
+    // 요청 본문 데이터를 응답으로 보냄
     res.send(req.body);
 });
+
 ```
 
 - `req.body`를 통해 클라이언트가 보낸 데이터를 확인하고 응답합니다.
