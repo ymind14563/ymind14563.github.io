@@ -1,0 +1,396 @@
+---
+layout: post
+title: "[SeSACx코딩온] 파일 업로드 구현 (Multer)"
+date: 2024-06-30
+categories: Node.js
+---
+
+# Node.js와 Multer로 파일 업로드 구현하기
+
+<hr>
+<br>
+
+## 1. 기본 모듈 설치
+
+파일 업로드 기능을 구현하기 위해 먼저 필요한 모듈들을 설치해야 합니다. Express와 Multer 모듈을 사용하며, EJS를 템플릿 엔진으로 사용합니다.
+
+```json
+// package.json
+{
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "multer": "^1.4.4" // Multer
+  }
+}
+```
+여기서 `multer`의 버전을 1.4.4로 설정한 이유는 최신 버전인 1.4.5-LTS.1에 한글 관련 버그가 있기 때문입니다.
+
+<br>
+
+## 2. 서버 설정 및 기본 미들웨어 설정
+
+```js
+const express = require('express');
+const app = express();
+const multer = require('multer');
+const path = require('path');
+
+const PORT = 8080;
+
+app.set('views', './views');
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use('/uploads', express.static(__dirname + '/uploads'));
+```
+
+Express 애플리케이션을 생성하고, EJS를 템플릿 엔진으로 설정하였습니다. `express.urlencoded`와 `express.json` 미들웨어를 사용하여 URL-encoded 데이터와 JSON 데이터를 파싱합니다. 또한, 업로드된 파일을 정적 파일로 제공하기 위해 `/uploads` 디렉토리를 설정합니다.
+
+- `express` 모듈을 가져와서 `app` 객체를 생성합니다.
+- `multer`와 `path` 모듈을 가져옵니다. `multer`는 파일 업로드를 위한 미들웨어이고, `path`는 파일 및 디렉토리 경로 작업을 위한 모듈입니다.
+- 포트를 8080으로 설정합니다.
+- `views` 디렉토리를 설정하고 템플릿 엔진으로 `ejs`를 사용합니다.
+- URL-encoded 데이터와 JSON 데이터를 파싱하기 위한 미들웨어를 추가합니다.
+- 업로드된 파일을 정적 파일로 제공하기 위해 `/uploads` 디렉토리를 설정합니다.
+
+<br>
+
+## 3. Multer 미들웨어 설정
+
+Multer는 파일 업로드를 처리하기 위한 미들웨어입니다. 파일의 저장 경로와 파일명을 설정할 수 있으며, 업로드 파일의 크기 제한 등을 설정할 수 있습니다.
+
+```js
+const uploadDetail = multer({
+    storage: multer.diskStorage({
+        destination(req, file, done) {
+            done(null, 'uploads/'); // 파일 저장할 경로
+        },
+        filename(req, file, done) {
+            const ext = path.extname(file.originalname);
+            done(null, path.basename(file.originalname, ext) + Date.now() + ext); // 저장할 파일명
+        }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 } // 업로드 크기 제한
+});
+```
+
+- `multer.diskStorage`를 사용하여 파일의 저장 경로와 파일명을 설정합니다.
+- `destination` 함수는 파일이 저장될 경로를 설정합니다. 여기서는 `uploads/` 디렉토리에 파일이 저장됩니다.
+- `filename` 함수는 저장될 파일명을 설정합니다. 파일명은 원래 파일명에 현재 시간을 추가하여 고유한 이름으로 저장됩니다. 
+- `path.extname`을 사용하여 파일의 확장자를 추출하고, `path.basename`을 사용하여 확장자를 제외한 파일명을 가져옵니다.
+- `limits` 옵션을 사용하여 업로드 파일의 최대 크기를 5MB로 제한합니다.
+
+<br>
+
+## 4. 파일 업로드 라우터 설정
+
+이제 파일 업로드를 처리하는 라우터를 설정합니다. Multer의 `single`, `array`, `fields` 메서드를 사용하여 각각 단일 파일, 여러 파일, 여러 인풋의 파일을 업로드하는 기능을 구현합니다.
+
+### (1) 단일 파일 업로드
+
+```js
+app.post('/upload', uploadDetail.single('userfile'), (req, res) => { // (`userfile`)은 ejs input의 name과 일치해야 정상적으로 불러 올 수 있음.
+    console.log(req.body); // { title: '바탕화면 사진임' }
+    console.log(req.file); // 업로드된 파일 정보
+    /*
+    {
+        "fieldname": "userfile",
+        "originalname": "example.jpg",
+        "encoding": "7bit",
+        "mimetype": "image/jpeg",
+        "destination": "upload/",
+        "filename": "1629800720273.jpg",
+        "path": "upload/1629800720273.jpg",
+        "size": 34567
+    }
+    */
+    res.render('uploaded', { title: req.body.title, scr: req.file.path });
+});
+```
+
+이 라우터는 단일 파일 업로드를 처리하며, 업로드된 파일의 정보를 콘솔에 출력하고, `uploaded` 템플릿을 렌더링합니다.
+
+- `uploadDetail.single('userfile')`는 단일 파일 업로드를 처리하는 Multer 미들웨어입니다. `userfile`은 업로드되는 파일의 인풋 이름입니다. `EJS의 input의 name속성과 일치해야 정상적으로 파일을 제공 받을 수 있습니다.`
+- `req.body`는 폼 데이터의 텍스트 필드 값을 포함합니다.
+- `req.file`은 업로드된 파일의 정보를 포함합니다.
+
+### (2) 여러 파일 업로드 (하나의 인풋)
+
+```js
+app.post('/upload/array', uploadDetail.array('userfiles'), (req, res) => {
+    console.log(req.body);
+    console.log(req.files); // [ {}, {}, ... ] 배열 형태로 각 파일 정보를 저장
+    res.send('Success Upload!! (multiple)');
+});
+```
+
+여러 파일을 하나의 인풋으로 업로드할 때 사용하는 라우터입니다. 업로드된 파일 정보가 배열 형태로 저장됩니다.
+
+- `uploadDetail.array('userfiles')`는 여러 파일 업로드를 처리하는 Multer 미들웨어입니다. `userfiles`는 업로드되는 파일의 인풋 이름입니다.
+- `req.files`는 업로드된 파일의 정보를 배열 형태로 포함합니다.
+
+### (3) 여러 파일 업로드 (여러 개의 인풋)
+
+```js
+app.post('/upload/fields', uploadDetail.fields([{ name: 'kiwi' }, { name: 'orange' }, { name: 'banana' }]), (req, res) => {
+    console.log(req.body);
+    console.log(req.files); // { kiwi: [{}, ...], orange : [{}, ...], banana [{}, ...]}
+    res.send('Success Upload!! (multiple2)');
+});
+```
+
+여러 인풋을 통해 각각의 파일을 업로드할 때 사용하는 라우터입니다. 각 파일 정보가 객체 형태로 저장됩니다.
+
+- `uploadDetail.fields([{ name: 'kiwi' }, { name: 'orange' }, { name: 'banana' }])`는 여러 인풋의 파일 업로드를 처리하는 Multer 미들웨어입니다. 각 인풋의 이름을 설정합니다.
+- `req.files`는 업로드된 파일의 정보를 객체 형태로 포함합니다. 각 키는 인풋 이름이며, 값은 파일 정보의 배열입니다.
+
+<br>
+
+## 5. 업로드된 파일을 보여주는 템플릿 설정
+
+파일 업로드가 완료된 후, 업로드된 파일을 사용자에게 보여주기 위해 EJS 템플릿을 사용합니다.
+
+### `views/uploaded.ejs` 템플릿
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 업로드 성공</title>
+</head>
+<body>
+    <h1>파일이 성공적으로 업로드 되었습니다.</h1>
+    <span>title: <%= title %></span>
+    <div>
+        img :
+        <img src="/<%= scr %>" alt="사진" width="300">
+    </div>
+</body>
+</html>
+```
+
+업로드가 완료된 후, `uploaded.ejs` 템플릿은 업로드된 파일의 제목과 이미지를 표시합니다. 이 템플릿은 파일 경로를 동적으로 받아와서 이미지를 출력합니다.
+
+- `title`과 `scr`은 라우터에서 전달된 데이터로, 각각 업로드된 파일의 제목과 파일 경로입니다.
+
+<br>
+
+## 6. 파일 업로드 폼 설정
+
+파일 업로드를 위해 HTML 폼을 설정합니다.
+
+### `views/index.ejs` 템플릿
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 업
+
+로드</title>
+</head>
+<body>
+    <!-- 
+    1. form action은 엔드포인트.
+    2. enctype은 multer사용 시 multipart/form-data 필수 입력.(공식문서)
+    3. input name은 매서드에서 지정한 필드 이름과 같게 함. -->
+    <h1>파일 업로드</h1>
+    <h2>Single file upload</h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="userfile"><br>
+        <input type="text" name="title">
+        <button type="submit">업로드</button>
+    </form>
+
+    <h2>Multi file upload case1</h2>
+    <form action="/upload/array" method="POST" enctype="multipart/form-data">
+        <input type="file" name="userfiles" multiple><br>
+        <input type="text" name="title">
+        <button type="submit">업로드</button>
+    </form>
+
+    <h2>Multi file upload case2</h2>
+    <form action="/upload/fields" method="POST" enctype="multipart/form-data">
+        <input type="file" name="kiwi">
+        <input type="text" name="title1"><br>
+        <input type="file" name="orange">
+        <input type="text" name="title2"><br>
+        <input type="file" name="banana">
+        <input type="text" name="title2"><br>
+        <button type="submit">업로드</button>
+    </form>
+</body>
+</html>
+```
+
+단일 파일, 여러 파일(하나의 인풋), 여러 파일(여러 인풋)을 사용자가 각 폼을 통해 파일을 업로드할 수 있습니다.
+
+- `enctype="multipart/form-data"`는 파일 업로드를 위해 필요한 속성입니다. (필수 / 공식문서)
+
+<br>
+
+## 7. 추가 설명
+
+### (1) 파일 경로 및 URL 설정
+
+- `app.use('/uploads', express.static(__dirname + '/uploads'));`를 통해 정적 파일을 제공할 때, 클라이언트는 `/uploads/파일명` 형식으로 파일에 접근할 수 있습니다.
+- 만약 URL 경로를 `/images`로 변경하고 싶다면, `app.use('/images', express.static(__dirname + '/uploads'));`로 설정하고, EJS 템플릿에서 `<img src="/images/<%= scr %>" alt="사진" width="300">`와 같이 변경해야 합니다.
+
+### (2) 파일 경로 및 URL 설정 구체적인 예시
+
+- 정적 파일 제공 경로, 엔드포인트, 파일 실제 저장 경로의 개념을 구분해야 합니다.
+
+<br>
+
+- 정적 파일 제공 경로는 클라이언트에서 접근할 수 있는 경로를 뜻합니다.
+- 엔드포인트는 URL, 
+- 파일 실제 저장 경로는 업로드한 파일이 실제로 존재하는 폴더 디렉토리를 뜻합니다.
+
+<br>
+
+- 예시에서 정적 파일 경로를 /files,
+- 엔드포인트는 /upload,
+- 파일 실제 저장 경로는 /directory 로 구분하여 설정한다면,
+(기타 설정 부분은 생략하고 주요점만 작성.)
+
+
+```js
+// 서버 코드
+
+app.use('/files', express.static(__dirname + '/directory'));
+// 정적 파일 경로 및 실제 파일 저장 디렉토리 설정
+
+const uploadDetail = multer({
+    storage : multer.diskStorage({
+        destination(req, file, done) {
+            done(null, `directory/`); // 파일 저장할 경로
+        },
+
+        filename(req, file, done) {
+            const ext = path.extname(file.originalname);
+            done(null, path.basename(file.originalname, ext) + Date.now() + ext); // 저장할 파일명
+        }
+
+
+        /* 참고: 아래 코드 처럼 바꿀 수도 있음.
+        destination: function (req, file, cb) {
+            cb(null, 'abc/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + path.extname(file.originalname));
+        }
+        */
+
+
+    }),
+})
+
+// 파일 업로드 엔드포인트
+app.post('/upload', uploadDetail.single('userfile'), (req, res) 
+=> {
+    res.render('uploaded', { title: req.body.title, scr: req.file.filename }); // filename으로 변경, path 사용의 경우 (3)에서 후술
+});
+```
+
+<br>
+
+``` html
+<!-- uploaded.ejs -->
+
+<body>
+    <h1>파일이 성공적으로 업로드 되었습니다.</h1>
+    <span>title: <%= title %></span>
+    <div>
+        <!-- '/files' 경로를 통해 정적 파일에 접근 -->
+        img :
+        <img src="/files/<%= scr %>" alt="사진" width="300">
+        
+    </div>
+</body>
+```
+
+- 정적 파일 제공 경로: `app.use('/files', express.static(__dirname + '/directory'));`
+- 클라이언트는 `/files` 경로를 통해 `directory` 폴더의 파일에 접근할 수 있습니다.
+
+<br>
+
+- 파일 저장 경로: `done(null, 'directory/');`
+- 업로드된 파일은 서버의 `directory` 폴더에 저장됩니다.
+
+<br>
+
+- 업로드 엔드포인트: `/upload`
+- 파일 업로드 후, `scr` 변수에 `req.file.filename`을 전달합니다.
+
+<br>
+
+- EJS 템플릿: `<img src="/files/<%= scr %>" alt="사진" width="300">`
+- `scr` 변수에는 파일의 이름만 포함되므로, 정적 파일 경로(`/files/`)를 사용하여 클라이언트가 파일에 접근할 수 있습니다.
+- `src="/files/<%= scr %>"` 부분에서 정적 파일 경로를 제대로 지정하지 않으면, 페이지에 업로드한 파일이 보여지지 않을 수 있습니다.
+
+<br>
+
+#### 결론
+- 업로드 엔드포인트: `http://localhost:8080/upload` (POST 요청)
+- 파일 저장 디렉토리: `directory` 폴더
+- 정적 파일 접근 경로: `http://localhost:8080/files/업로드된파일이름`
+
+
+<br>
+
+### (3) scr: req.file.filename과 scr: req.file.path
+
+- filename을 사용할 경우 파일 이름을 가져오기에 ejs 에서 정적 파일 경로를 설정하면 되지만,
+- path를 사용할 경우에는 이미 파일 디렉토리 경로가 directory/파일명으로 이미 포함되어 있기에  제대로 접근하지 못합니다.
+
+```js
+app.post('/upload', uploadDetail.single('userfile'), (req, res) => {
+    console.log(req.body); // { title: '바탕화면 사진임' }
+    console.log(req.file); // 업로드된 파일 정보
+    
+    res.render('uploaded', { title: req.body.title, scr: req.file.path });
+});
+
+```
+
+<br>
+
+```html
+<div>
+    img :
+    <% const clientPath = scr.replace('directory', 'files'); %>
+    <img src="<%= clientPath %>" alt="사진" width="300">
+    <!-- 경로를 변환하여 클라이언트가 접근할 수 있게 함 -->
+</div>
+```
+
+- 위와 같이 directory부분을 files 로 변경하는 부분을 추가하여 정상 접근할 수 있게 만들어 줍니다.
+- 만약 정적 파일 경로와 실제 파일 저장 경로가 같다면 path에 있는 디렉토리도 같기 때문에 `<img src="/<%= scr %>">` 로 가능합니다. (본문 상단 코드와 같음)
+
+
+<br>
+
+### (4) 파일 크기 제한
+
+- Multer 설정에서 `limits: { fileSize: 5 * 1024 * 1024 }`와 같이 파일 크기를 제한할 수 있습니다.
+- 1MB = 1024KB, 1KB = 1024바이트이므로, 5MB는 5 * 1024 * 1024 바이트입니다. (현재 파일 크기 제한 설정 5MB)
+- 파일 크기를 제한하지 않으면, 큰 파일이 업로드되어 서버의 리소스를 과도하게 사용할 수 있습니다.
+
+<br>
+
+### (5) 파일 이름 충돌 방지
+
+- `filename` 함수에서 파일명에 현재 시간을 추가하여 고유한 이름으로 저장합니다. 이렇게 하면 같은 이름의 파일이 업로드되더라도 충돌을 방지할 수 있습니다.
+
+```js
+filename(req, file, done) {
+    const ext = path.extname(file.originalname);
+    done(null, path.basename(file.originalname, ext) + Date.now() + ext);
+    // 확장자(ext)제외한 순수 파일명 + 현재시간 + 확장자
+}
+```
