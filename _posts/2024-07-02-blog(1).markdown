@@ -1,0 +1,169 @@
+---
+layout: post
+title: "[SeSACx코딩온] 동적 폼 전송 (Multer)"
+date: 2024-07-02
+categories: Node.js
+---
+
+# Node.js와 Multer를 이용한 동적 파일 업로드 구현
+
+<hr>
+<br>
+
+## 1. 동적 파일 업로드를 위한 기본 설정
+
+- 동적 파일 업로드를 구현하기 위해 필요한 모듈들을 설정합니다. 
+- 기존 설정에 이어, `public` 디렉토리와 정적 파일에 관련된 것을 설정합니다.
+
+```js
+const express = require('express');
+const app = express();
+const multer = require('multer'); // 파일 업로드를 위한 Multer 모듈 불러오기
+const path = require('path'); // 파일 및 디렉토리 경로 작업을 위한 Path 모듈 불러오기
+
+const PORT = 8080;
+
+app.set('views', './views'); // 뷰 템플릿 디렉토리 설정
+app.set('view engine', 'ejs'); // EJS를 템플릿 엔진으로 설정
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터 파싱 미들웨어
+app.use(express.json()); // JSON 데이터 파싱 미들웨어
+
+// 정적 파일 제공 설정
+app.use('/static', express.static(__dirname + '/public')); // 추가
+app.use('/uploads', express.static(__dirname + '/uploads'));
+```
+
+- 정적 파일을 제공하기 위해 `/static`과 `/uploads` 경로를 설정합니다.
+
+<br>
+<br>
+
+## 2. Multer 설정 및 동적 파일 업로드 라우터 추가
+
+### (1) Multer 설정
+
+```js
+const uploadDetail = multer({
+    storage: multer.diskStorage({
+        destination(req, file, done) {
+            done(null, 'uploads/'); // 파일 저장할 경로
+        },
+        filename(req, file, done) {
+            const ext = path.extname(file.originalname); // 파일 확장자 추출
+            done(null, path.basename(file.originalname, ext) + Date.now() + ext); // 저장할 파일명
+        }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 } // 업로드 파일 크기 제한 (5MB)
+});
+```
+
+- `multer.diskStorage`를 사용하여 파일의 저장 경로와 파일명을 설정합니다.
+- `destination` 함수는 파일이 저장될 경로를 설정합니다. 여기서는 `uploads/` 디렉토리에 파일이 저장됩니다.
+- `filename` 함수는 저장될 파일명을 설정합니다. 파일명은 원래 파일명에 현재 시간을 추가하여 고유한 이름으로 저장됩니다. `path.extname`을 사용하여 파일의 확장자를 추출하고, `path.basename`을 사용하여 확장자를 제외한 파일명을 가져옵니다.
+- `limits` 옵션을 사용하여 업로드 파일의 최대 크기를 5MB로 제한합니다.
+
+### (2) 동적 파일 업로드 라우터
+
+```js
+app.post('/dynamicFile', uploadDetail.single('thumbnail'), (req, res) => { // ejs의 input의 name과 같아야 정상적으로 불러옴.
+    res.send(req.file); // 업로드된 파일 정보를 클라이언트에 응답
+});
+```
+
+- `uploadDetail.single('thumbnail')`은 단일 파일 업로드를 처리하는 Multer 미들웨어입니다.
+- 업로드된 파일의 정보를 클라이언트에 응답으로 보냅니다.
+
+<br>
+<br>
+
+## 3. 업로드된 동적 파일을 보여주는 템플릿 및 코드
+
+### (1) `views/index.ejs` 템플릿
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동적 파일 업로드</title>
+    <!-- Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/static/css/thumbnail.css">
+</head>
+<body>
+    <h1><%= title %></h1>
+    <h2>동적 파일 업로드</h2>
+    <input type="file" name="thumbnail" id="thumbnail">
+    <button type="button" onclick="uploadThumbnail();">업로드</button>
+    <br>
+    <!-- 이미지 업로드 시 위치할 태그 -->
+    <img src="" alt=""><br> 
+    <script src="static/js/thumbnail.js"></script>
+</body>
+</html>
+```
+
+- 사용자는 파일을 선택하고 "업로드" 버튼을 클릭하여 파일을 업로드할 수 있습니다.
+- 업로드된 파일은 `<img>` 태그를 통해 즉시 확인할 수 있습니다.
+
+<br>
+
+### (2) `public/js/thumbnail.js` 파일
+```js
+function uploadThumbnail() {
+    // FormData 객체 생성
+    const formData = new FormData();
+    // 파일 입력 요소 선택 (name="thumbnail")
+    const fileInput = document.querySelector('#thumbnail');
+
+    // FormData에 업로드한 파일 추가
+    formData.append('thumbnail', fileInput.files[0]);
+     
+    // formData.append('thumbnail', fileInput.files[0]); 는 파일 입력 요소에서 
+    // 첫 번째 파일 객체를 'thumbnail'이라는 이름으로 FormData에 추가합니다.
+    // FormData 객체는 HTML 폼의 필드와 그 값을 키-값 쌍으로 저장합니다. 
+    // 'thumbnail'은 서버로 전송될 때의 필드 이름이고, fileInput.files[0]는 사용자가 업로드한 파일입니다.
+
+
+    // Axios를 사용하여 서버에 비동기적으로 파일 업로드 요청 보내기
+    axios({
+        method: 'POST',
+        url: '/dynamicFile',
+        data: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    }).then((res) => {
+        // 서버 응답 데이터에서 파일 경로 추출하여 img 태그에 설정
+        document.querySelector('img').src = `/${res.data.path}`;
+        // img 태그에 썸네일 스타일 클래스 추가
+        document.querySelector('img').classList.add('thumbnail');
+    }).catch((err) => {
+        console.error(err);
+    });
+}
+```
+
+- `formData.append('thumbnail', fileInput.files[0]);`는 파일 입력 요소에서 첫 번째 파일 객체를 `thumbnail`이라는 이름으로 `FormData`에 추가합니다. 이 코드는 `FormData` 객체를 사용하여 사용자가 업로드한 파일을 서버로 전송할 수 있도록 준비합니다. `FormData` 객체는 HTML 폼의 필드와 그 값을 키-값 쌍으로 저장하며, `thumbnail`은 서버로 전송될 때의 필드 이름이고, `fileInput.files[0]`는 사용자가 선택한 파일입니다. 이를 통해 서버는 `thumbnail`이라는 이름의 파일 데이터를 받을 수 있게 됩니다.
+- `axios`를 사용하여 비동기적으로 파일 업로드 요청을 보냅니다.
+- 업로드가 성공하면, 응답으로 받은 파일 경로를 `<img>` 태그의 `src` 속성에 설정하여 이미지를 표시합니다.
+- 파일 업로드 요청이 실패하면 에러를 콘솔에 출력합니다.
+
+<br>
+
+### (3) `public/css/thumbnail.css` 파일
+
+```css
+.thumbnail {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #0002;
+}
+```
+
+- 업로드된 이미지에 `thumbnail` 클래스를 적용하여 스타일을 지정합니다.
+- 이미지를 원형으로 만들고, 그림자를 추가합니다.
+
+<br>
