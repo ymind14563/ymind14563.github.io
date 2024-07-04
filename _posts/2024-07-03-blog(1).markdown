@@ -1,0 +1,548 @@
+---
+layout: post
+title: "SQL 명령어 (MySQL)"
+date: 2024-07-04
+categories: Database
+---
+
+# MySQL DDL, DCL, DML 명령어 정리
+
+<hr>
+<br>
+
+## 1. DDL (Data Definition Language)
+
+DDL은 데이터베이스와 테이블의 구조를 정의합니다. 데이터베이스와 테이블을 생성, 수정, 삭제하는 데 사용됩니다.
+
+### 1) 데이터베이스 관련 명령어
+
+#### (1) 데이터베이스 생성
+
+```sql
+CREATE DATABASE codingon CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+이 명령어는 `codingon`이라는 이름의 데이터베이스를 생성합니다. 여기서 `CHARACTER SET utf8mb4`는 데이터베이스가 사용할 문자 집합을 `utf8mb4`로 설정하는 것입니다. `utf8mb4`는 유니코드 문자 집합을 지원하며, 4바이트 UTF-8 인코딩을 사용합니다. `COLLATE utf8mb4_unicode_ci`는 문자열을 비교하고 정렬하는 기준을 설정합니다. `utf8mb4_unicode_ci`는 유니코드 대소문자 구분(case insensitive) 정렬 순서를 의미합니다.
+
+[유니코드 참고](https://blog.gangnamunni.com/post/aws-rds-mysql-utf8mb4/)
+
+#### (2) 데이터베이스 목록
+
+```sql
+SHOW DATABASES; -- 현재 서버에 존재하는 모든 데이터베이스의 목록
+```
+
+#### (3) 데이터베이스 사용 선언
+
+```sql
+USE codingon; -- 특정 데이터베이스를 사용하기 위해 선언
+```
+
+#### (4) 데이터베이스 삭제
+
+```sql
+DROP DATABASE codingon; -- codingon 데이터베이스를 삭제
+```
+
+<br>
+
+### 2) 테이블 관련 명령어
+
+#### (1) 테이블 생성
+
+- NOT NULL: NULL을 허용하지 않습니다. 필수로 값이 있어야 합니다.
+- AUTO_INCREMENT: 자동 숫자 증가합니다.
+- PRIMARY KEY: 기본키 (중복 안됨, NULL 안됨) : PK 설정된 컬럼은 NULL 값이 들어올 수 없으므로 NOT NULL을 적지 않아도 자동으로 NOT NULL이 설정됩니다.
+- DEFAULT [XX]: 기본값을 설정할 수 있습니다.
+- UNIQUE: 중복 허용하지 않지만, NULL은 가능합니다. 한 테이블에 여러 개 설정 가능 합니다.
+
+```sql
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    model_number VARCHAR(15) NOT NULL,
+    series VARCHAR(30) NOT NULL
+);
+```
+`products`라는 이름의 테이블을 생성합니다. 이 테이블에는 `id`, `name`, `model_number`, `series` 필드가 있으며, `id` 필드는 자동 증가(AUTO_INCREMENT) 속성을 가지며 기본 키(PRIMARY KEY)로 설정됩니다.
+
+#### (2) 테이블 목록 확인
+
+```sql
+SHOW TABLES; -- 현재 데이터베이스에 존재하는 모든 테이블의 목록
+```
+
+#### (3) 테이블 구조 확인
+
+```sql
+DESC products; -- products 테이블의 구조를 보여줍니다
+```
+
+#### (4) 테이블 삭제
+
+```sql
+DROP TABLE products; -- products 테이블을 삭제
+```
+
+#### (5) 테이블 수정
+
+이미 생성된 테이블의 구조를 변경할 때 사용됩니다.
+
+##### 컬럼 추가
+
+```sql
+ALTER TABLE products ADD new_column VARCHAR(20); 
+-- products 테이블에 new_column이라는 새로운 컬럼을 추가
+-- 기존에 있던 테이블에 값들은 NULL이 입력 됨
+```
+
+##### 컬럼 타입 수정
+
+```sql
+ALTER TABLE products MODIFY new_column INT; -- new_column의 데이터 타입을 INT로 수정
+```
+
+##### 컬럼 삭제
+
+```sql
+ALTER TABLE products DROP new_column; -- new_column을 products 테이블에서 삭제
+```
+
+<br>
+<br>
+
+
+## 2. DML (Data Manipulation Language)
+
+DML은 데이터베이스의 데이터를 조작하여 데이터를 삽입, 수정, 삭제하는 데 사용됩니다.
+
+### 1) 데이터 삽입
+
+#### (1) 단일 데이터 삽입
+
+```sql
+-- 데이터 하나만 삽입
+INSERT INTO customer (custid, custname, addr, phone, birth)
+    VALUES ('lucky', '강해원', '미국 뉴욕', '01022223333', '2002-03-05');
+```
+#### (2) 다중 데이터 삽입
+
+```sql
+-- 데이터 여러개 동시 삽입
+-- 필드명을 명시하지 않는경우 컬럼이 정의된 순서대로 값을 넣어야 함
+INSERT INTO customer VALUES 
+    ('asdf', '강세희', '대한민국 부산', '01033331235', '2004-11-11'),
+    ('sdfg', '윤지성', '일본 도쿄', '01033331236', '1950-02-15'),
+    ('dfgh', '이재은', '미국 뉴욕', '01033331237', '2004-06-07');
+
+-- 만약 참조하는 테이블의 경우 기준 테이블에 없는 컬럼 값에 대해 참조 테이블에 값을 넣을 경우 오류가 발생 (Error Code: 1452)
+-- ex) 만약 customers 에 없는 사람의 orders 테이블 값을 삽입할 경우 에러 발생
+```
+
+<br>
+
+### 2) 데이터 수정
+
+```sql
+UPDATE customer SET addr = '대한민국 서울' WHERE custid = 'happy'; -- custid가 happy인 고객의 주소를 대한민국 서울로 수정
+```
+
+### 3) 데이터 삭제
+
+```sql
+DELETE FROM customer WHERE custid = 'happy'; -- custid가 happy인 고객의 데이터를 삭제
+```
+
+### 4) 데이터 조회
+
+데이터를 조회하는 SELECT 문은 여러 가지 조건을 사용하여 데이터를 조회할 수 있습니다.
+
+#### (1) 기본 조회
+
+```sql
+SELECT * FROM customer; -- customer 테이블의 모든 데이터를 조회
+```
+
+#### (2) 특정 컬럼 조회
+
+```sql
+SELECT custid, birth FROM customer; -- customer 테이블에서 custid와 birth 컬럼의 데이터를 조회
+```
+
+#### (3) 중복 제거 조회
+
+```sql
+SELECT DISTINCT addr FROM customer; -- customer 테이블에서 중복을 제거한 addr 컬럼의 데이터를 조회
+```
+
+<br>
+
+### 5) WHERE 절
+
+WHERE 절을 사용하여 더 구체적인 조건으로 데이터를 조회할 수 있습니다.
+
+#### (1) 비교 조건
+
+```sql
+SELECT birth FROM customer WHERE custname = '강해린'; -- 이름이 강해린인 고객의 생일을 조회
+```
+
+#### (2) 제외 조건 (!=, NOT)
+
+```sql
+SELECT birth FROM customer WHERE custname != '강해린'; -- 이름이 강해린이 아닌 고객의 생일을 조회
+SELECT * FROM customer WHERE phone NOT LIKE '%_4'; -- 무조건 4앞에 한자리는 있어야함.
+SELECT * FROM customer WHERE phone NOT LIKE '%4'; -- '4'만 단독으로 입력되어있어도 검색에서 제외 됨.
+```
+
+#### (3) 범위 조건 (BETWEEN, >= and <=)
+
+```sql
+SELECT * FROM customer WHERE birth BETWEEN '1995-01-01' AND '2000-12-31'; -- 1995년부터 2000년 사이에 태어난 고객을 조회
+SELECT * FROM customer WHERE birth >= '1995-01-01' AND birth <= '2000-12-31'; -- 상동
+```
+
+#### (4) 집합 조건
+
+```sql
+SELECT * FROM customer WHERE addr IN ('서울', '런던'); -- 주소가 서울 또는 런던인 고객을 조회
+SELECT * FROM customer WHERE addr = '서울' OR addr = '런던'; -- 상동
+```
+
+#### (5) 패턴 조건
+
+```sql
+-- % : 0개 이상의 문자열
+-- _ : 1개의 단일 문자
+SELECT * FROM customer WHERE addr LIKE '미국%'; -- 주소가 미국으로 시작하는 고객을 조회
+SELECT * FROM customer WHERE custname LIKE '%린'; -- 이름이 린으로 끝나는 고객을 조회
+SELECT * FROM customer WHERE custname LIKE '_지'; -- 이름 2글자에 2번째가 '지' 인 사람
+SELECT * FROM customer WHERE custname LIKE '__수%'; -- 이름 세번째 글자가 '수'인 고객 (_ 2번 사용)
+```
+
+#### (6) 복합 조건
+
+```sql
+SELECT * FROM customer WHERE addr LIKE '대한민국%' AND birth >= '2000-01-01'; -- 주소가 대한민국으로 시작하고 2000년 이후에 태어난 고객을 조회
+SELECT * FROM customer WHERE addr LIKE '미국%' OR addr LIKE '영국%'; -- 주소지 시작이 미국이거나 영국인 고객 검색(OR)
+```
+
+<br>
+
+### 6) ORDER BY 절
+
+ORDER BY 절은 WHERE 절 보다 뒤에 위치해야 합니다.
+
+#### (1) 오름차순 정렬
+
+```sql
+SELECT * FROM customer ORDER BY custname ASC; -- 고객 이름을 기준으로 오름차순 정렬하여 조회, ASC는 생략 가능
+```
+
+#### (2) 내림차순 정렬
+
+```sql
+SELECT * FROM customer ORDER BY custname DESC; -- 고객 이름을 기준으로 내림차순 정렬하여 조회, DESC는 내림차순을 의미
+```
+
+<br>
+
+### 7) LIMIT 절
+
+```sql
+SELECT * FROM
+
+ customer LIMIT 5; -- customer 테이블에서 처음 5개의 데이터를 조회
+```
+
+<br>
+<br>
+
+### 8), 9), 10) 예시 데이터 삽입
+
+8), 9), 10) 설명을 위한 `customer` 테이블과 `orders` 테이블에 몇 가지 예시 데이터를 설정해 보겠습니다.
+
+```sql
+-- customer 테이블 예시 데이터
+INSERT INTO customer (custid, custname, addr, phone, birth) VALUES
+('C001', 'Alice', 'Addr1', '01012345678', '1980-01-01'),
+('C002', 'Bob', 'Addr2', '01087654321', '1990-02-02'),
+('C003', 'Charlie', 'Addr3', '01011223344', '1985-03-03');
+
+-- orders 테이블 예시 데이터
+INSERT INTO orders (custid, prodname, price, amount) VALUES
+('C001', 'Prod1', 5000, 2),
+('C001', 'Prod2', 2000, 1),
+('C002', 'Prod1', 1000, 1),
+('C003', 'Prod3', 3000, 3),
+('C003', 'Prod2', 2000, 5),
+('C003', 'Prod1', 1000, 1);
+```
+<br>
+<br>
+
+### 8) 집계 함수
+
+집계 함수는 데이터를 계산하여 특정 값을 반환합니다. 주로 GROUP BY 절과 함께 사용됩니다.
+
+#### (1) 집계 함수 예제
+
+```sql
+SELECT SUM(amount) AS 'total_amount', -- orders테이블의 amount컬럼 값을 모두 합산
+    AVG(amount) AS 'avg_amount', -- amount 평균 값
+    MIN(price) AS 'min_price', -- price 최소 값
+    MAX(price) AS 'max_price' -- price 최대 값
+	FROM orders;
+```
+
+- `orders` 테이블에서 상품의 총 판매 개수를 조회합니다. 
+- `SUM(amount)`는 `orders` 테이블의 `amount` 컬럼 값을 모두 더한 결과를 `total_amount`라는 이름으로 출력합니다. 즉, 총 13개의 상품이 판매되었습니다.
+
+| total_amount | avg_amount | min_price | max_price |
+|--------------|------------|-----------|-----------|
+| 13           | 2.17       | 1000      | 5000      |
+
+<br>
+
+**참고**
+만약 결과 테이블을 세로로 출력하고 싶다면
+```sql
+SELECT 'total_amount' AS metric, SUM(amount) AS value FROM orders
+UNION ALL
+SELECT 'avg_amount', AVG(amount) FROM orders
+UNION ALL
+SELECT 'min_price', MIN(price) FROM orders
+UNION ALL
+SELECT 'max_price', MAX(price) FROM orders;
+```
+
+| metric       | value |
+|--------------|-------|
+| total_amount | 13    |
+| avg_amount   | 2.17  |
+| min_price    | 1000  |
+| max_price    | 5000  |
+
+_UNION ALL: SQL에서 두 개 이상의 SELECT 문을 결합하여 하나의 결과 집합으로 반환하는 데 사용되는 연산자_ <br>
+_metric: 시간이 지남에 따라 변화하는 데이터를 의미_
+
+<br>
+
+#### (2) 주문 테이블에서 총 주문 건수 조회
+
+```sql
+SELECT COUNT(*) AS order_count FROM orders; -- 전체 주문 개수를 조회
+```
+
+- `orders` 테이블에서 총 주문 건수를 조회합니다.
+- `COUNT(*)`는 테이블의 모든 행을 세어 `order_count`라는 이름으로 출력합니다.
+
+| order_count |
+|-------------|
+| 6           |
+
+#### (3) 주문한 고객 수 조회
+
+```sql
+SELECT COUNT(DISTINCT custid) AS customer_count FROM orders; -- 주문한 고객 수를 중복 없이 조회
+```
+
+- `orders` 테이블에서 주문한 고객 수를 조회합니다.
+- `COUNT(DISTINCT custid)`는 `custid` 컬럼의 중복을 제거한 후 고객 수를 세어 `customer_count`라는 이름으로 출력합니다.
+
+| customer_count |
+|----------------|
+| 3              |
+
+
+<br>
+<br>
+
+### 9) GROUP BY 절
+
+특정 컬럼을 기준으로 데이터를 그룹화하여 집계할 수 있습니다. 데이터를 요약하여 그룹별로 통계를 낼 때 유용합니다.
+
+#### (1) 고객별 주문 수량 조회
+
+```sql
+SELECT custid, COUNT(*) AS order_count FROM orders GROUP BY custid;
+```
+- `custid`를 기준으로 `orders` 테이블의 데이터를 그룹화하여 각 고객이 주문한 건수를 조회합니다. `COUNT(*)`는 각 그룹의 행 개수를 세며, 결과는 `order_count`라는 이름으로 출력됩니다. 즉, 각 고객이 몇 번의 주문을 했는지 알 수 있습니다.
+
+| custid | order_count |
+|--------|-------------|
+| C001   | 2           |
+| C002   | 1           |
+| C003   | 3           |
+
+
+<br>
+
+#### (2) 고객별 주문 총액 조회
+
+```sql
+SELECT custid, SUM(price * amount) AS total_pay FROM orders GROUP BY custid;
+```
+
+- `custid`를 기준으로 `orders` 테이블의 데이터를 그룹화하여 각 고객의 총 주문 금액을 계산합니다. `SUM(price * amount)`는 각 주문의 금액을 모두 더한 값을 나타내며, 결과는 `total_pay`라는 이름으로 출력됩니다. 즉, 각 고객이 총 얼마를 지불했는지 알 수 있습니다.
+
+| custid | total_pay |
+|--------|-----------|
+| C001   | 12000     |
+| C002   | 1000      |
+| C003   | 19000     |
+
+
+<br>
+<br>
+
+### 10) HAVING 절
+
+HAVING 절은 GROUP BY 절로 그룹화된 데이터에 조건을 적용할 때 사용됩니다. WHERE 절과 달리 집계 함수와 함께 사용될 수 있습니다. GROUP BY 절 이후에 추가 조건을 설정합니다.
+
+```sql
+SELECT custid, SUM(price * amount) AS total_pay 
+FROM orders 
+GROUP BY custid 
+HAVING SUM(price * amount) >= 10000;
+```
+
+- `custid`를 기준으로 데이터를 그룹화한 후, 각 그룹의 주문 총액이 10000원 이상인 고객만 조회합니다. `HAVING` 절은 그룹화된 데이터에 조건을 적용할 수 있어, 총 주문액이 특정 금액 이상인 그룹을 필터링할 때 유용합니다. `WHERE` 절은 개별 행에 조건을 적용하지만, `HAVING` 절은 그룹 전체에 조건을 적용합니다.
+
+| custid | total_pay |
+|--------|-----------|
+| C001   | 12000     |
+| C003   | 19000     |
+
+<br>
+
+**참고**
+WHERE VS. HAVING
+- HAVING
+> - 그룹에 대해서 필터링(그래서 GROUP BY와 함께 쓰임)
+> - GROUP BY 보다 뒤에 위치해야 함
+> - 집계 함수랑 함께 사용 가능
+- WHERE
+> - 각각의 행을 필터링
+> - GROUP BY 보다 앞에 위치
+> - 집계함수를 쓸 수는 있으나 HAVING 절 보다는 자유롭지 못함
+
+<br>
+<br>
+
+## 3. DCL (Data Control Language)
+
+DCL은 데이터베이스에 접근하고 데이터를 읽거나 쓰는 것을 제어하는 언어입니다. 주로 권한 부여와 박탈에 사용됩니다.
+
+### 1) 권한 부여 (GRANT)
+
+```sql
+GRANT SELECT, INSERT ON codingon.* TO 'user'@'localhost' IDENTIFIED BY 'password'; -- user라는 사용자에게 codingon 데이터베이스의 모든 테이블에 대해 SELECT와 INSERT 권한을 부여
+```
+
+### 2) 권한 박탈 (REVOKE)
+
+```sql
+REVOKE INSERT ON codingon.* FROM 'user'@'localhost'; -- user라는 사용자에게서 codingon 데이터베이스의 모든 테이블에 대해 INSERT 권한을 박탈
+```
+
+<br>
+<br>
+
+## 4. PK(Primary Key)와 FK(Foreign Key)
+
+데이터베이스에서 PK(Primary Key)와 FK(Foreign Key)는 테이블 간의 관계를 정의하고 데이터의 무결성을 유지하는 데 중요한 역할을 합니다.
+
+### (1) Primary Key (기본 키)
+
+- Primary Key는 테이블 내에서 각 행(row)을 고유하게 식별할 수 있는 열(column)입니다.
+- 한 테이블에 하나의 Primary Key만 존재할 수 있습니다.
+- Primary Key는 NULL 값을 가질 수 없습니다.
+- Primary Key는 중복 값을 가질 수 없습니다.
+
+```sql
+CREATE TABLE customer (
+    custid CHAR(10) PRIMARY KEY, -- `customer` 테이블의 Primary Key
+    custname VARCHAR(10) NOT NULL,
+    addr CHAR(10) NOT NULL,
+    phone CHAR(11),
+    birth DATE
+);
+```
+
+### (2) Foreign Key (외래 키)
+
+- Foreign Key는 한 테이블의 열이 다른 테이블의 Primary Key를 참조할 때 사용됩니다.
+- Foreign Key는 두 테이블 간의 관계를 설정하여 데이터의 무결성을 유지합니다.
+- Foreign Key는 NULL 값을 가질 수 있습니다.
+- 외래 키 제약 조건을 사용하여 참조 무결성을 강제할 수 있습니다. 예를 들어, 부모 테이블의 행이 업데이트되거나 삭제될 때 자식 테이블의 행을 자동으로 업데이트하거나 삭제할 수 있습니다.
+- Foreign Key는 테이블을 생성할 때 또는 이미 생성
+
+된 테이블에 ALTER TABLE 문을 사용하여 정의됩니다.
+
+```sql
+CREATE TABLE orders (
+    orderid INT PRIMARY KEY AUTO_INCREMENT,
+    custid CHAR(10) NOT NULL,
+    prodname CHAR(6) NOT NULL,
+    price INT NOT NULL,
+    amount SMALLINT NOT NULL,
+    FOREIGN KEY (custid) REFERENCES customer(custid) ON UPDATE CASCADE ON DELETE CASCADE 
+    -- `custid` 열은 `orders` 테이블의 Foreign Key
+    -- `customer` 테이블의 `custid` 열을 참조한다는 것을 의미
+    -- `ON UPDATE CASCADE`: 기준 테이블의 데이터가 변경되면 참조 테이블의 데이터도 변경
+    -- `ON DELETE CASCADE`: 기준 테이블의 데이터가 삭제되면 참조 테이블의 데이터도 삭제
+);
+```
+
+### (3) 테이블간 관계 맺은 후 삭제 시 주의 사항
+
+- 테이블끼리 관계를 맺고 나면 테이블 삭제할 때 순서에 주의해야 합니다.
+- customer.custid, orders.custid "관계"를 맺은 경우,
+- customer에 존재하는 회원만 orders 테이블에 데이터를 추가 할 수 있습니다.
+
+<br>
+
+- 만약 orders테이블이 존재하고 있는 상황에서 customer 테이블을 삭제(drop)하게 될 경우,
+- orders 테이블은 어떤 고객의 생일 정보를 알고 싶어도 customer 테이블 자체가 삭제되었기 때문에 알 수 없게 됩니다.
+- PK-FK 연결된 테이블은 외래키가 설정된 테이블(참조테이블)이 먼저 삭제됩니다.
+- 현 스키마에서는 (1) orders 테이블 삭제(drop) -> (2) customer 테이블 삭제(drop) 해야 customer 테이블 삭제 됩니다.
+
+<br>
+<br>
+
+## 5. 조인 (Join)
+
+### (1) INNER JOIN
+
+```sql
+SELECT * FROM customer INNER JOIN orders ON customer.custid = orders.custid; -- 두 테이블을 조인하여 custid가 일치하는 데이터를 조회
+```
+
+### (2) LEFT JOIN
+
+LEFT JOIN은 왼쪽 테이블의 모든 데이터를 포함하고 오른쪽 테이블의 일치하는 데이터를 포함합니다.
+
+```sql
+SELECT * FROM customer LEFT JOIN orders ON customer.custid = orders.custid; -- customer 테이블의 모든 데이터와 orders 테이블의 일치하는 데이터를 조회, 일치하는 데이터가 없으면 NULL로 표시
+```
+
+### (3) RIGHT JOIN
+
+RIGHT JOIN은 오른쪽 테이블의 모든 데이터를 포함하고 왼쪽 테이블의 일치하는 데이터를 포함합니다.
+
+```sql
+SELECT * FROM customer RIGHT JOIN orders ON customer.custid = orders.custid; -- orders 테이블의 모든 데이터와 customer 테이블의 일치하는 데이터를 조회, 일치하는 데이터가 없으면 NULL로 표시
+```
+
+### (4) FULL OUTER JOIN
+
+- MySQL에서는 FULL OUTER JOIN을 직접 지원하지 않지만, LEFT JOIN과 RIGHT JOIN의 결과를 UNION으로 결합하여 구현할 수 있습니다.
+- `customer`와 `orders` 테이블의 모든 데이터를 결합하여, 어느 한쪽에만 있는 데이터도 포함합니다. FULL OUTER JOIN은 두 테이블의 모든 데이터를 포함합니다.
+
+```sql
+SELECT * FROM customer LEFT JOIN orders ON customer.custid = orders.custid
+UNION
+SELECT * FROM customer RIGHT JOIN orders ON customer.custid = orders.custid;
+```
+
