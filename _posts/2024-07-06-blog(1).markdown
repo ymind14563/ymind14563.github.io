@@ -1,0 +1,345 @@
+---
+layout: post
+title: "[SeSACx코딩온] MVC 패턴"
+date: 2024-07-06
+categories: Node.js
+---
+
+# Node.js와 MVC 패턴으로 간단한 웹 구현
+
+<hr>
+<br>
+
+## 1. MVC 패턴이란?
+
+MVC는 Model-View-Controller의 약자로, 애플리케이션을 세 부분으로 나누어 개발하는 소프트웨어 디자인 패턴입니다. 
+
+- **Model**: 데이터와 비즈니스 로직을 처리합니다.
+- **View**: 사용자에게 데이터를 표시하는 부분입니다.
+- **Controller**: 사용자 입력을 받아서 처리하고, 모델과 뷰를 연결합니다.
+
+<br>
+
+## 2. 프로젝트 구조
+
+프로젝트를 MVC 패턴으로 구성하기 위해 다음과 같은 디렉토리 구조를 사용합니다.
+
+```
+15-mvc/
+├── controller/
+│   ├── Cmain.js
+│   └── Cuser.js
+├── model/
+│   ├── Comment.js
+│   └── User.js
+├── routes/
+│   ├── index.js
+│   └── user.js
+├── views/
+│   ├── 404.ejs
+│   ├── comment.ejs
+│   ├── comments.ejs
+│   ├── index.ejs
+│   └── user.ejs
+├── app.js
+├── package.json
+└── package-lock.json
+```
+
+이 구조를 통해 각 부분을 분리하여 관리할 수 있습니다.
+
+<br>
+
+## 3. 기본 모듈 설치 및 설정
+
+프로젝트를 시작하기 전에 필요한 모듈을 설치하고 설정합니다.
+
+```json
+{
+  "name": "15-mvc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  }
+}
+```
+
+<br>
+
+## 4. Express 애플리케이션 설정
+
+`app.js` 파일에서 Express 애플리케이션을 설정합니다.
+
+```js
+const express = require('express'); // Express 모듈을 가져옴
+const app = express(); // 애플리케이션 객체를 생성함
+const PORT = 8000; // 서버가 실행될 포트를 8000번으로 설정함
+
+app.set('view engine', 'ejs'); // EJS 템플릿 엔진을 사용하도록 설정함
+app.set('views', './views'); // 뷰 파일들이 위치한 디렉토리를 설정함
+
+const indexRouter = require('./routes/index'); // 메인 라우터를 불러옴
+const userRouter = require('./routes/user'); // 유저 라우터를 불러옴
+
+app.use('/', indexRouter); // 메인 라우터를 '/' 경로에 연결함
+app.use('/user', userRouter); // 유저 라우터를 '/user' 경로에 연결함
+
+// 모든 정의되지 않은 경로에 대해 404 페이지를 렌더링함 (후순위에 두어야 기존 라우터를 성공적으로 불러옴)
+app.get('*', (req, res) => {
+    res.render('404');
+});
+
+// 서버를 지정된 포트에서 실행함
+app.listen(PORT, () => {
+    console.log(`${PORT} 서버 연결 성공`);
+});
+```
+
+<br>
+
+## 5. 모델 설정
+
+모델은 데이터와 관련된 로직을 처리합니다. 여기서는 임시 데이터베이스로 댓글과 유저 정보를 가져오는 함수를 정의합니다.
+
+### `model/Comment.js`
+
+```js
+// getDbComments 함수는 임시로 DB에서 전체 댓글 목록을 읽어오는 역할을 함
+exports.getDbComments = () => {
+    return [
+        // 하드코딩된 댓글 데이터 배열
+        { id: 1, userid: 'helloworld', date: '2022-10-31', comment: '안녕하세요^~^' },
+        { id: 2, userid: 'happy', date: '2022-11-01', comment: '반가워유' },
+        { id: 3, userid: 'lucky', date: '2022-11-02', comment: '오 신기하군' },
+        { id: 4, userid: 'bestpart', date: '2022-11-02', comment: '첫 댓글입니당ㅎㅎ' },
+    ];
+};
+```
+
+### `model/User.js`
+
+```js
+// getDbUser 함수는 임시로 DB에서 유저 한 명의 정보를 읽어오는 역할을 함
+exports.getDbUser = () => {
+    return {
+        realId: 'helloworld',
+        realPw: 'qwer1234*',
+        name: '홍길동',
+        age: 20
+    };
+};
+```
+<br>
+
+## 6. 컨트롤러 설정
+
+컨트롤러는 사용자의 요청을 처리하고, 모델에서 데이터를 가져와 뷰에 전달합니다.
+
+### `controller/Cmain.js`
+
+```js
+// 비구조화 할당
+// const commentModule = require('../model/Comment');
+// const getDbComments = commentModule.getDbComments;
+const { getDbComments } = require('../model/Comment'); // 댓글 데이터를 가져오는 함수를 불러옴
+
+// getMain 함수는 메인 페이지를 렌더링함
+exports.getMain = (req, res) => {
+    res.render('index'); // index.ejs 파일을 렌더링함
+};
+
+// getComments 함수는 전체 댓글 목록을 렌더링함
+exports.getComments = (req, res) => {
+    const comments = getDbComments(); // 댓글 데이터를 가져옴
+    res.render('comments', { comments }); // comments.ejs 파일을 렌더링하고, 댓글 데이터를 전달함
+};
+
+// getComment 함수는 특정 id의 댓글을 렌더링함
+exports.getComment = (req, res) => {
+    const commentId = req.params.id; // 요청 URL에서 id를 가져옴
+    const dbComments = getDbComments(); // 댓글 데이터를 가져옴
+
+    if (!dbComments[commentId - 1]) {
+        return res.render('404'); // id에 해당하는 댓글이 없으면 404 페이지를 렌더링함
+    }
+
+    const comment = dbComments[commentId - 1]; // id에 해당하는 댓글을 가져옴
+    res.render('comment', { comment }); // comment.ejs 파일을 렌더링하고, 해당 댓글 데이터를 전달함
+};
+```
+<br>
+
+### `controller/Cuser.js`
+
+```js
+const { getDbUser } = require('../model/User'); // 유저 데이터를 가져오는 함수를 불러옴
+
+// getUser 함수는 유저 정보를 렌더링함
+exports.getUser = (req, res) => {
+    const user = getDbUser(); // 유저 데이터를 가져옴
+    res.render('user', { user }); // user.ejs 파일을 렌더링하고, 유저 데이터를 전달함
+};
+```
+
+<br>
+
+## 7. 라우터 설정
+
+라우터는 URL 요청을 컨트롤러의 특정 함수와 연결합니다.
+
+### `routes/index.js`
+
+```js
+const express = require('express'); // Express 모듈을 가져옴
+const controller = require('../controller/Cmain'); // 메인 컨트롤러를 가져옴
+const router = express.Router(); // 라우터 객체를 생성함
+
+// 메인 페이지 요청을 처리함
+router.get('/', controller.getMain);
+
+// 댓글 목록 페이지 요청을 처리함
+router.get('/comments', controller.getComments);
+
+// 특정 댓글 페이지 요청을 처리함, :id는 변수를 의미함
+router.get('/comment/:id', controller.getComment);
+
+module.exports = router; // 라우터 객체를 모듈로 내보냄
+```
+
+
+### `routes/user.js`
+
+```js
+const express = require('express'); // Express 모듈을 가져옴
+const controller = require('../controller/Cuser'); // 유저 컨트롤러를 가져옴
+const router = express.Router(); // 라우터 객체를 생성함
+
+// 유저 정보 페이지 요청을 처리함
+router.get('/', controller.getUser);
+
+module.exports = router; // 라우터 객체를 모듈로 내보냄
+```
+
+<br>
+
+## 8. 뷰 설정
+
+뷰 파일은 사용자에게 보여지는 화면을 구성합니다. EJS 템플릿을 사용하여 데이터를 동적으로 렌더링합니다.
+
+### `views/index.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+</head>
+<body>
+    <h1>MVC 패턴을 배워보자</h1>
+    <a href="/comments">댓글 목록 보기</a>
+    <a href="/user">유저 정보 보기</a>
+</body>
+</html>
+```
+
+<br>
+
+### `views/comments.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댓글 목록</title>
+</head>
+<body>
+    <h1>댓글 목록</h1>
+    <a href="/">홈으로 이동하기</a>
+
+    <ul>
+        <!-- 서버에서 전달된 `comments` 배열을 사용하여 각 댓글을 목록으로 렌더링 -->
+        <% for (let i = 0; i < comments.length; i++) { %>
+            <li>
+                <%= comments[i].userid %> -
+                <a href="/comment/<%= i + 1 %>"><%= comments[i].comment %></a>
+            </li>
+        <% } %>
+    </ul>
+</body>
+</html>
+```
+
+<br>
+
+### `views/comment.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댓글 상세 보기</title>
+</head>
+<body>
+    <!-- 서버에서 전달된 `comment` 객체를 사용하여 댓글의 세부 정보를 렌더링 -->
+    <h1>댓글 자세히 보기</h1>
+    <a href="/comments">목록 보기</a>
+    <div><%= comment.userid %> 님의 댓글입니다.</div>
+    <div>작성일: <%= comment.date %></div>
+    <div>내용: <%= comment.comment %></div>
+</body>
+</html>
+```
+
+<br>
+
+### `views/user.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유저 정보</title>
+</head>
+<body>
+    <h1>유저 조회</h1>
+    <a href="/">홈으로 이동</a>
+    <br>
+    <!-- 서버에서 전달된 `user` 객체를 사용하여 유저의 세부 정보를 렌더링 -->
+    <input type="text" value="<%= user.realId %>" readonly><br>
+    <input type="text" value="<%= user.realPw %>" readonly><br>
+    <input type="text" value="<%= user.name %>" readonly><br>
+    <input type="number" value="<%= user.age %>" readonly><br>
+</body>
+</html>
+```
+
+### `views/404.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 페이지</title>
+</head>
+<body>
+    <h1>404. 페이지를 찾을 수 없습니다.</h1>
+    <p>죄송합니다. 찾을 수 없는 페이지입니다.</p>
+    <a href="/">홈으로 가기</a>
+</body>
+</html>
+```
