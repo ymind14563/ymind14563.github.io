@@ -1,0 +1,365 @@
+---
+layout: post
+title: "[SeSACx코딩온] MVC 패턴(+ MySQL)"
+date: 2024-07-07
+categories: Node.js
+---
+
+# Node.js와 MySQL을 활용한 MVC 패턴으로 추가, 조회 하기
+
+<hr>
+<br>
+
+## 1. MVC 패턴
+
+- **Model**: 데이터와 비즈니스 로직을 처리합니다.
+- **View**: 사용자에게 데이터를 표시하는 부분입니다.
+- **Controller**: 사용자 입력을 받아서 처리하고, 모델과 뷰를 연결합니다.
+
+<br>
+
+## 2. 프로젝트 구조
+
+프로젝트를 MVC 패턴으로 구성하기 위해 다음과 같은 디렉토리 구조를 사용합니다:
+
+```
+16-mvc_mysql/
+├── controller/
+│   └── Cvisitor.js
+├── model/
+│   └── Visitor.js
+├── routes/
+│   └── index.js
+├── views/
+│   ├── 404.ejs
+│   ├── index.ejs
+│   └── visitor.ejs
+├── static/
+│   └── visitor.js
+├── app.js
+├── package.json
+└── package-lock.json
+```
+
+이 구조를 통해 각 부분을 분리하여 관리할 수 있습니다.
+
+<br>
+
+## 3. 기본 모듈 설치 및 설정
+
+프로젝트를 시작하기 전에 필요한 모듈을 설치하고 설정합니다.
+
+```json
+{
+  "name": "16-mvc_mysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql": "^2.18.1"
+  }
+}
+```
+
+<br>
+
+## 4. Express 애플리케이션 설정
+
+`app.js` 파일에서 Express 애플리케이션을 설정합니다.
+
+```js
+const express = require(`express`); // Express 모듈을 가져옴
+const app = express(); // 애플리케이션 객체를 생성함
+const PORT = 8000; // 서버가 실행될 포트를 8000번으로 설정함
+
+app.set(`view engine`, `ejs`); // EJS 템플릿 엔진을 사용하도록 설정함
+app.set(`views`, `./views`); // 뷰 파일들이 위치한 디렉토리를 설정함
+app.use(`/static`, express.static(__dirname + `/static`)); // 정적 파일을 제공할 디렉토리를 설정함
+
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터를 파싱함
+app.use(express.json()); // JSON 데이터를 파싱함
+
+const indexRouter = require(`./routes`); // 메인 라우터를 불러옴
+app.use(`/`, indexRouter); // 메인 라우터를 '/' 경로에 연결함
+
+// 모든 정의되지 않은 경로에 대해 404 페이지를 렌더링함
+app.get(`*`, (req, res) => {
+    res.render(`404`);
+});
+
+// 서버를 지정된 포트에서 실행함
+app.listen(PORT, () => {
+    console.log(`${PORT} 서버 연결 성공`);
+});
+```
+
+<br>
+
+## 5. 모델 설정
+
+모델은 데이터와 관련된 로직을 처리합니다. MySQL을 사용하여 방명록 데이터를 처리합니다.
+
+### `model/Visitor.js`
+
+```js
+// MySQL 모듈을 가져옴
+const mysql = require(`mysql`);
+
+// MySQL 연결 객체를 생성함
+const conn = mysql.createConnection({
+  host: `localhost`,
+  user: `user`,
+  password: `12345678`,
+  database: `codingon`
+});
+
+// 전체 방문자 목록을 가져오는 함수
+exports.getVisitors = (callback) => {
+  conn.query(`select * from visitor`, (err, rows) => {
+    if (err) throw err; // 오류 발생 시 예외 처리
+
+    console.log(`model/Visitor.js >>  `, rows); // 결과를 콘솔에 출력함
+    callback(rows); // 콜백 함수로 결과를 전달함
+  });
+};
+
+// 새로운 방문자를 추가하는 함수
+exports.postVisitor = (data, callback) => {
+  console.log(data); // 요청 데이터를 콘솔에 출력함
+  conn.query(`insert into visitor(name, comment) values('${data.name}','${data.comment}')`,
+    (err, rows) => {
+      if (err) throw err; // 오류 발생 시 예외 처리
+
+      console.log('model/Visitor.js >> ', rows); // 결과를 콘솔에 출력함
+      callback(rows.insertId); // 콜백 함수로 삽입된 데이터의 ID를 전달함
+    }
+  );
+};
+```
+
+<br>
+
+## 6. 컨트롤러 설정
+
+컨트롤러는 사용자의 요청을 처리하고, 모델에서 데이터를 가져와 뷰에 전달합니다.
+
+### `controller/Cvisitor.js`
+
+```js
+const Visitor = require('../model/Visitor'); // Visitor 모델을 가져옴
+
+// 메인 페이지를 렌더링하는 함수
+exports.getMain = (req, res) => {
+  res.render('index'); // index.ejs 파일을 렌더링함
+};
+
+// 전체 방문자 목록을 렌더링하는 함수
+exports.getVisitors = (req, res) => {
+  Visitor.getVisitors((result) => {
+    console.log(`controller/Cvisitor.js >> `, result); // 결과를 콘솔에 출력함
+    res.render(`visitor`, { data: result }); // visitor.ejs 파일을 렌더링하고, 결과 데이터를 전달함
+  });
+};
+
+// 새로운 방문자를 추가하는 함수
+exports.postVisitor = (req, res) => {
+  console.log(req.body); // 요청 데이터를 콘솔에 출력함
+
+  Visitor.postVisitor(req.body, (result) => {
+    console.log(`controller/Cvisitor.js >> `, result); // 결과를 콘솔에 출력함
+    res.send({
+      id: result, // 삽입된 데이터의 ID
+      name: req.body.name, // 요청 데이터의 name
+      comment: req.body.comment // 요청 데이터의 comment
+    });
+  });
+};
+```
+
+<br>
+
+## 7. 라우터 설정
+
+라우터는 URL 요청을 컨트롤러의 특정 함수와 연결합니다.
+
+### `routes/index.js`
+
+```js
+const express = require('express'); // Express 모듈을 가져옴
+const controller = require('../controller/Cvisitor'); // Visitor 컨트롤러를 가져옴
+const router = express.Router(); // 라우터 객체를 생성함
+
+// 메인 페이지 요청을 처리함
+router.get('/', controller.getMain);
+
+// 전체 방문자 목록 페이지 요청을 처리함
+router.get('/visitors', controller.getVisitors);
+
+// 새로운 방문자 추가 요청을 처리함
+router.post(`/visitor`, controller.postVisitor);
+
+module.exports = router; // 라우터 객체를 모듈로 내보냄
+```
+
+<br>
+
+## 8. 뷰 설정
+
+뷰 파일은 사용자에게 보여지는 화면을 구성합니다.
+
+### `views/index.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="
+
+ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+</head>
+<body>
+    <h1>MVC 패턴을 MySQL과 연결해보자</h1>
+    <a href="/visitors">방문자 목록 보기</a>
+</body>
+</html>
+```
+
+- 이 파일은 메인 페이지를 구성합니다.
+- `<a>` 태그를 사용하여 방문자 목록 페이지로 이동할 수 있는 링크를 제공합니다.
+
+### `views/visitor.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방문자 목록</title>
+    <!-- axios cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <a href="/">홈으로 가기</a>
+    <form name="visitor-form">
+        <fieldset>
+          <legend>방명록 등록</legend>
+          <input type="text" id="name" placeholder="사용자 이름" /> <br>
+          <input type="text" id="comment" placeholder="방명록" /> <br>
+          <div id="button-group">
+            <button type="button" onclick="createVisitor();">등록</button>
+          </div>
+        </fieldset>
+      </form>
+      <br>
+
+      <table border="1" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>작성자</th>
+            <th>방명록</th>
+            <th>수정</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- data: db에서 가지고 오는 데이터 => 새로고침해도 데이터 남아있음 -->
+          <% for (let i = 0; i < data.length; i++) { %>
+          <tr id="tr_<%= data[i].id %>">
+            <td><%= data[i].id %></td>
+            <td><%= data[i].name %></td>
+            <td><%= data[i].comment %></td>
+            <td><button type="button">수정</button></td>
+            <td><button type="button">삭제</button></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <script src="/static/visitor.js"></script>
+</body>
+</html>
+```
+
+- 전체 방문자 목록을 표시합니다.
+- 서버에서 전달된 `data` 배열을 사용하여 각 방문자를 목록으로 렌더링합니다.
+- 방문자 추가 폼과 방문자 목록 테이블을 포함합니다.
+- Axios를 사용하여 비동기적으로 새로운 방문자를 추가할 수 있습니다.
+
+### `views/404.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 페이지</title>
+</head>
+<body>
+    <h1>404. 페이지를 찾을 수 없습니다.</h1>
+    <p>죄송합니다. 찾을 수 없는 페이지입니다.</p>
+    <a href="/">홈으로 가기</a>
+</body>
+</html>
+```
+
+- 사용자가 존재하지 않는 경로로 접근했을 때 표시됩니다.
+
+<br>
+
+## 9. 정적 파일 설정
+
+정적 파일은 서버에서 제공하는 정적인 자원(이미지, CSS, JavaScript 등)입니다. `visitor.js` 파일을 통해 클라이언트에서 방문자 추가 기능을 구현합니다.
+
+### `static/visitor.js`
+
+```js
+const tbody = document.querySelector(`tbody`); // tbody 요소를 선택함
+
+// 폼의 [등록] 버튼 클릭시 -> POST /visitor 요청 
+function createVisitor() {
+    console.log('click 등록 btn')
+
+    const form = document.forms['visitor-form']; // visitor-form 폼 요소를 선택함
+
+    axios({
+        method: 'POST',
+        url: '/visitor',
+        // 추가하려는 정보를 req.body에 실어서 요청을 보냄
+        data: {
+            name: form.name.value,
+            comment: form.comment.value
+        }
+    }).then((res) => {
+        console.log(res)
+
+        const { data } = res; // 응답 데이터에서 결과를 추출함
+        console.log(data)
+
+        const html = `
+            <tr id="tr_${data.id}">
+                <td>${data.id}</td>
+                <td>${data.name}</td>
+                <td>${data.comment}</td>
+                <td><button type="button">수정</button></td>
+                <td><button type="button">삭제</button></td>
+            </tr>
+        `;
+
+        // insertAdjacentHTML : 특정 요소에 html 추가
+        tbody.insertAdjacentHTML(`beforeend`, html); // 새로운 방문자를 테이블에 추가함
+    })
+}
+```
+
+- `createVisitor` 함수는 폼의 등록 버튼을 클릭했을 때 호출됩니다.
+- Axios를 사용하여 서버에 새로운 방문자를 추가하는 POST 요청을 보냅니다.
+- 서버 응답을 받아서 새로운 방문자를 테이블에 추가합니다.
