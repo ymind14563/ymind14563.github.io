@@ -6,11 +6,14 @@ categories: project
 ---
 
 <hr>
-<b>프로젝트 기간: 2024년 7월 10일 ~ 2024년 7월 24일 <br>
-프로젝트 명: MovieMemo <br>
-프로젝트 내용: 감상한 영화의 리뷰를 작성, 공유하는 사이트 제작 프로젝트 <br>
-프로젝트 Repo: https://github.com/SeSAC-1st-Project-Team-C/MovieMemo <br> </b>
+
+**프로젝트 기간 - 2024년 7월 10일 ~ 2024년 7월 24일** <br>
+**프로젝트 명 - MovieMemo** <br>
+**프로젝트 내용 - 감상한 영화의 리뷰를 작성, 공유하는 사이트 제작 프로젝트** <br>
+**프로젝트 Repo - [https://github.com/SeSAC-1st-Project-Team-C/MovieMemo](https://github.com/SeSAC-1st-Project-Team-C/MovieMemo)**
+
 <hr>
+
 
 <br>
 
