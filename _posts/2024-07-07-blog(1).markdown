@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[SeSACx코딩온] MVC 패턴(+ MySQL)"
+title: "[SeSACx코딩온] MVC 패턴(+ MySQL) 생성, 조회"
 date: 2024-07-07
 categories: Node.js
 ---

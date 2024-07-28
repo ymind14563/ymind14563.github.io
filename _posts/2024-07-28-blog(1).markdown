@@ -1,0 +1,508 @@
+---
+layout: post
+title: "[SeSACx코딩온] MVC 패턴(+ MySQL) 조회, 수정, 삭제"
+date: 2024-07-28
+categories: Node.js
+---
+
+# Node.js와 MySQL을 활용한 MVC 패턴으로 조회, 수정, 삭제 하기
+- 이 글에선 이전에 작성한 postVistor와 getVistors(목록)의 내용과 달리
+- getVisitor, patchVisitor, deleteVisitor를 알아봅니다.
+- 1.~ 4. 의 내용은 같습니다.
+<hr>
+<br>
+
+## 1. MVC 패턴
+
+- **Model**: 데이터와 비즈니스 로직을 처리합니다.
+- **View**: 사용자에게 데이터를 표시하는 부분입니다.
+- **Controller**: 사용자 입력을 받아서 처리하고, 모델과 뷰를 연결합니다.
+
+<br>
+
+## 2. 프로젝트 구조
+
+프로젝트를 MVC 패턴으로 구성하기 위해 다음과 같은 디렉토리 구조를 사용합니다:
+
+```
+16-mvc_mysql/
+├── controller/
+│   └── Cvisitor.js
+├── model/
+│   └── Visitor.js
+├── routes/
+│   └── index.js
+├── views/
+│   ├── 404.ejs
+│   ├── index.ejs
+│   └── visitor.ejs
+├── static/
+│   └── visitor.js
+├── app.js
+├── package.json
+└── package-lock.json
+```
+
+이 구조를 통해 각 부분을 분리하여 관리할 수 있습니다.
+
+<br>
+
+## 3. 기본 모듈 설치 및 설정
+
+프로젝트를 시작하기 전에 필요한 모듈을 설치하고 설정합니다.
+
+```json
+{
+  "name": "16-mvc_mysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql": "^2.18.1"
+  }
+}
+```
+
+<br>
+
+## 4. Express 애플리케이션 설정
+
+`app.js` 파일에서 Express 애플리케이션을 설정합니다.
+
+```js
+const express = require(`express`); // Express 모듈을 가져옴
+const app = express(); // 애플리케이션 객체를 생성함
+const PORT = 8000; // 서버가 실행될 포트를 8000번으로 설정함
+
+app.set(`view engine`, `ejs`); // EJS 템플릿 엔진을 사용하도록 설정함
+app.set(`views`, `./views`); // 뷰 파일들이 위치한 디렉토리를 설정함
+app.use(`/static`, express.static(__dirname + `/static`)); // 정적 파일을 제공할 디렉토리를 설정함
+
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터를 파싱함
+app.use(express.json()); // JSON 데이터를 파싱함
+
+const indexRouter = require(`./routes`); // 메인 라우터를 불러옴
+app.use(`/`, indexRouter); // 메인 라우터를 '/' 경로에 연결함
+
+// 모든 정의되지 않은 경로에 대해 404 페이지를 렌더링함
+app.get(`*`, (req, res) => {
+    res.render(`404`);
+});
+
+// 서버를 지정된 포트에서 실행함
+app.listen(PORT, () => {
+    console.log(`${PORT} 서버 연결 성공`);
+});
+```
+
+<br>
+
+## 5. 모델 설정
+
+모델은 데이터와 관련된 로직을 처리합니다. MySQL을 사용하여 방명록 데이터를 처리합니다.
+
+### `model/Visitor.js`
+
+```js
+// MySQL 모듈을 가져옴
+const mysql = require(`mysql`);
+
+// MySQL 연결 객체를 생성함
+const conn = mysql.createConnection({
+  host: `localhost`,
+  user: `user`,
+  password: `12345678`,
+  database: `codingon`
+});
+
+// 방문자 한명을 조회하는 함수
+exports.getVisitor = (targetId, callback)  => {
+  conn.query(`select * from visitor where id=${targetId}`, (err, row) => {
+    if(err) throw err;
+
+    console.log(`model/Visitor.js >>`, row);
+    // model/Visitor.js >> [ RowDataPacket { id: 3, name: '이수현', comment: '아뵤뵤뵤' } ]
+    callback(row[0]); // 배열 형태이기 때문에 [0] 사용
+  })
+}
+
+// 방문자 한명의 정보를 수정하는 함수
+// PATCH 로직
+exports.patchVisitor = (updateData, callback) => {
+  const {id, name, comment} = updateData;
+  conn.query(
+    `update visitor set name='${name}', comment='${comment}' where id=${id}`,
+    (err, rows) => {
+      if(err) throw err
+
+      console.log(`model/visitor.js >> `, rows);
+      callback(true);
+    });
+}
+
+// 방문자 한명의 정보를 삭제하는 함수
+// DELETE 로직
+exports.deleteVisitor = (targetId, callback) => {
+  // targetId: 삭제해야할 visitor id
+  conn.query(`delete from visitor where id=${targetId}`, (err, rows) => {
+    if (err) {
+      throw err;
+    }
+
+    console.log(`model/Visitor.js >> `, rows);
+    // OkPacket {
+    //   fieldCount: 0,
+    //   affectedRows: 1,
+    //   insertId: 0,
+    //   serverStatus: 2,
+    //   warningCount: 0,
+    //   message: '',
+    //   protocol41: true,
+    //   changedRows: 0
+    // }
+    callback(true); // 삭제
+  })
+}
+```
+
+<br>
+
+## 6. 컨트롤러 설정
+
+컨트롤러는 사용자의 요청을 처리하고, 모델에서 데이터를 가져와 뷰에 전달합니다.
+
+### `controller/Cvisitor.js`
+
+```js
+const Visitor = require('../model/Visitor'); // Visitor 모델을 가져옴
+
+// 방문자 한명을 조회하는 함수
+// GET /visitor/:id
+exports.getVisitor = (req, res) => {
+  // req.params.id // 조회 해야할 id
+  Visitor.getVisitor(req.params.id, (result) => {
+    res.send(result);
+  }); 
+}
+
+// 방문자 정보를 수정하는 함수
+// Patch
+exports.patchVisitor = (req, res) => {
+  console.log(req.body);
+
+  Visitor.patchVisitor(req.body, (result) => {
+    console.log(`controller/Cvisitor.js >> `, result);
+    res.send({ result }); // { result : result } // 수정 결과를 클라이언트에 전송 (JSON 형태로)
+  });
+}
+
+// 방문자를 삭제하는 함수
+// Delete
+exports.deleteVisitor = (req, res) => {
+  console.log(req.body);
+
+  Visitor.deleteVisitor(req.body.id, (result) => {
+    console.log('controller/Cvisitor.js >> ', result);
+
+    res.send({ result }); // { result : result } // 삭제 결과를 클라이언트에 전송 (JSON 형태로)
+  })
+}
+
+```
+
+<br>
+
+## 7. 라우터 설정
+
+라우터는 URL 요청을 컨트롤러의 특정 함수와 연결합니다.
+
+### `routes/index.js`
+
+```js
+const express = require('express'); // Express 모듈을 가져옴
+const controller = require('../controller/Cvisitor'); // Visitor 컨트롤러를 가져옴
+const router = express.Router(); // 라우터 객체를 생성함
+
+// GET /visitor/:id
+router.get('/visitor/:id', controller.getVisitor); // 방명록 하나 조회
+
+// PATCH /visitor
+router.patch(`/visitor`, controller.patchVisitor); // 방명록 하나 수정
+
+// DELETE /visitor
+router.delete(`/visitor`, controller.deleteVisitor); // 방명록 하나 삭제
+
+module.exports = router; // 라우터 객체를 모듈로 내보냄
+```
+
+<br>
+
+## 8. 뷰 설정
+
+뷰 파일은 사용자에게 보여지는 화면을 구성합니다.
+
+### `views/index.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="
+
+ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+</head>
+<body>
+    <h1>MVC 패턴을 MySQL과 연결해보자</h1>
+    <a href="/visitors">방문자 목록 보기</a>
+</body>
+</html>
+```
+
+- 이 파일은 메인 페이지를 구성합니다.
+- `<a>` 태그를 사용하여 방문자 목록 페이지로 이동할 수 있는 링크를 제공합니다.
+
+### `views/visitor.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방문자 목록</title>
+    <!-- axios cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <a href="/">홈으로 가기</a>
+    <form name="visitor-form">
+        <fieldset>
+          <legend>방명록 등록</legend>
+          <input type="text" id="name" placeholder="사용자 이름" /> <br>
+          <input type="text" id="comment" placeholder="방명록" /> <br>
+          <div id="button-group">
+            <button type="button" onclick="createVisitor();">등록</button>
+          </div>
+        </fieldset>
+      </form>
+      <br>
+
+      <table border="1" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>작성자</th>
+            <th>방명록</th>
+            <th>수정</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- data: db에서 가지고 오는 데이터 => 새로고침해도 데이터 남아있음 -->
+          <% for (let i = 0; i < data.length; i++) { %>
+          <tr id="tr_<%= data[i].id %>">
+            <td><%= data[i].id %></td>
+            <td><%= data[i].name %></td>
+            <td><%= data[i].comment %></td>
+            <td><button type="button" onclick="editVisitor(`<%= data[i].id %>`);">수정</button></td>
+            <td><button type="button" onclick="deleteVisitor(this, `<%= data[i].id %>`);">삭제</button></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <script src="/static/visitor.js"></script>
+</body>
+</html>
+```
+
+- 전체 방문자 목록을 표시합니다.
+- 서버에서 전달된 `data` 배열을 사용하여 각 방문자를 목록으로 렌더링합니다.
+- button onclick의 함수를 넣어 서버에서 전달된 `data[i].id` 사용하여 각 방문자를 수정 혹은 삭제합니다.
+
+
+<br>
+
+## 9. 정적 파일 설정
+
+정적 파일은 서버에서 제공하는 정적인 자원(이미지, CSS, JavaScript 등)입니다. `visitor.js` 파일을 통해 클라이언트에서 방문자 조회, 수정, 삭제 기능을 구현합니다.
+
+### `static/visitor.js`
+
+```js
+const tbody = document.querySelector(`tbody`); // tbody 요소를 선택함
+
+// 폼의 [등록] 버튼 클릭시 -> POST /visitor 요청 
+function createVisitor() {
+    console.log('click 등록 btn')
+
+    const form = document.forms['visitor-form']; // visitor-form 폼 요소를 선택함
+
+    axios({
+        method: 'POST',
+        url: '/visitor',
+        // 추가하려는 정보를 req.body에 실어서 요청을 보냄
+        data: {
+            name: form.name.value,
+            comment: form.comment.value
+        }
+    }).then((res) => {
+        console.log(res)
+
+        const { data } = res; // 응답 데이터에서 결과를 추출함
+        console.log(data)
+
+        const html = `
+            <tr id="tr_${data.id}">
+                <td>${data.id}</td>
+                <td>${data.name}</td>
+                <td>${data.comment}</td>
+                <td><button type="button" onclick="patchVisitor(${data.id};">수정</button></td>
+                <td><button type="button" onclick="deleteVisitor(this, ${data.id});">삭제</button></td>
+            </tr>
+        `;
+
+        // insertAdjacentHTML : 특정 요소에 html 추가
+        tbody.insertAdjacentHTML(`beforeend`, html); // 새로운 방문자를 테이블에 추가함
+    })
+}
+
+
+
+// [삭제] 버튼 클릭 시
+// - 테이블에서 해당 행 삭제
+function deleteVisitor(obj, id) {
+    console.log(obj); // 클릭한 삭제 버튼 
+    console.log(id); // 행의 id
+
+    if (!confirm('삭제하시겠습니까?')) { // !false: 취소버튼 클릭
+        return; // deleteVisitor 함수 종료 -> 백으로 요청하지 않고 그대로 종료
+    } 
+
+    // 서버에 DELETE 요청을 보냄
+    axios({
+        method: 'DELETE',
+        url: '/visitor',
+        data: {
+            id // id : id
+        }
+    }).then((res) => {
+        console.log(res.data)
+
+        if (res.data.result) {
+            alert('삭제 성공!');
+            // obj.parentElement.parentElement.remove(); // 버튼(obj)의 부모요소의 부모요소를 삭제하면 행이 삭제되는 개념이다.
+
+            obj.closest(`#tr_${id}`).remove(); // 버튼에서 해당되는 요소를 역순으로 찾아주는 매서드
+        }
+    })
+}
+
+
+// [수정] 버튼 클릭 시
+// - form input에 value 넣기
+// - [변경], [취소] 버튼 보이기
+function editVisitor(id) {
+        
+    // 서버에 GET 요청을 보내 특정 id의 방문자 정보를 가져옴
+    axios({
+        method : 'GET',
+        url : `/visitor/${id}`
+    }).then(res => {
+        console.log(res.data);
+        // {
+        //     id: 3, 
+        //     name: '이수현', 
+        //     comment: '아뵤뵤뵤'
+        // }
+
+        // 서버로부터 받은 데이터를 form의 name과 comment 필드에 채워 넣음
+        const {name, comment} = res.data;
+        const form = document.forms[`visitor-form`];
+        form.name.value = name;
+        form.comment.value = comment;
+    });
+
+    // [변경], [취소] 버튼을 동적으로 생성하여 buttonGroup에 추가
+    const html = `
+        <button type="button" onclick="editDo(${id});">변경</button>
+        <button type="button" onclick="editCancel();">취소</button>
+    `;
+    buttonGroup.innerHTML = html;
+}
+
+
+// [변경] 버튼 클릭시
+// - 데이터 수정 요청 
+function editDo(id) {
+    const form = document.forms['visitor-form'];
+
+    // 서버에 PATCH 요청을 보내 수정된 데이터를 전송
+    axios({
+        method: 'PATCH',
+        url: '/visitor',
+        data: {
+            id, // id : id
+            name : form.name.value,
+            comment : form.comment.value
+        }
+    }).then(res => {
+        console.log(res.data);
+
+        if (res.data.result) {
+            alert('수정 성공!');
+
+            // 테이블의 해당 행을 수정된 데이터로 업데이트
+            const children = document.querySelector(`#tr_${id}`).children;
+            children[1].textContent = form.name.value; // 이름 열
+            children[2].textContent = form.comment.value; // 방명록 열
+
+            // 입력창 초기화
+            editCancel();
+        }
+    })
+}
+
+
+// [취소] 버튼 클릭시
+// - input 초기화
+// - [등록] 버튼 되돌리기
+function editCancel() {
+    // 1. input 초기화
+    const form = document.forms[`visitor-form`];
+    form.name.value = ``;
+    form.comment.value = ``;
+
+    // 2. [등록] 버튼 보이기
+    const html = `<button type="button" onclick="createVisitor();">등록</button>`;
+    buttonGroup.innerHTML = html;    
+
+}
+```
+
+### 1) `deleteVisitor` 함수
+   - 특정 방문자 정보를 삭제할 때 호출됩니다.
+   - 사용자가 '삭제' 버튼을 클릭하면, 해당 버튼(`obj`)과 삭제할 방문자의 ID(`id`)를 인자로 받습니다.
+   - 삭제 확인 팝업을 띄운 후, 사용자가 '확인'을 클릭하면 서버에 DELETE 요청을 보냅니다.
+   - 요청이 성공하면, 테이블에서 해당 행을 제거합니다. 여기서 `obj.closest(`#tr_${id}`).remove()`는 삭제 버튼에서 가장 가까운 상위 요소를 찾아 삭제합니다.
+
+### 2) `editVisitor` 함수
+   - 특정 방문자 정보를 수정하기 위해 해당 데이터를 폼에 채워 넣을 때 호출됩니다.
+   - 사용자가 '수정' 버튼을 클릭하면, 수정할 방문자의 ID를 인자로 받아 서버에 GET 요청을 보냅니다.
+   - 서버로부터 받은 방문자 데이터를 폼의 input 필드에 채웁니다.
+   - '변경', '취소' 버튼을 동적으로 생성하여 버튼 그룹에 추가합니다.
+
+### 3) `editDo` 함수
+   - 수정된 방문자 정보를 서버에 전송할 때 호출됩니다.
+   - 사용자가 '변경' 버튼을 클릭하면, 폼의 데이터를 가져와 서버에 PATCH 요청을 보냅니다.
+   - 요청이 성공하면, 테이블의 해당 행을 수정된 데이터로 업데이트하고 폼을 초기화합니다.
+
+### 4) `editCancel` 함수
+   - 수정 작업을 취소하고 폼을 초기화할 때 호출됩니다.
+   - '취소' 버튼을 클릭하면, 폼의 input 필드를 초기화하고 '등록' 버튼을 다시 보이게 합니다.
