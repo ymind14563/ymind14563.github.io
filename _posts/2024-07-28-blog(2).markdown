@@ -447,7 +447,7 @@ function editCancel() {
 </html>
 ```
 
-## (1) views/visitor.ejs
+## (3) views/visitor.ejs
 
 ```html
 <!DOCTYPE html>
