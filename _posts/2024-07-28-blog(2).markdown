@@ -1,0 +1,601 @@
+---
+layout: post
+title: "[SeSACx코딩온] MVC 패턴(+ MySQL)"
+date: 2024-07-28
+categories: Node.js
+---
+
+# Node.js와 MySQL을 활용한 MVC 패턴
+- 앞서 작성한 생성, 조회, 수정, 삭제의 내용을 전체적으로 살펴봅니다.
+<hr>
+<br>
+
+## 1. 프로젝트 구조
+
+```
+16-mvc_mysql/
+├── controller/
+│   └── Cvisitor.js
+├── model/
+│   └── Visitor.js
+├── routes/
+│   └── index.js
+├── views/
+│   ├── 404.ejs
+│   ├── index.ejs
+│   └── visitor.ejs
+├── static/
+│   └── visitor.js
+├── app.js
+├── package.json
+└── package-lock.json
+```
+
+<br>
+
+## 2. 구조별 살펴보기
+
+## 1) controller/CVisitor.js
+
+
+```js
+const Visitor = require('../model/Visitor');
+
+// (1) GET / => localhost:PORT/
+exports.getMain = (req, res) => {
+  res.render('index');
+};
+
+// (2) GET /visitor => localhost:PORT/visitor
+exports.getVisitors = (req, res) => {
+  // [before]
+  // res.render('visitor', { data: Visitor.getVisitors() });
+
+  // [after]
+  Visitor.getVisitors((result) => {
+    // result 매개변수
+    // : model/Visitor.js의 getVisitors 함수의 callback(rows)의 "rows" 변수에 대응.
+    console.log(`controller/Cvisitor.js >> `, result);
+
+    console.log(Visitor); // { getVisitors: [Function (anonymous)] }
+    console.log(Visitor.getVisitors); // [Function (anonymous)]
+    
+
+    // res.send(`test`);
+
+    res.render(`visitor`, { data: result });
+    // 함수의 결과 값을 data에 대입하여야 하는데 Visitor.getVisitors를 입력하게 되면
+    // 함수 자체를 입력하는 것이 되기 때문에 오류가 발생한다.
+  })
+};
+
+// GET /visitor/:id
+exports.getVisitor = (req, res) => {
+  // req.params.id // 조회 해야할 id
+  Visitor.getVisitor(req.params.id, (result) => {
+    res.send(result);
+  }); 
+
+}
+
+
+// POST
+exports.postVisitor = (req, res) => {
+  console.log(req.body);
+
+  Visitor.postVisitor(req.body, (result) => {
+    // result: rows.insertId
+    
+    console.log(`controller/Cvisitor.js >> ` , result);
+    // controller/Cvisitor.js >> 4
+
+    res.send({
+      id : result,
+      name : req.body.name,
+      comment : req.body.comment
+    })
+  });
+}
+
+// Patch
+exports.patchVisitor = (req, res) => {
+  console.log(req.body);
+
+  Visitor.patchVisitor(req.body, (result) => {
+    console.log(`controller/Cvisitor.js >> `, result);
+
+    res.send({ result }); // { result : result }
+
+  });
+}
+
+
+// Delete
+exports.deleteVisitor = (req, res) => {
+  console.log(req.body);
+
+  Visitor.deleteVisitor(req.body.id, (result) => {
+    console.log('controller/Cvisitor.js >> ', result);
+    
+    res.send({ result }); // { result : result }
+  })
+```
+
+<br>
+
+## 2) model/Visitor.js
+
+```js
+// [before]
+// // (임시) DB로부터 방명록 데이터를 받아옴
+// exports.getVisitors = () => {
+//     return [
+//       { id: 1, name: '홍길동', comment: '내가 왔다.' },
+//       { id: 2, name: '이찬혁', comment: '으라차차' },
+//     ];
+// };    
+
+// [after]
+const mysql = require(`mysql`);
+const conn = mysql.createConnection({
+  host: `localhost`,
+  user: `user`,
+  password: `12345678`,
+  database: `codingon`
+}); // database 연결 객체
+
+exports.getVisitors = (callback) => {
+  conn.query(`select * from visitor`, (err, rows) => {
+    if(err) throw err;
+
+    console.log(`model/Visitor.js >>  `, rows);
+    callback(rows);
+  })
+}
+
+
+exports.getVisitor = (targetId, callback)  => {
+  conn.query(`select * from visitor where id=${targetId}`, (err, row) => {
+    if(err) throw err;
+
+    console.log(`model/Visitor.js >>`, row);
+    // model/Visitor.js >> [ RowDataPacket { id: 3, name: '이수현', comment: '아뵤뵤뵤' } ]
+    callback(row[0]); // 배열 형태이기 때문에 [0] 사용
+  })
+
+}
+
+
+// POST 로직
+exports.postVisitor = (data, callback) => {
+  console.log(data)
+  conn.query(`insert into visitor(name, comment) values('${data.name}','${data.comment}')`,
+    (err, rows) => {
+      if (err) throw err;
+
+      console.log('model/Visitor.js >> ', rows);
+      // model/Visitor.js >>  OkPacket {
+      //   fieldCount: 0,
+      //   affectedRows: 1,
+      //   insertId: 4, // -> pk
+      //   serverStatus: 2,
+      //   warningCount: 0,
+      //   message: '',
+      //   protocol41: true,
+      //   changedRows: 0
+      // }
+      callback(rows.insertId);
+    }
+  )
+}
+
+
+// PATCH 로직
+exports.patchVisitor = (updateData, callback) => {
+  const {id, name, comment} = updateData;
+  conn.query(
+    `update visitor set name='${name}', comment='${comment}' where id=${id}`,
+    (err, rows) => {
+      if(err) throw err
+
+      console.log(`model/visitor.js >> `, rows);
+      callback(true);
+    });
+}
+
+// DELETE 로직
+exports.deleteVisitor = (targetId, callback) => {
+  // targetId: 삭제해야할 visitor id
+  conn.query(`delete from visitor where id=${targetId}`, (err, rows) => {
+    if (err) {
+      throw err;
+    }
+
+    console.log(`model/Visitor.js >> `, rows);
+    // OkPacket {
+    //   fieldCount: 0,
+    //   affectedRows: 1,
+    //   insertId: 0,
+    //   serverStatus: 2,
+    //   warningCount: 0,
+    //   message: '',
+    //   protocol41: true,
+    //   changedRows: 0
+    // }
+    callback(true); // 삭제
+  })
+```
+
+<br>
+
+## 3) routes/index.js
+
+```js
+const express = require('express');
+const controller = require('../controller/Cvisitor');
+const router = express.Router();
+
+// 작업 순서
+// read all -> create -> delete -> read one -> update
+
+
+// GET / => localhost:PORT/
+router.get('/', controller.getMain);
+
+// GET /visitors => localhost:PORT/visitors
+router.get('/visitors', controller.getVisitors); // 전체 조회
+
+// GET /visitor/:id
+router.get('/visitor/:id', controller.getVisitor); // 방명록 하나 조회
+
+// POST /visitor
+router.post(`/visitor`, controller.postVisitor); // 방명록 추가
+
+// PATCH /visitor
+router.patch(`/visitor`, controller.patchVisitor); // 방명록 하나 수정
+
+
+// DELETE /visitor
+router.delete(`/visitor`, controller.deleteVisitor); // 방명록 하나 삭제
+module.exports = router;
+```
+
+<br>
+
+## 4) static/visitor.js
+
+```js
+const tbody = document.querySelector(`tbody`);
+const buttonGroup = document.querySelector(`#button-group`);
+
+
+// 폼의 [등록] 버튼 클릭 시 -> POST /visitor 요청 
+function createVisitor() {
+    console.log('click 등록 btn')
+
+    const form = document.forms['visitor-form'];
+
+    axios({
+        method: 'POST',
+        url: '/visitor',
+        // 추가하려는 정보를 req.body에 실어서 요청을 보냄
+        data: {
+            name: form.name.value,
+            comment: form.comment.value
+        }
+    }).then((res) => {
+        console.log(res)
+
+        const { data } = res; // {id : ooo, name : ooo, comment : ooo}
+        console.log(data)
+
+        const html = `
+            <tr id="tr_${data.id}">
+                <td>${data.id}</td>
+                <td>${data.name}</td>
+                <td>${data.comment}</td>
+                <td><button type="button" onclick="patchVisitor(${data.id};">수정</button></td>
+                <td><button type="button" onclick="deleteVisitor(this, ${data.id});">삭제</button></td>
+            </tr>
+        `;
+
+        // insertAdjacentHTML : 특정 요소에 html 추가
+        tbody.insertAdjacentHTML(`beforeend`, html);
+    })
+}
+
+// [삭제] 버튼 클릭 시
+// - 테이블에서 해당 행 삭제
+function deleteVisitor(obj, id) {
+    console.log(obj); // 클릭한 삭제 버튼 
+    console.log(id); // 행의 id
+
+    if (!confirm('삭제하시겠습니까?')) { // !false: 취소버튼 클릭
+        return; // deleteVisitor 함수 종료 -> 백으로 요청하지 않고 그대로 종료
+    } 
+
+    axios({
+        method: 'DELETE',
+        url: '/visitor',
+        data: {
+            id // id : id
+        }
+    }).then((res) => {
+        console.log(res.data)
+
+        if (res.data.result) {
+            alert('삭제 성공!');
+            // obj.parentElement.parentElement.remove(); // 버튼(obj)의 부모요소의 부모요소를 삭제하면 행이 삭제되는 개념이다.
+            
+            obj.closest(`#tr_${id}`).remove(); // 버튼에서 해당되는 요소를 역순으로 찾아주는 매서드
+        }
+    })
+}
+
+// [수정] 버튼 클릭 시
+// - form input에 value 넣기
+// - [변경], [취소] 버튼 보이기
+function editVisitor(id) {
+    axios({
+        method : 'GET',
+        url : `/visitor/${id}`
+    }).then(res => {
+        console.log(res.data);
+        // {
+        //     id: 3, 
+        //     name: '이수현', 
+        //     comment: '아뵤뵤뵤'
+        // }
+
+        const {name, comment} = res.data;
+        const form = document.forms[`visitor-form`];
+        form.name.value = name;
+        form.comment.value = comment;
+    });
+
+    const html = `
+        <button type="button" onclick="editDo(${id});">변경</button>
+        <button type="button" onclick="editCancel();">취소</button>
+    `;
+    buttonGroup.innerHTML = html;
+}
+
+// [변경] 버튼 클릭시
+// - 데이터 수정 요청 
+function editDo(id) {
+    const form = document.forms['visitor-form'];
+
+    axios({
+        method: 'PATCH',
+        url: '/visitor',
+        data: {
+            id, // id : id
+            name : form.name.value,
+            comment : form.comment.value
+        }
+    }).then(res => {
+        console.log(res.data);
+
+        if (res.data.result) {
+            alert('수정 성공!');
+
+            const children = document.querySelector(`#tr_${id}`).children;
+            children[1].textContent = form.name.value; // 이름 열
+            children[2].textContent = form.comment.value; // 방명록 열
+
+            // 입력창 초기화
+            editCancel();
+        }
+    })
+}
+
+
+// [취소] 버튼 클릭시
+// - input 초기화
+// - [등록] 버튼 되돌리기
+function editCancel() {
+    // 1. input 초기화
+    const form = document.forms[`visitor-form`];
+    form.name.value = ``;
+    form.comment.value = ``;
+
+    // 2. [등록] 버튼 보이기
+    const html = `<button type="button" onclick="createVisitor();">등록</button>`;
+    buttonGroup.innerHTML = html;    
+
+}
+```
+
+<br>
+
+## 5) views/
+
+## (1) views/404.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>404. 페이지를 찾을 수 없습니다. </h1>
+
+    <p> 죄송합니다. 찾을 수 없는 페이지입니다.</p>
+
+    <a href="/">홈으로 가기</a>
+</body>
+</html>
+```
+
+## (2) views/index.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>MVC 패턴을 MySQL과 연결해보자</h1>
+    <a href="/visitors"> 방문자 목록 보기</a>
+</body>
+</html>
+```
+
+## (1) views/visitor.ejs
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document</title>
+      <!-- axios cdn -->
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <a href="/">홈으로 가기</a>
+    <form name="visitor-form">
+        <fieldset>
+          <legend>방명록 등록</legend>
+          <input type="text" id="name" placeholder="사용자 이름" /> <br>
+          <input type="text" id="comment" placeholder="방명록" /> <br>
+          <div id="button-group">
+            <button type="button" onclick="createVisitor();">등록</button>
+          </div>
+        </fieldset>
+      </form>
+      <br>
+
+      <table border="1" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>작성자</th>
+            <th>방명록</th>
+            <th>수정</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- data: db에서 가지고 오는 데이터 => 새로고침해도 데이터 남아있음 -->
+          <% for (let i = 0; i < data.length; i++) { %>
+          <tr id="tr_<%= data[i].id %>">
+            <td><%= data[i].id %></td>
+            <td><%= data[i].name %></td>
+            <td><%= data[i].comment %></td>
+            <td><button type="button" onclick="editVisitor(`<%= data[i].id %>`);">수정</button></td>
+            <td><button type="button" onclick="deleteVisitor(this, `<%= data[i].id %>`);">삭제</button></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <script src="/static/visitor.js"></script>
+</body>
+</html>
+```
+
+<br>
+
+## 6) app.js
+
+```js
+const express = require(`express`);
+const app = express();
+const PORT = 8000;
+
+app.set(`view engine`, `ejs`);
+app.set(`views`, `./views`);
+app.use(`/static`, express.static(__dirname + `/static`));
+
+app.use(express.urlencoded({ extended : true}));
+app.use(express.json());
+
+const indexRouter = require(`./routes`);
+app.use(`/`, indexRouter);
+
+app.get(`*`, (req, res) => {
+    res.render(`404`);
+})
+
+app.listen(PORT, () => {
+    console.log(`${PORT} 서버 연결 성공`);
+})
+```
+
+<br>
+
+## 7) index.sql
+
+```sql
+show databases;
+
+use codingon;
+
+create table visitor (
+	id int primary key auto_increment,
+    name varchar(10) not null,
+    comment mediumtext
+);
+
+desc visitor;
+
+-- 데이터 추가
+insert into visitor values
+	(null, '홍길동', '내가 왔다.'), 
+    (null, '이찬혁', '으라차차');
+    
+insert into visitor values
+	(null, '이수현', '아뵤뵤뵤');
+
+select * from visitor;
+
+-- user 계정 생성
+create user 'user'@'%' identified by '12345678'; -- 계정 추가
+grant all privileges on *.* to 'user'@'%' with grant option; -- 새로운 계정에 권한 부여
+flush privileges; -- 캐쉬 지우고 새로운 설정 적용
+
+alter user 'user'@'%' identified with mysql_native_password by '12345678'; -- 인증 방식 변경
+
+select * from mysql.user;  -- 계정 생성 확인
+```
+
+<br>
+
+## 8) package.json
+
+```json
+{
+  "name": "16-mvc_mysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql": "^2.18.1"
+  }
+}
+```
+
+<br>
+
+## 9) package-lock.json
+
+```json
+생략
+```
