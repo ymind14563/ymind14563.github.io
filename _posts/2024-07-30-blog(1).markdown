@@ -1,0 +1,457 @@
+---
+layout: post
+title: "[SeSACx코딩온] Sequelize"
+date: 2024-07-30
+categories: Node.js
+---
+
+# Sequelize를 이용한 모델 및 관계 설정
+
+- Sequelize는 Node.js 애플리케이션에서 데이터베이스와의 상호작용을 간편하게 처리할 수 있도록 도와주는 ORM(Object-Relational Mapping) 라이브러리입니다. 
+- ORM을 사용하게 되면 SQL문을 쓰지 않고도 CRUD를 할 수 있다는 장점이 있습니다.
+
+<hr>
+<br>
+
+## 프로젝트 디렉토리 구조
+
+```
+project/
+│
+├── sequelize/
+│   ├── models/
+│   │   ├── Player.js
+│   │   ├── Profile.js
+│   │   ├── Team.js
+│   │   └── index.js
+│   │
+│   ├── routes/
+│   │   └── index.js
+│   │
+│   ├── controller/
+│   │   └── Cmain.js
+│   │
+│   └── views/
+│       └── index.ejs
+│
+├── config/
+│   └── config.json
+│
+├── node_modules/
+│   └── [npm packages]
+│
+├── package.json
+└── package-lock.json
+```
+
+## 설치할 npm 목록
+
+```
+npm install ejs express mysql2 sequelize sequelize-cli
+```
+
+#### `sequelize/package.json`
+
+```json
+{
+  "name": "17-sequelize",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql2": "^3.10.1",
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2"
+  }
+}
+```
+
+<br>
+<br>
+
+## 1. Sequelize 기본 설정
+
+### 1) 기본 Express 서버 설정
+
+#### `sequelize/index.js`
+
+```js
+const express = require('express'); // Express 웹 프레임워크 불러오기
+const app = express(); // Express 애플리케이션 생성
+const PORT = 8000; // 서버가 사용할 포트 번호
+const router = require('./routes/index'); // 라우터 모듈 불러오기
+const { sequelize } = require('./models'); // Sequelize 인스턴스와 모델을 불러오기
+
+app.set('view engine', 'ejs'); // EJS를 템플릿 엔진으로 설정
+app.set('views', './views'); // EJS 템플릿 파일이 위치할 디렉토리 설정
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터 파싱 미들웨어
+app.use(express.json()); // JSON 데이터 파싱 미들웨어
+
+app.use('/', router); // 루트 경로에 대한 요청을 라우터로 전달
+
+// 데이터베이스와 모델을 동기화하고 서버를 시작
+sequelize
+
+    // force : true ; 서버 실행할 때마다 테이블 재생성
+    // force : false ; 서버 실행 시 테이블이 없으면 생성 
+    .sync({ force: true }) // 데이터베이스와 모델 간의 동기화. 테이블을 강제로 재생성
+    .then(() => {
+        app.listen(PORT, () => console.log(`${PORT}에서 서버 실행 중`));
+        console.log('데이터베이스 연결 성공');
+    })
+    .catch((err) => {
+        console.error('데이터베이스 연결 실패:', err); // 데이터베이스 연결 에러 출력
+    });
+```
+- 기본적인 Express 서버와 Sequelize 초기화 설정을 포함합니다. `express` 모듈을 사용하여 웹 서버를 설정하고, `sequelize.sync({ force: true })`를 통해 데이터베이스와 모델 간의 동기화를 수행합니다. 
+- `sequelize.sync({ force: true })`은 개발 중 데이터베이스 스키마를 변경할 때 유용하지만 모든 데이터가 삭제되므로 신중하게 사용해야 합니다. 
+- 초기 설정 시 `sequelize.sync({ force: true })`를 사용하고 DB에 데이터가 생기면 `{ force: false }`로 변경해 줍니다.
+- 서버가 성공적으로 실행되면 지정된 포트에서 요청을 수신하고, 데이터베이스와의 연결 상태를 콘솔에 출력합니다.
+
+<br>
+
+### 2) DB 관련 세부설정
+
+#### `sequelize/config/config.json`
+
+```json
+{
+  "development": {
+    "username": "user", // 데이터베이스 사용자 이름
+    "password": "12345678", // 데이터베이스 사용자 비밀번호
+    "database": "codingon", // 사용할 데이터베이스 이름
+    "host": "127.0.0.1", // 데이터베이스 서버 호스트 주소(거의 고정)
+    "dialect": "mysql" // 사용할 데이터베이스 종류 (배포 시 해당 내용이 빠지면 에러 발생함)
+  },
+
+  "test": {
+    // 테스트 환경 설정 (추후 필요 시 작성)
+  },
+  "production": {
+    // 프로덕션 환경 설정 (추후 필요 시 작성)
+  }
+}
+```
+
+<br>
+
+## 2. 데이터베이스 모델 정의
+
+### 1) `Player` 모델 정의
+
+#### `sequelize/models/Player.js`
+
+```js
+const playerModel = (sequelize, DataTypes) => {
+    // sequelize 매개변수 : model/index.js에서의 sequelize (db 연결 정보를 입력하여 생성한 객체)
+    // DataTypes 매개변수 : model/index.js에서의 sequelize (sequelize 패키지 자체)
+    const Player = sequelize.define(
+
+        // param 1 : 모델 이름 설정
+        'Player', {
+
+        // param 2 : 모델 컬럼 정의
+            player_id: {
+                type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+                primaryKey: true, // 기본키로 설정
+                allowNull: false, // NULL 값 허용 안함
+                autoIncrement: true // 자동 증가 설정
+            },
+            name: {
+                type: DataTypes.STRING(63), // 데이터 타입은 문자열, 최대 길이 63자
+                allowNull: false // NULL 값 허용 안함
+            },
+            age: {
+                type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+                allowNull: false // NULL 값 허용 안함
+            }
+        },
+
+        // param 3 : 모델 옵션 정의
+        {
+            freezeTableName: true // 모델 이름을 테이블 이름으로 사용(테이블 이름을 복수형으로 변환하지 않음)
+            timestamps: false // 데이터가 추가되고 수정된 시간을 자동으로 컬럼을 만들어서 기록
+        });
+
+    return Player;
+}
+
+module.exports = playerModel;
+```
+
+- `Player` 모델은 `player_id`, `name`, `age`의 세 가지 속성을 가지며, 각각의 속성에 대한 데이터 타입과 제약 조건을 정의합니다. `player_id`는 기본키로 설정되어 있으며 자동 증가합니다. 
+- `name`과 `age`는 각각 문자열과 정수형 데이터로 정의되고 NULL 값을 허용하지 않습니다. 
+- `freezeTableName: true` 옵션을 사용하여 모델 이름과 테이블 이름을 동일하게 유지합니다.
+- `freezeTableName: false` 를 사용하면 테이블의 이름을 자동으로 명명합니다. 이때 복수형으로 바뀝니다.
+
+<br>
+
+### 2) `Profile` 모델 정의
+
+#### `sequelize/models/Profile.js`
+
+```js
+const ProfileModel = (sequelize, DataTypes) => {
+    const Profile = sequelize.define('Profile', {
+        profile_id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            primaryKey: true, // 기본키로 설정
+            allowNull: false, // NULL 값 허용 안함
+            autoIncrement: true // 자동 증가 설정
+        },
+        position: {
+            type: DataTypes.STRING(63), // 데이터 타입은 문자열, 최대 길이 63자
+            allowNull: false // NULL 값 허용 안함
+        },
+        salary: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            allowNull: false // NULL 값 허용 안함
+        }
+    }, {
+        freezeTableName: true // 모델 이름을 테이블 이름으로 사용(테이블 이름을 복수형으로 변환하지 않음)
+    });
+
+    return Profile;
+};
+
+module.exports = ProfileModel;
+```
+
+- `Profile` 모델은 `profile_id`, `position`, `salary`의 세 가지 속성을 가지며, 각각의 속성에 대한 데이터 타입과 제약 조건을 정의합니다. `profile_id`는 기본키로 설정되어 있으며 자동 증가합니다. 
+- `position`과 `salary`는 각각 문자열과 정수형 데이터로 정의되고 NULL 값을 허용하지 않습니다. 
+- `freezeTableName: true` 옵션을 사용하여 모델 이름과 테이블 이름을 동일하게 유지합니다.
+
+<br>
+
+### 3) `Team` 모델 정의
+
+#### `sequelize/models/Team.js`
+
+```js
+const TeamModel = (sequelize, DataTypes) => {
+    const Team = sequelize.define('Team', {
+        team_id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            primaryKey: true, // 기본키로 설정
+            allowNull: false, // NULL 값 허용 안함
+            autoIncrement: true // 자동 증가 설정
+        },
+        name: {
+            type: DataTypes.STRING(63), // 데이터 타입은 문자열, 최대 길이 63자
+            allowNull: false // NULL 값 허용 안함
+        }
+    }, {
+        freezeTableName: true // 모델 이름을 테이블 이름으로 사용(테이블 이름을 복수형으로 변환하지 않음)
+    });
+
+    return Team;
+};
+
+module.exports = TeamModel;
+```
+
+- `Team` 모델은 `team_id`와 `name`의 두 가지 속성을 가지며, 각각의 속성에 대한 데이터 타입과 제약 조건을 정의합니다. `team_id`는 기본키로 설정되어 있으며 자동 증가합니다. 
+- `name`은 최대 63자의 문자열로 정의되고 NULL 값을 허용하지 않습니다. 
+- `freezeTableName: true` 옵션을 사용하여 모델 이름과 테이블 이름을 동일하게 유지합니다.
+
+<br>
+
+## 3. 모델 간의 관계 설정
+
+모델 간의 관계를 정의하여 데이터베이스의 외래 키 및 참조 관계를 설정합니다. 이를 통해 데이터베이스의 무결성을 유지하고 모델 간의 연관성을 관리할 수 있습니다.
+
+### 1) 모델 간의 관계 정의
+
+#### `sequelize/models/index.js`
+
+```js
+const Sequelize = require('sequelize'); // Sequelize 모듈 불러오기
+const config = require(__dirname + '/../config/config.json')["development"]; // 데이터베이스 설정 불러오기 (config.json으로 가서 development의 키에 해당하는 값을 가져온다는 의미)
+const db = {}; // 데이터베이스 객체를 저장할 빈 객체
+
+const sequelize = new Sequelize(config.database, config.username, config.password, config); // Sequelize 인스턴스 생성
+
+// 모델 불러오기
+const PlayerModel = require('./Player')(sequelize, Sequelize);
+const ProfileModel = require('./Profile')(sequelize, Sequelize);
+const TeamModel = require('./Team')(sequelize, Sequelize);
+
+// 모델 간의 관계 설정
+// 1) Player : Profile = 1 : 1
+PlayerModel.hasOne(ProfileModel, { 
+    onDelete: 'CASCADE', // 플레이어와 연관된 프로필도 삭제
+    onUpdate: 'CASCADE', // 플레이어와 연관된 프로필도 업데이트
+    foreignKey: 'player_id', // ProfileModel에 player_id 외래 키 생성
+    sourceKey: 'player_id' // PlayerModel의 player_id 컬럼 참조
+});
+
+ProfileModel.belongsTo(PlayerModel, {
+    foreignKey: 'player_id', // ProfileModel에 player_id 외래 키 생성
+    targetKey: 'player_id' // 참조할 PlayerModel의 키는 player_id
+});
+
+// 2) Team : Player = 1 : N
+TeamModel.hasMany(PlayerModel, {
+    foreignKey: 'team_id', // PlayerModel에 team_id 외래 키 생성
+    sourceKey: 'team_id' // TeamModel의 team_id 컬럼 참조
+});
+
+PlayerModel.belongsTo(TeamModel, {
+    foreignKey: 'team_id', // PlayerModel에 team_id 외래 키 생성
+    targetKey: 'team_id' // 참조할 TeamModel의 키는 team_id
+});
+
+db.sequelize = sequelize; // sequelize 인스턴스를 db 객체에 추가
+db.Sequelize = Sequelize; // Sequelize 모듈을 db 객체에 추가
+
+db.Player = PlayerModel; // Player 모델을 db 객체에 추가
+db.Profile = ProfileModel; // Profile 모델을 db 객체에 추가
+db.Team = TeamModel; // Team 모델을 db 객체에 추가
+
+module.exports = db; // db 객체 내보내기
+```
+
+- 이 코드는 모델 간의 관계를 설정합니다. `Player`와 `Profile` 사이의 1:1 관계를 설정하고, `Player`가 하나의 `Profile`을 가지며, `Profile`은 하나의 `Player`에 속한다고 정의합니다. 
+- `Team`과 `Player` 사이의 1:N 관계를 설정하여 하나의 `Team`은 여러 명의 `Player`를 가질 수 있으며, `Player`는 하나의 `Team`에 속한다고 정의합니다. `onDelete`와 `onUpdate` 옵션을 사용하여 관계가 변경될 때의 동작을 설정합니다. 
+- sequelize는 Sequelize의 인스턴스이고, Sequelize는 Sequelize 라이브러리 자체를 의미합니다. 이들을 db 객체에 추가합니다. 또한 위에서 작성한 모델(데이터베이스 객체)를 `db` 객체에 추가하고 내보냅니다.
+
+<br>
+
+**참고 사항**
+> - 맨처음 파일 설정하면 등록이 되어버리기때문에 중간에 파일명을 바꾸거나해도 등록되어있기에 계속 에러가 발생합니다.
+> - 파일을 삭제하고 새로 만들어야 해결됩니다. 그래도 해결되지 않을 땐 VScode를 종료 후 재실행 시 해결됩니다.
+> - 코드를 실행하고 MySQL 워크벤치에 테이블이 생성되는데 Mac은 테이블명이 대문자로, Windows는 소문자로 생성됩니다. MySQL은 대소문자를 구분하지 않으므로 상관은 없습니다.
+
+<br>
+
+### 2) 만약 N:N 관계가 있는 경우에는?
+
+- Sequelize에서 N 대 N 관계를 설정하려면 중간 테이블을 사용해야 합니다. 중간 테이블은 두 모델 간의 다대다 관계를 연결해주는 역할을 합니다. 
+- 여기서 예시로 `PlayerTeamModel` 이라는 중간 테이블을 생성해 보겠습니다.
+
+#### (1) 중간 테이블 정의
+
+- `PlayerTeam` 모델은 `player_id`와 `team_id` 두 개의 외래 키를 가집니다.
+- 이 외래 키들은 각각 `Player` 모델과 `Team` 모델을 참조합니다.
+
+#### `sequelize/models/PlayerTeam.js`
+```js
+const PlayerTeamModel = (sequelize, DataTypes) => {
+    const PlayerTeam = sequelize.define('PlayerTeam', {
+        player_id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            allowNull: false, // NULL 값 허용 안함
+            references: {
+                model: 'Player', // 참조할 모델 이름
+                key: 'player_id' // 참조할 모델의 키
+            }
+        },
+        team_id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            allowNull: false, // NULL 값 허용 안함
+            references: {
+                model: 'Team', // 참조할 모델 이름
+                key: 'team_id' // 참조할 모델의 키
+            }
+        }
+    }, {
+        freezeTableName: true // 모델 이름을 테이블 이름으로 사용
+    });
+
+    return PlayerTeam;
+};
+
+module.exports = PlayerTeamModel;
+
+```
+
+<br>
+
+#### (2) 모델 간의 N 대 N 관계 정의
+
+```js
+const PlayerTeamModel = require('./PlayerTeam')(sequelize, Sequelize);
+
+// 3) Player : Team = N : N (다대다 관계 설정)
+PlayerModel.belongsToMany(TeamModel, {
+    through: PlayerTeamModel, // 중간 테이블 설정
+    foreignKey: 'player_id', // PlayerTeamModel에 player_id fk 생성
+    otherKey: 'team_id' // PlayerTeamModel에 team_id fk 생성
+});
+
+TeamModel.belongsToMany(PlayerModel, {
+    through: PlayerTeamModel, // 중간 테이블 설정
+    foreignKey: 'team_id', // PlayerTeamModel에 team_id fk 생성
+    otherKey: 'player_id' // PlayerTeamModel에 player_id fk 생성
+});
+
+db.PlayerTeam = PlayerTeamModel;
+```
+- `through` 옵션은 다대다 관계를 연결할 중간 테이블을 지정합니다.
+- `foreignKey` 옵션은 중간 테이블에서 사용할 외래 키를 지정합니다.
+- `otherKey` 옵션은 상대 모델의 외래 키를 지정합니다.
+
+이렇게 설정하면 `Player`와 `Team` 간에 다대다 관계가 설정되고, 중간 테이블 `PlayerTeam`을 통해 연결됩니다.
+
+<br>
+
+## 4. 컨트롤러 및 라우터 설정
+
+### 1) 라우터 정의
+
+#### `sequelize/routes/index.js`
+
+```js
+const express = require('express'); // Express 모듈 불러오기
+const router = express.Router(); // Express 라우터 생성
+const controller = require('../controller/Cmain'); // 컨트롤러 모듈 불러오기
+
+// 기본 요청 경로: localhost:PORT
+router.get('/', controller.index); // 루트 경로에 대한 GET 요청 처리
+
+module.exports = router; // 라우터 모듈 내보내기
+```
+
+- 라우터를 정의하여 클라이언트의 요청을 처리합니다. 루트 경로('/')에 대한 GET 요청을 `controller.index` 메서드로 전달합니다. 라우터를 모듈로 내보내어 서버에서 사용할 수 있게 합니다.
+
+<br>
+
+### 2) 컨트롤러 설정
+
+#### `sequelize/controller/Cmain.js`
+
+```js
+exports.index = (req, res) => {
+    res.render('index'); // index.ejs 템플릿 렌더링
+}
+```
+
+- `index` 메서드는 `views/index.ejs` 템플릿을 렌더링하여 클라이언트에 응답합니다. 이 메서드는 라우터에서 호출되며, 클라이언트의 요청에 대해 동적 HTML 페이지를 제공합니다.
+
+<br>
+
+## 5. EJS 템플릿
+
+#### `sequelize/views/index.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Sequelize를 배워보자!!</h1>
+</body>
+</html>
+```
