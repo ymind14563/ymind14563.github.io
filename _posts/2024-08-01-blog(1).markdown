@@ -5,7 +5,7 @@ date: 2024-08-01
 categories: Node.js
 ---
 
-# Sequelize를 이용한 모델 및 관계 설정
+# Sequelize를 이용한 API 추가
 
 - 앞서 작성한 Sequelize 기본 구조를 토대로 API를 작성해보겠습니다.
 - models의 구조는 그대로 활용하고 controller와 router를 추가합니다.
