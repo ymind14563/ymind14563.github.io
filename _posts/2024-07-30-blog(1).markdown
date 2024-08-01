@@ -333,9 +333,9 @@ module.exports = db; // db 객체 내보내기
 
 <br>
 
-### 2) 만약 N:N 관계가 있는 경우에는?
+### 2) 만약 N:M 관계가 있는 경우에는?
 
-- Sequelize에서 N 대 N 관계를 설정하려면 중간 테이블을 사용해야 합니다. 중간 테이블은 두 모델 간의 다대다 관계를 연결해주는 역할을 합니다. 
+- Sequelize에서 N 대 M 관계를 설정하려면 중간 테이블을 사용해야 합니다. 중간 테이블은 두 모델 간의 다대다 관계를 연결해주는 역할을 합니다. 
 - 여기서 예시로 `PlayerTeamModel` 이라는 중간 테이블을 생성해 보겠습니다.
 
 #### (1) 중간 테이블 정의
@@ -376,12 +376,12 @@ module.exports = PlayerTeamModel;
 
 <br>
 
-#### (2) 모델 간의 N 대 N 관계 정의
+#### (2) 모델 간의 N 대 M 관계 정의
 
 ```js
 const PlayerTeamModel = require('./PlayerTeam')(sequelize, Sequelize);
 
-// 3) Player : Team = N : N (다대다 관계 설정)
+// 3) Player : Team = N : M (다대다 관계 설정)
 PlayerModel.belongsToMany(TeamModel, {
     through: PlayerTeamModel, // 중간 테이블 설정
     foreignKey: 'player_id', // PlayerTeamModel에 player_id fk 생성
