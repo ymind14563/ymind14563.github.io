@@ -1,0 +1,268 @@
+---
+layout: post
+title: "[SeSACx코딩온] Sequelize Model 추가"
+date: 2024-08-01
+categories: Node.js
+---
+
+# Sequelize를 이용한 모델 및 다대다 관계 설정
+
+- Game과 TeamGame의 Model을 추가합니다.
+- 이전 블로그 글에서 언급한 적이 있는 `다 대 다 (N : M)` 관계의 테이블을 만들어보겠습니다.
+- [3. 모델 간의 관계 설정 - 2) 만약 N:M 관계가 있는 경우에는?](https://ymind14563.github.io/node.js/2024/07/30/blog(1).html)
+
+
+
+<hr>
+<br>
+
+## 프로젝트 디렉토리 구조
+
+```json
+project/
+│
+├── sequelize/
+│   ├── models/
+│   │   ├── index.js
+│   │   ├── Profile.js
+│   │   ├── Player.js
+│   │   ├── Team.js
+│   │   ├── Game.js // 추가
+│   │   └── TeamGame.js // 추가
+│   │
+│   ├── routes/
+│   │   ├── index.js
+│   │   ├── player.js
+│   │   └── team.js
+│   │
+│   ├── controller/
+│   │   ├── Cmain.js
+│   │   ├── Cplayer.js
+        └── Cteam.js
+│   │
+│   └── views/
+│       └── index.ejs
+│
+├── config/
+│   └── config.json
+│
+├── node_modules/
+│   └── [npm packages]
+│
+├── index.js // 수정
+├── package.json
+└── package-lock.json
+```
+
+<br>
+
+## 1. 모델 정의
+
+### 1) `Game` 모델
+
+#### `models/Game.js`
+
+```js
+const GameModel = (sequelize, DataTypes) => {
+    const Game = sequelize.define('Game', {
+        game_id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            primaryKey: true, // 기본키로 설정
+            allowNull: false, // NULL 값 허용 안함
+            autoIncrement: true, // 자동 증가 설정
+        },
+        date: {
+            type: DataTypes.DATE, // 데이터 타입은 DATE
+            allowNull: false, // NULL 값 허용 안함
+        },
+        location: {
+            type: DataTypes.STRING(63), // 데이터 타입은 문자열, 최대 길이 63자
+            allowNull: false, // NULL 값 허용 안함
+        },
+    }, {
+        freezeTableName: true // 모델 이름을 테이블 이름으로 사용(테이블 이름을 복수형으로 변환하지 않음)
+    });
+    return Game;
+};
+
+module.exports = GameModel;
+```
+
+- `game_id`: 경기의 고유 ID를 나타내며, 기본키로 설정되고 자동 증가합니다.
+- `date`: 경기가 열리는 날짜를 나타내며, NULL 값을 허용하지 않습니다.
+- `location`: 경기가 열리는 장소를 나타내며, 문자열 데이터로 최대 63자까지 입력할 수 있습니다.
+- `freezeTableName: true` 옵션을 사용하여 모델 이름과 테이블 이름을 동일하게 유지합니다.
+
+<br>
+
+### 2) `TeamGame` 모델
+
+#### `models/TeamGame.js`
+
+```js
+const TeamGameModel = (sequelize, DataTypes) => {
+    const TeamGame = sequelize.define('TeamGame', {
+        id: {
+            type: DataTypes.INTEGER, // 데이터 타입은 INTEGER
+            primaryKey: true, // 기본키로 설정
+            autoIncrement: true, // 자동 증가 설정
+        },
+    }, {
+        freezeTableName: true // 모델 이름을 테이블 이름으로 사용(테이블 이름을 복수형으로 변환하지 않음)
+    });
+
+    return TeamGame;
+};
+
+module.exports = TeamGameModel;
+
+```
+
+- `id`: `TeamGame`의 고유 ID를 나타내며, 기본키로 설정되고 자동 증가합니다.
+- `freezeTableName: true` 옵션을 사용하여 모델 이름과 테이블 이름을 동일하게 유지합니다.
+
+<br>
+
+### 3) 모델 간의 관계 설정
+
+#### `models/index.js`
+
+```js
+const Sequelize = require('sequelize');
+const config = require(__dirname + '/../config/config.json')["development"];
+const db = {};
+const sequelize = new Sequelize(config.database, config.username, config.password, config); 
+
+// 모델 불러오기 
+const PlayerModel = require(`./Player`)(sequelize, Sequelize);
+const ProfileModel = require(`./Profile`)(sequelize, Sequelize);
+const TeamModel = require(`./Team`)(sequelize,Sequelize);
+const GameModel = require(`./Game`)(sequelize,Sequelize);
+const TeamGameModel = require(`./TeamGame`)(sequelize,Sequelize);
+
+
+// 모델간 관계 연결
+// 1) Player : Profile = 1 : 1
+// 하나의 선수당 하나의 프로필을 가짐
+PlayerModel.hasOne(ProfileModel, { 
+  onDelete: `CASCADE`, 
+  onUpdate: `CASCADE`, 
+  foreignKey: `player_id`, 
+  sourceKey: `player_id` 
+});
+
+ProfileModel.belongsTo(PlayerModel, {
+  foreignKey: `player_id`, 
+  targetKey: `player_id` 
+});
+
+
+// 2) Team : Player = 1 : N
+// 한 팀에는 여러 명의 선수가 존재
+TeamModel.hasMany(PlayerModel, {
+  foreignKey: `team_id`, 
+  sourceKey: `team_id` 
+});
+
+PlayerModel.belongsTo(TeamModel, {
+  foreignKey: 'team_id', 
+  targetKey: `team_id` 
+});
+
+
+
+/* 추가된 부분 */
+
+// 3) Team : Game = N : M
+// 하나의 팀은 여러 게임 가능, 한 게임에서는 여러 팀이 참여
+
+// 두 모델의 관계 모델은 TeamGameModel
+
+TeamModel.belongsToMany(GameModel, {
+  through: TeamGameModel, // 중계(관계) 테이블 정의
+  foreignKey: `team_id`, // TeamGameModel에서 TeamModel을 참조하는 fk
+  otherKey: `game_id` // TeamGameModel에서 GameModel을 참조하는 fk
+})
+
+GameModel.belongsToMany(TeamModel, {
+  through: TeamGameModel, // 중계(관계) 테이블 정의
+  foreignKey: `game_id`, // TeamGameModel에서 GameModel을 참조하는 fk
+  otherKey: `team_id` // TeamGameModel에서 TeamModel을 참조하는 fk
+})
+
+
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+db.Player = PlayerModel;
+db.Profile = ProfileModel;
+db.Team = TeamModel;
+
+module.exports = db;
+```
+
+- through 옵션은 다대다 관계를 연결할 중간 테이블을 지정합니다.
+- foreignKey 옵션은 중간 테이블에서 사용할 외래 키를 지정합니다.
+- otherKey 옵션은 상대 모델의 외래 키를 지정합니다.
+
+<br>
+
+## 2. SQL 쿼리 (SQL Query) 추가
+
+#### `sequelize/create.sql`
+
+```sql
+-- 팀 데이터 삽입
+insert into Team(name, createdAt, updatedAt) values 
+  ('sk', now(), now()), 
+  ('kt', now(), now()), 
+  ('nc', now(), now()), 
+  ('lg', now(), now());
+
+-- 선수 데이터 삽입
+insert into Player(name, age, createdAt, updatedAt, team_id) values 
+  ('홍길동', 20, now(), now(), 1), 
+  ('성춘향', 21, now(), now(), 3), 
+  ('김첨지', 22, now(), now(), 2), 
+  ('김수지', 23, now(), now(), 4), 
+  ('강민재', 19, now(), now(), 1), 
+  ('황찬수', 28, now(), now(), 1), 
+  ('이장우', 24, now(), now(), 2), 
+  ('박나래', 30, now(), now(), 3);
+
+-- 프로필 데이터 삽입
+insert into Profile(position, salary, createdAt, updatedAt, player_id) values
+  ('1B', 100, now(), now(), 1),
+  ('2B', 150, now(), now(), 2),
+  ('3B', 80, now(), now(), 3),
+  ('LF', 200, now(), now(), 4),
+  ('1B', 170, now(), now(), 5),
+  ('2B', 130, now(), now(), 6),
+  ('3B', 90, now(), now(), 7),
+  ('LF', 250, now(), now(), 8);
+
+-- 경기 데이터 삽입
+insert into Game(date, location, createdAt, updatedAt) values
+  ('2023-10-01', 'seoul', now(), now()),
+  ('2023-10-03', 'london', now(), now()),
+  ('2023-10-05', 'la', now(), now());
+
+-- 팀과 경기 관계 데이터 삽입
+insert into TeamGame(team_id, game_id, createdAt, updatedAt) values
+  (1, 1, now(), now()), 
+  (2, 1, now(), now()), 
+  (2, 2, now(), now()), 
+  (3, 1, now(), now()), 
+  (1, 3, now(), now()), 
+  (3, 3, now(), now());
+
+-- 데이터 조회
+select * from Player;
+select * from Profile;
+select * from Team;
+select * from Game;
+select * from TeamGame;
+```
+
+- Game과 TeamGame에 관련된 쿼리문을 추가 작성합니다.
