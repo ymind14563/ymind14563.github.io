@@ -1,0 +1,509 @@
+---
+layout: post
+title: "[SeSACx코딩온] api.http"
+date: 2024-08-01
+categories: Node.js
+---
+
+# api.http를 활용한 테스트
+
+<hr>
+<br>
+
+## 테스트 준비
+- 확장프로그램을 검색하여 설치해줍니다.
+
+![image](https://github.com/user-attachments/assets/ab9737ad-dd32-455b-ad5b-1e6473d2d69f)
+
+<br>
+
+- 확장자 .http 나 .rest 인 파일을 생성해 줍니다.
+
+- 위와 같이 Send Request가 나오면 준비 완료입니다.
+
+![스크린샷 ](https://github.com/user-attachments/assets/d2a21fac-abd6-432e-a98f-7848be09b522)
+
+<br>
+
+- 클릭 시, 오른쪽과 같이 Response가 출력됩니다.
+
+![image](https://github.com/user-attachments/assets/9c905af2-cff4-4cea-aa07-a904ee75d131)
+
+<br>
+
+## 전체 코드
+
+```json
+@server = http://localhost:8000
+@player_id = 1
+@team_id = 1
+
+
+### 전체 선수 조회
+GET {{server}}/players
+
+### id로 특정 선수 조회
+GET {{server}}/players/{{player_id}}
+
+### 선수 추가
+POST {{server}}/players
+Content-Type: application/json; charset=UTF-8
+
+{
+    "name": "손흥민",
+    "age": 31,
+    "team_id": 2
+}
+
+### 특정 선수의 소속 팀 변경
+PATCH {{server}}/players/{{player_id}}/team
+Content-Type: application/json; charset=UTF-8
+
+// 성공하면 1을 출력, 실패하면 0을 출력함.
+// 주석을 { } 안에 넣으면 SyntaxError다. 주석을 json으로 해석해버리기 때문이다. 
+{
+    "team_id": 1 
+}
+
+### 특정 선수 방출 (삭제)
+DELETE {{server}}/players/{{player_id}}
+// 삭제되면 isDeleted = 1, 결과값이 true 가 출력된다.
+// 이미 삭제되어 없는 선수를 삭제하면 결과값이 false 가 출력된다.
+// cascade 설정을 해놓았기 때문에, 선수가 삭제되면 프로필도 함께 삭제된다.
+
+
+### 전체 팀 조회
+GET {{server}}/teams
+
+### 전체 팀 조회 + 이름순 정렬
+GET {{server}}/teams?sort=name_asc
+
+### 팀 이름 검색
+GET {{server}}/teams?search=KT
+
+### 특정 팀 조회
+GET {{server}}/teams/{{team_id}}
+
+### 특정 팀의 모든 선수 조회
+GET {{server}}/teams/{{team_id}}/players
+```
+<br>
+
+## 기본 정보
+
+```http
+@server = http://localhost:8000
+@player_id = 1
+@team_id = 1
+```
+
+- **서버 URL**: `http://localhost:8000`
+- **선수 ID**: `1`
+- **팀 ID**: `1`
+
+<br>
+
+## 1. 전체 선수 조회
+
+### 요청
+
+```http
+GET http://localhost:8000/players
+```
+
+### 응답
+
+- 서버는 전체 선수 목록을 JSON 형식으로 반환합니다. 응답은 다음과 같습니다
+
+- 스크린샷과 같이 MySQL에 있는 내용과 같음을 알 수 있습니다.
+
+![image](https://github.com/user-attachments/assets/5aafcabb-7b3b-4169-8ca2-c5decaa03cf6)
+
+
+```json
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 1073
+ETag: W/"431-saebBYevUdOaf13TAw/cJs9/rAg"
+Date: Thu, 01 Aug 2024 15:32:16 GMT
+Connection: close
+
+[
+  {
+    "player_id": 1,
+    "name": "홍길동",
+    "age": 20,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 1
+  },
+  {
+    "player_id": 2,
+    "name": "성춘향",
+    "age": 21,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 3
+  },
+  {
+    "player_id": 3,
+    "name": "김첨지",
+    "age": 22,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 2
+  },
+  {
+    "player_id": 4,
+    "name": "김수지",
+    "age": 23,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 4
+  },
+  {
+    "player_id": 5,
+    "name": "강민재",
+    "age": 19,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 1
+  },
+  {
+    "player_id": 6,
+    "name": "황찬수",
+    "age": 28,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 1
+  },
+  {
+    "player_id": 7,
+    "name": "이장우",
+    "age": 24,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 2
+  },
+  {
+    "player_id": 8,
+    "name": "박나래",
+    "age": 30,
+    "createdAt": "2024-08-02T00:12:44.000Z",
+    "updatedAt": "2024-08-02T00:12:44.000Z",
+    "team_id": 3
+  }
+]
+```
+
+<br>
+
+## 2. 특정 선수 조회
+
+선수의 ID를 통해 특정 선수를 조회할 수 있습니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/players/1
+```
+
+### 응답
+
+서버는 해당 선수의 정보를 JSON 형식으로 반환합니다. 응답은 다음과 같습니다.
+
+```json
+{
+  "player_id": 1,
+  "name": "홍길동",
+  "age": 20,
+  "createdAt": "2024-08-02T00:12:44.000Z",
+  "updatedAt": "2024-08-02T00:12:44.000Z",
+  "team_id": 1,
+  "Profile": {
+    "position": "1B",
+    "salary": 100
+  }
+}
+```
+
+<br>
+
+
+## 3. 선수 추가
+
+새 선수를 추가하려면 POST 요청을 사용합니다. 선수 정보를 JSON 형식으로 제공해야 합니다.
+
+### 요청
+
+```http
+POST http://localhost:8000/players
+Content-Type: application/json; charset=UTF-8
+
+{
+    "name": "손흥민",
+    "age": 31,
+    "team_id": 2
+}
+```
+
+### 응답
+
+서버는 추가된 선수의 정보를 포함한 JSON 객체를 반환합니다. 응답은 다음과 같습니다.
+
+```json
+{
+  "player_id": 9,
+  "name": "손흥민",
+  "age": 31,
+  "team_id": 2,
+  "updatedAt": "2024-08-02T00:13:44.000Z",
+  "createdAt": "2024-08-02T00:13:44.000Z"
+}
+```
+
+<br>
+
+## 4. 특정 선수의 소속 팀 변경
+
+선수의 소속 팀을 변경하려면 PATCH 요청을 사용합니다.
+
+## 성공 시
+### 요청
+
+```http
+PATCH http://localhost:8000/players/1/team
+Content-Type: application/json; charset=UTF-8
+
+{
+    "team_id": 1
+}
+```
+
+### 응답
+
+```json
+[
+  1
+]
+```
+
+## 실패 시
+### 요청
+
+```http
+PATCH http://localhost:8000/players/1/team
+Content-Type: application/json; charset=UTF-8
+
+{
+    "team_id": 999
+}
+```
+
+### 응답
+
+```json
+[
+  0
+]
+```
+
+성공 시, 서버는 `1`을 반환합니다. 실패 시, 서버는 `0`을 반환합니다.
+
+<br>
+
+## 5. 특정 선수 방출 (삭제)
+
+선수를 삭제하려면 DELETE 요청을 사용합니다.
+
+### 요청
+
+```http
+DELETE http://localhost:8000/players/1
+```
+
+### 응답
+
+```json
+true
+```
+- 삭제되면 isDeleted = 1 이므로 결과값이 `true` 가 출력됩니다.
+- 이미 삭제된 선수를 삭제하려고 하면 `false`가 반환됩니다.
+
+삭제된 선수는 프로필도 함께 삭제되며, cascade 설정으로 인해 관련된 모든 정보가 제거됩니다.
+
+<br>
+
+## 6. 전체 팀 조회
+
+팀 목록을 조회하려면 다음과 같은 GET 요청을 서버에 보냅니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/teams
+```
+
+### 응답
+
+서버는 전체 팀 목록을 JSON 형식으로 반환합니다. 응답은 다음과 같습니다.
+
+```json
+[
+  {
+    "team_id": 1,
+    "name": "sk"
+  },
+  {
+    "team_id": 2,
+    "name": "kt"
+  },
+  {
+    "team_id": 3,
+    "name": "nc"
+  },
+  {
+    "team_id": 4,
+    "name": "lg"
+  }
+]
+```
+
+<br>
+
+## 7. 전체 팀 조회 + 이름순 정렬
+
+팀 목록을 이름 순으로 정렬하여 조회할 수 있습니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/teams?sort=name_asc
+```
+
+### 응답
+
+서버는 이름 순으로 정렬된 팀 목록을 JSON 형식으로 반환합니다.
+
+```json
+[
+  {
+    "team_id": 2,
+    "name": "kt"
+  },
+  {
+    "team_id": 4,
+    "name": "lg"
+  },
+  {
+    "team_id": 3,
+    "name": "nc"
+  },
+  {
+    "team_id": 1,
+    "name": "sk"
+  }
+]
+```
+
+<br>
+
+## 8. 팀 이름 검색
+
+팀 이름을 기준으로 검색할 수 있습니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/teams?search=KT
+```
+
+### 응답
+
+서버는 이름에 "KT"가 포함된 팀 목록을 JSON 형식으로 반환합니다.
+
+```json
+[
+  {
+    "team_id": 2,
+    "name": "kt"
+  }
+]
+```
+
+<br>
+
+## 9. 특정 팀 조회
+
+팀의 ID를 통해 특정 팀을 조회할 수 있습니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/teams/1
+```
+
+### 응답
+
+서버는 해당 팀의 정보를 JSON 형식으로 반환합니다. 응답은 다음과 같습니다.
+
+```json
+{
+  "team_id": 1,
+  "name": "sk",
+  "createdAt": "2024-08-02T00:12:44.000Z",
+  "updatedAt": "2024-08-02T00:12:44.000Z"
+}
+```
+
+<br>
+
+## 10. 특정 팀의 모든 선수 조회
+
+특정 팀에 소속된 모든 선수를 조회할 수 있습니다.
+
+### 요청
+
+```http
+GET http://localhost:8000/teams/1/players
+```
+
+### 응답
+
+서버는 해당 팀에 소속된 선수 목록을 JSON 형식으로 반환합니다. 응답은 다음과 같습니다.
+
+```json
+{
+  "team_id": 1,
+  "name": "sk",
+  "createdAt": "2024-08-02T00:12:44.000Z",
+  "updatedAt": "2024-08-02T00:12:44.000Z",
+  "Players": [
+    {
+      "player_id": 1,
+      "name": "홍길동",
+      "age": 20,
+      "createdAt": "2024-08-02T00:12:44.000Z",
+      "updatedAt": "2024-08-01T15:41:09.000Z",
+      "team_id": 1
+    },
+    {
+      "player_id": 5,
+      "name": "강민재",
+      "age": 19,
+      "createdAt": "2024-08-02T00:12:44.000Z",
+      "updatedAt": "2024-08-02T00:12:44.000Z",
+      "team_id": 1
+    },
+    {
+      "player_id": 6,
+      "name": "황찬수",
+      "age": 28,
+      "createdAt": "2024-08-02T00:12:44.000Z",
+      "updatedAt": "2024-08-02T00:12:44.000Z",
+      "team_id": 1
+    }
+  ]
+}
+```
