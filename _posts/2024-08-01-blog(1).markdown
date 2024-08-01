@@ -1,0 +1,509 @@
+---
+layout: post
+title: "[SeSACx코딩온] Sequelize 관련 API 추가"
+date: 2024-08-01
+categories: Node.js
+---
+
+# Sequelize를 이용한 모델 및 관계 설정
+
+- 앞서 작성한 Sequelize 기본 구조를 토대로 API를 작성해보겠습니다.
+- models의 구조는 그대로 활용하고 controller와 router를 추가합니다.
+- 작성할 API는 Player, Team 관련 CRUD입니다.
+
+
+<hr>
+<br>
+
+## 프로젝트 디렉토리 구조
+
+```json
+project/
+│
+├── sequelize/
+│   ├── models/
+│   │   ├── index.js
+│   │   ├── Profile.js
+│   │   ├── Player.js
+│   │   └── Team.js
+│   │
+│   ├── routes/
+│   │   ├── index.js
+│   │   ├── player.js // 추가
+│   │   └── team.js // 추가
+│   │
+│   ├── controller/
+│   │   ├── Cmain.js
+│   │   ├── Cplayer.js // 추가
+        └── Cteam.js // 추가
+│   │
+│   └── views/
+│       └── index.ejs
+│
+├── config/
+│   └── config.json
+│
+├── node_modules/
+│   └── [npm packages]
+│
+├── index.js // 수정
+├── package.json
+└── package-lock.json
+```
+
+## 1. 기본 Express 서버 설정에서 라우터 전달 부분 추가
+
+#### `sequelize/index.js`
+
+```js
+const express = require('express'); // Express 웹 프레임워크 불러오기
+const app = express(); // Express 애플리케이션 생성
+const PORT = 8000; // 서버가 사용할 포트 번호
+const router = require('./routes/index'); // 라우터 모듈 불러오기
+
+// 추가
+const playerRouter = require(`./routes/player`); // player 관련 라우터 추가
+const teamRouter = require(`./routes/team`); // team 관련 라우터 추가
+
+
+const { sequelize } = require('./models'); // Sequelize 인스턴스와 모델을 불러오기
+
+app.set('view engine', 'ejs'); // EJS를 템플릿 엔진으로 설정
+app.set('views', './views'); // EJS 템플릿 파일이 위치할 디렉토리 설정
+app.use(express.urlencoded({ extended: true })); // URL-encoded 데이터 파싱 미들웨어
+app.use(express.json()); // JSON 데이터 파싱 미들웨어
+
+app.use('/', router); // 루트 경로에 대한 요청을 라우터로 전달
+
+// 추가
+app.use(`/players`, playerRouter); // player 경로에 대한 요청을 라우터로 전달
+app.use(`/teams`, teamRouter); // team 경로에 대한 요청을 라우터로 전달
+
+
+// 데이터베이스와 모델을 동기화하고 서버를 시작
+sequelize
+
+    // force : true ; 서버 실행할 때마다 테이블 재생성
+    // force : false ; 서버 실행 시 테이블이 없으면 생성 
+    // 데이터베이스와 모델 간의 동기화. 테이블을 강제로 재생성
+    .sync({ force: false }) // 값을 입력 후 초기화되는 것을 방지하기 위해 false로 변경
+    .then(() => {
+        app.listen(PORT, () => console.log(`${PORT}에서 서버 실행 중`));
+        console.log('데이터베이스 연결 성공');
+    })
+    .catch((err) => {
+        console.error('데이터베이스 연결 실패:', err); // 데이터베이스 연결 에러 출력
+    });
+```
+
+- `const playerRouter = require('./routes/player');`
+- player와 team 관련 API 경로를 처리하기 위해 별도의 라우터 모듈을 추가로 불러옵니다. 이로 인해 코드를 더 모듈화하고 유지보수하기 쉽게 만듭니다.
+
+- `app.use('/players', playerRouter); // player 경로에 대한 요청을 라우터로 전달`
+- 불러온 라우터 모듈을 실제 경로에 매핑합니다. /players와 /teams 경로로 들어오는 요청을 각각 playerRouter와 teamRouter로 전달합니다. 이 부분은 경로 설정의 핵심입니다.
+
+<br>
+
+## 2. 라우터 설정
+
+### 1) `player` 라우터 정의
+
+#### `sequelize/routes/player.js`
+
+```js
+// 선수와 관련된 라우터를 정의
+
+// 기본 요청 경로 localhost:PORT/players
+// `/players` 초기 위치 설정은 최상단 index.js 에서 app.use(`/players`,playerRouter); 부분에서 설정
+
+const express = require(`express`); // Express 모듈 불러오기
+const router = express.Router(); // Express 라우터 생성
+const controller = require(`../controller/Cplayer`); // player 컨트롤러 모듈 불러오기
+
+// 이미 players.js에서 설정하고 있기에 `/`로 설정 = /players
+// 그러므로 현재 위치의 url주소는 모두 /players로 시작
+// ex) / => /players 를 의미
+// ex2) /:player_id => /players/:player_id 를 의미
+
+// 선수 등록
+// POST /players 요청을 처리. 클라이언트가 새로운 선수 정보를 전송하면 controller의 postPlayer 메서드가 호출됨
+router.post(`/`, controller.postPlayer);
+
+// 선수 전체 조회
+// GET /players 요청을 처리. 클라이언트가 모든 선수 정보를 요청하면 controller의 getPlayers 메서드가 호출됨
+router.get(`/`, controller.getPlayers); 
+
+// 선수 한명 조회
+// GET /players/:player_id 요청을 처리. 클라이언트가 특정 선수의 정보를 요청하면 controller의 getPlayer 메서드가 호출됨
+router.get(`/:player_id`, controller.getPlayer); 
+
+// 선수 정보 수정 (소속 팀 수정)
+// PATCH /players/:player_id/team 요청을 처리. 클라이언트가 특정 선수의 팀 정보를 수정하면 controller의 patchPlayer 메서드가 호출됨
+router.patch(`/:player_id/team`, controller.patchPlayer); 
+
+// 선수 삭제
+// DELETE /players/:player_id 요청을 처리. 클라이언트가 특정 선수를 삭제하면 controller의 deletePlayer 메서드가 호출됨
+router.delete(`/:player_id`, controller.deletePlayer); 
+
+// 설정한 라우터를 모듈로 내보냄. 이를 통해 다른 파일에서 이 라우터 사용 가능
+module.exports = router; 
+```
+
+- 기본 요청 경로는 `/players`로 설정됩니다. 이 설정은 최상단 index.js 파일의 `app.use('/players', playerRouter);` 부분에서 정의됩니다.
+- 각 라우트 경로는 컨트롤러 모듈의 특정 메서드와 연결됩니다. 예를 들어, `POST /players` 요청은 `controller.postPlayer` 메서드로 처리됩니다.
+
+<br>
+
+### 2) `team` 라우터 정의
+
+#### `sequelize/routes/team.js`
+
+```js
+// 팀과 관련된 라우터를 정의
+
+// 기본 요청 경로 localhost:PORT/teams
+// `/teams` 초기 위치 설정은 최상단 index.js 에서 app.use(`/teams`,teamRouter); 부분에서 설정
+
+const express = require(`express`); // Express 모듈 불러오기
+const router = express.Router(); // Express 라우터 생성
+const controller = require(`../controller/Cteam`); // team 컨트롤러 모듈 불러오기
+
+// 현재 위치의 url주소는 모두 /teams로 시작
+// ex) / => /teams 를 의미
+// ex2) /:team_id => /teams/:team_id 를 의미
+
+// 팀 전체 조회 (팀 검색)
+// GET /teams 요청을 처리. 클라이언트가 모든 팀 정보를 요청하면 controller의 getTeams 메서드가 호출됨
+router.get(`/`, controller.getTeams); 
+
+// 팀 한개 조회
+// GET /teams/:team_id 요청을 처리. 클라이언트가 특정 팀의 정보를 요청하면 controller의 getTeam 메서드가 호출됨
+router.get(`/:team_id`, controller.getTeam); 
+
+// 팀 소속 선수 조회
+// GET /teams/:team_id/players 요청을 처리. 클라이언트가 특정 팀에 소속된 선수들의 정보를 요청하면 controller의 getTeamPlayers 메서드가 호출됨
+router.get(`/:team_id/players`, controller.getTeamPlayers); 
+
+
+// 설정한 라우터를 모듈로 내보냄. 이를 통해 다른 파일에서 이 라우터 사용가능
+module.exports = router; 
+```
+
+- 기본 요청 경로는 `/teams`로 설정됩니다. 이 설정은 최상단 index.js 파일의 `app.use('/teams', teamRouter);` 부분에서 정의됩니다.
+- 각 라우트 경로는 컨트롤러 모듈의 특정 메서드와 연결됩니다. 예를 들어, `GET /teams` 요청은`controller.getTeams` 메서드로 처리됩니다.
+
+<br>
+
+## 3. 컨트롤러 설정
+
+### 1) `player` 컨트롤러 정의
+
+#### `sequelize/controller/Cplayer.js`
+
+```js
+const { Player, Profile } = require(`../models/index`); // `index.js`에서 정의된 모든 모델을 한꺼번에 불러옴. 이렇게 하면 개별 모델 파일을 직접 불러올 필요 없이, 통합된 모델 접근이 가능함.
+
+
+// 선수 등록
+exports.postPlayer = async (req, res) => {
+    try {
+        console.log(req.body); // 요청 본문에서 선수 정보를 확인
+        const { name, age, team_id } = req.body; // 선수의 이름, 나이, 팀 ID를 추출
+
+        // 새로운 선수를 데이터베이스에 추가
+        const newPlayer = await Player.create({ // INSERT INTO Player(name, age, team_id) VALUES (name, age, team_id)
+
+            name, age, team_id // {name : name, age : age, team_id : team_id}
+
+        });
+
+        res.json(newPlayer); // 추가된 선수 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 선수 전체 조회
+exports.getPlayers = async (req, res) => {
+    try { 
+        // 모든 선수 정보를 조회
+        // Models에 접근하여 확인해야 함. 선수는 DB가 가지고 있음.
+        const players = await Player.findAll(); // select * from player
+
+        res.json(players); // 조회된 선수 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 선수 한명 조회
+exports.getPlayer = async (req, res) => {
+    try {
+        console.log(req.params.player_id); // 요청 매개변수에서 선수 ID를 확인
+        const { player_id } = req.params; // 선수 ID를 추출
+
+        // 특정 선수의 정보와 관련된 프로필을 조회
+        const player = await Player.findOne({ // select * from player where player_id = 1
+
+            where: { player_id }, // { player_id : player_id }
+
+            // 선수의 프로필 정보를 포함
+            include: [
+                { 
+                    model: Profile, // 가져올 정보가 위치해 있는 모델 지정
+                    attributes: [`position`, `salary`] // 프로필의 특정 속성만 포함
+                }
+            ] // join
+        });
+
+        res.json(player); // 조회된 선수 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 선수 정보 수정 (소속 팀 수정)
+exports.patchPlayer = async (req, res) => {
+    try {
+        console.log(req.params.id); // 요청 매개변수(params)에서 선수 ID를 확인
+        console.log(req.body); // 요청 본문(body)에서 수정할 정보를 확인
+
+        const { player_id } = req.params; // 선수 ID를 추출
+        const { team_id } = req.body; // 수정할 팀 ID를 추출
+
+        const updatedPlayer = await Player.update(
+
+            { team_id }, // 수정할 내용
+            { where: { player_id } } // 조건: 특정 선수
+        );
+
+        res.json(updatedPlayer); // 업데이트된 선수 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 선수 삭제
+exports.deletePlayer = async (req, res) => {
+    try {
+        const { player_id } = req.params; // 요청 매개변수에서 선수 ID를 추출
+
+        // 특정 선수를 데이터베이스에서 삭제
+        const isDeleted = await Player.destroy({
+            where: { player_id }
+        });
+
+        console.log(isDeleted); // 삭제 결과 확인 (1: 삭제 성공, 0: 삭제 실패)
+
+        if (isDeleted) {
+            return res.send(true); // 삭제 성공 응답
+        } else {
+            return res.send(false); // 삭제 실패 응답
+        }
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+```
+
+- 선수 등록: `postPlayer` 메서드는 `Player` 모델을 사용하여 새로운 선수를 데이터베이스에 등록합니다. 요청 본문(body)에서 이름, 나이, 팀 ID를 받아와 새로운 선수 데이터를 생성합니다.
+- 선수 전체 조회: `getPlayers` 메서드는 모든 선수 정보를 조회합니다. `Player` 모델의 `findAll` 메서드를 사용하여 모든 선수 데이터를 반환합니다.
+- 선수 한명 조회: `getPlayer` 메서드는 특정 선수의 정보를 조회합니다. 요청 매개변수(params)에서 선수 ID를 받아와 `Player` 모델의 `findOne` 메서드를 사용하여 해당 선수 데이터를 반환하며, `include`를 활용하여 선수의 프로필 정보도 포함합니다.
+- 선수 정보 수정 (소속 팀 수정): `patchPlayer` 메서드는 특정 선수의 팀 정보를 수정합니다. 요청 매개변수에서 선수 ID를, 요청 본문에서 새로운 팀 ID를 받아와 `Player` 모델의 `update` 메서드를 사용하여 해당 선수의 팀 정보를 업데이트합니다.
+- 선수 삭제: `deletePlayer` 메서드는 특정 선수를 삭제합니다. 요청 매개변수에서 선수 ID를 받아와 `Player` 모델의 `destroy` 메서드를 사용하여 해당 선수 데이터를 삭제합니다.
+
+<br>
+
+
+### 2) `team` 컨트롤러 정의
+
+#### `sequelize/controller/Cteam.js`
+
+```js
+const { Team, Player } = require(`../models/index`);
+const { Op } = require(`sequelize`); // Sequelize 연산자(Op)
+
+// 팀 전체 조회 (팀 검색)
+exports.getTeams = async (req, res) => {
+    try {
+        const { sort, search } = req.query; // 요청 쿼리(query)에서 정렬 및 검색어 추출
+        
+        let teams;
+
+        if (sort === `name_asc`) {
+            
+            // 이름 기준 오름차순 정렬
+            teams = await Team.findAll({ // SELECT `team_id`, `name` FROM `Team` AS `Team` ORDER BY `Team`.`name` ASC;
+            
+                attributes: [`team_id`, `name`], // 필요한 속성만 조회
+                
+                order: [[`name`, `ASC`]] // 정렬 기준: 이름, 오름차순
+
+            });
+            
+        } else if (search) {
+            
+            // 검색어가 포함된 팀만 조회 (팀명 검색)
+            teams = await Team.findAll({ // SELECT `team_id`, `name` FROM `Team` AS `Team` WHERE `Team`.`name` LIKE '%KT%';
+
+                attributes: [`team_id`, `name`], // 필요한 속성만 조회
+
+                where: {
+                    name: { [Op.like]: `%${search}%`} // 조건: 이름에 검색어가 포함된 팀만 조회
+                }
+
+            });
+
+        } else {
+
+            // 전체 팀 조회
+            teams = await Team.findAll({ // SELECT `team_id`, `name` FROM `Team` AS `Team`;
+
+                attributes: [`team_id`, `name`], // 필요한 속성만 조회
+
+            });
+        }
+
+        res.json(teams); // 조회된 팀 정보를 클라이언트에 반환
+        
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 팀 한개 조회
+exports.getTeam = async (req, res) => {
+    try {
+        const { team_id } = req.params; // 요청 매개변수에서 팀 ID를 추출
+
+        // 특정 팀의 정보 조회
+        const team = await Team.findOne({ // SELECT `team_id`, `name` FROM `Team` AS `Team` WHERE `Team`.`team_id` = 1;
+
+            where: { team_id } // 조건: 특정 팀
+
+        });
+
+        res.json(team); // 조회된 팀 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+
+// 팀 소속 선수 조회
+exports.getTeamPlayers = async (req, res) => {
+    try {
+        const { team_id } = req.params; // 요청 매개변수에서 팀 ID를 추출
+
+        // 특정 팀에 소속된 선수 정보 조회
+        const team = await Team.findOne({ // SELECT * FROM Team AS Team JOIN Player AS Player ON Team.team_id = Player.team_id WHERE Team.team_id = 1;
+
+            where: { team_id }, // 조건: 특정 팀
+
+            // 팀에 소속된 선수 정보도 포함
+            include: [{ 
+                model: Player // 가져올 정보가 위치해 있는 모델 지정. attributes를 생략하면 내용 전부 가져옴
+            }]
+
+        });
+
+        res.json(team); // 조회된 팀 및 선수 정보를 클라이언트에 반환
+
+    } catch (error) {
+        console.error(error); // 에러 로그 출력
+        res.status(500).send(`Internal Server Error`); // 내부 서버 오류 응답
+    }
+};
+```
+
+- 팀 전체 조회 (팀 검색): `getTeams` 메서드는 모든 팀 정보를 조회하거나 특정 조건에 맞는 팀들을 검색합니다. 정렬이나 검색어를 요청 쿼리(query)로 받아와 `Team` 모델의 `findAll` 메서드를 사용하여 팀 데이터를 반환합니다.
+  - `sort` 파라미터가 `name_asc`일 경우, 팀 이름을 기준으로 오름차순 정렬하여 팀 목록을 반환합니다.
+  - `search` 파라미터가 제공되면, 팀 이름에 검색어가 포함된 팀만 조회합니다. 이 때, `LIKE` 연산자를 사용하여 부분 문자열 매칭을 구현합니다.
+  - `sort`와 `search`가 모두 없는 경우, 기본적으로 모든 팀 정보를 조회하여 반환합니다.
+
+- 팀 한개 조회: `getTeam` 메서드는 특정 팀의 정보를 조회합니다. 요청 매개변수에서 팀 ID를 받아와 `Team` 모델의 `findOne` 메서드를 사용하여 해당 팀 데이터를 반환합니다.
+- 팀 소속 선수 조회: `getTeamPlayers` 메서드는 특정 팀에 소속된 모든 선수 정보를 조회합니다. 요청 매개변수에서 팀 ID를 받아와 `Team` 모델의 `findOne` 메서드를 사용하고, `include`를 활용하여 해당 팀에 소속된 선수들의 정보를 포함하여 반환합니다.
+
+<br>
+
+**참고 자료**
+- [Sequelize 연산자(Op) 관련 참고자료](https://sequelize.org/docs/v6/core-concepts/model-querying-basics/#operators)
+
+<br>
+
+## 4. SQL 쿼리 (SQL Query) 추가
+
+#### `sequelize/create.sql`
+
+```sql
+insert into Team(name, createdAt, updatedAt) values 
+  ('sk', now(), now()), 
+  ('kt', now(), now()), 
+  ('nc', now(), now()), 
+  ('lg', now(), now());
+
+insert into Player(name, age, createdAt, updatedAt, team_id) values 
+  ('홍길동', 20, now(), now(), 1), 
+  ('성춘향', 21, now(), now(), 3), 
+  ('김첨지', 22, now(), now(), 2), 
+  ('김수지', 23, now(), now(), 4), 
+  ('강민재', 19, now(), now(), 1), 
+  ('황찬수', 28, now(), now(), 1), 
+  ('이장우', 24, now(), now(), 2), 
+  ('박나래', 30, now(), now(), 3);
+
+insert into Profile(position, salary, createdAt, updatedAt, player_id) values
+  ('1B', 100, now(), now(), 1),
+  ('2B', 150, now(), now(), 2),
+  ('3B', 80, now(), now(), 3),
+  ('LF', 200, now(), now(), 4),
+  ('1B', 170, now(), now(), 5),
+  ('2B', 130, now(), now(), 6),
+  ('3B', 90, now(), now(), 7),
+  ('LF', 250, now(), now(), 8);
+
+select * from Player;
+select * from Profile;
+select * from Team;
+```
+
+- 테이블에 값을 추가하기 위해 SQL 쿼리문을 작성합니다. 
+- `insert into` 문을 사용하여 팀과 선수, 프로필 데이터를 초기화합니다.
+- `select` 문을 사용하여 `Player`, `Profile`, `Team` 테이블의 모든 데이터를 조회할 수 있습니다.
+
+
+<br>
+
+
+
+## 5. EJS 템플릿
+
+#### `sequelize/views/index.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Sequelize를 배워보자!!</h1>
+
+    <!-- 추가 -->
+    <a href="/players">전체 선수 확인</a> 
+</body>
+</html>
+```
