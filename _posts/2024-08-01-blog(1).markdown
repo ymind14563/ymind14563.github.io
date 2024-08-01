@@ -51,6 +51,8 @@ project/
 └── package-lock.json
 ```
 
+<br>
+
 ## 1. 기본 Express 서버 설정에서 라우터 전달 부분 추가
 
 #### `sequelize/index.js`
@@ -484,8 +486,6 @@ select * from Team;
 
 
 <br>
-
-
 
 ## 5. EJS 템플릿
 
