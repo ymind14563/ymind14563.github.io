@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "[SeSACx코딩온] api.http"
-date: 2024-08-01
+title: "[SeSACx코딩온] REST Client를 활용한 테스트"
+date: 2024-08-02
 categories: Node.js
 ---
 
-# api.http를 활용한 테스트
+# REST Client를 활용한 테스트
 
 <hr>
 <br>
@@ -17,7 +17,7 @@ categories: Node.js
 
 <br>
 
-- 확장자 .http 나 .rest 인 파일을 생성해 줍니다.
+- 확장자 .http 나 .rest 인 파일을 생성해 줍니다. (현재 api.http)
 
 - 위와 같이 Send Request가 나오면 준비 완료입니다.
 
@@ -89,7 +89,7 @@ GET {{server}}/teams/{{team_id}}/players
 ```
 <br>
 
-## 기본 정보
+## 0. 기본 정보
 
 ```http
 @server = http://localhost:8000
