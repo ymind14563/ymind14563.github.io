@@ -35,7 +35,7 @@ project/
 │   ├── controller/
 │   │   ├── Cmain.js
 │   │   ├── Cplayer.js // 추가
-        └── Cteam.js // 추가
+│   │   └── Cteam.js // 추가
 │   │
 │   └── views/
 │       └── index.ejs
