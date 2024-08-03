@@ -1,0 +1,238 @@
+---
+layout: post
+title: "Node.js 프로젝트 환경 변수 설정(.env)"
+date: 2024-08-03
+categories: Node.js
+---
+
+# Node.js 프로젝트에서 환경 변수 설정하기
+
+- `.env`, `.env.development`, `.env.production` 파일을 이용한 환경 변수 설정 방법을 살펴보겠습니다.
+- 다양한 환경에서의 설정을 통해 개발, 테스트, 배포 환경을 보다 체계적으로 관리할 수 있습니다. 
+- 환경 변수 파일은 보안과 관리의 측면에서 중요한 역할을 하므로, 실제 프로젝트에서는 `.gitignore` 파일에 포함시켜 버전 관리에서 제외하여야 합니다.
+
+
+<hr>
+<br>
+
+## 1. 프로젝트 초기 설정
+
+### 1) 프로젝트 디렉토리 구조
+
+```json
+env-variable/
+│
+├── .env
+├── .env.development
+├── .env.production
+├── app.js
+└── package.json
+```
+
+### 2) 필요한 npm 패키지 설치
+
+```sh
+npm install express dotenv cross-env
+```
+
+- `express`: Node.js 웹 애플리케이션 프레임워크입니다.
+- `dotenv`: 환경 변수 파일을 로드하는 모듈입니다.
+- `cross-env`: 플랫폼에 상관없이 환경 변수를 설정할 수 있는 모듈입니다.
+
+<br>
+
+## 2. 환경 변수 파일 설정
+
+### 1) 기본 환경 변수 파일 (.env)
+
+#### `env-variable/.env`
+
+```env
+# 주석
+# .env 파일은 .gitignore 파일에 추가해서 깃 관리를 하지 않는 것이 바람직함.
+# 현재 프로젝트는 연습용이니까 깃으로 관리함.
+PORT=3000
+DATABASE_NAME=codingon
+DATABASE_PW=1234
+```
+
+- `PORT`: 기본 서버 포트 번호를 설정합니다. 여기서는 3000번 포트를 사용합니다.
+- `DATABASE_NAME`: 데이터베이스 이름을 설정합니다. `codingon`입니다.
+- `DATABASE_PW`: 데이터베이스 비밀번호를 설정할 수 있습니다. 비밀번호를 `1234`로 설정합니다.
+
+### 2) 개발 환경 변수 파일 (.env.development)
+
+#### `env-variable/.env.development`
+
+```env
+# 개발환경, 테스트환경, 배포환경 모두 .env가 다른 경우가 많음.
+# 현재 프로젝트에선 개발환경 배포환경 두 가지가 다른 경우를 예제함.
+
+# 개발환경
+DATABASE_NAME=codingon-dev
+DATABASE_PW=dev4321
+```
+
+- `DATABASE_NAME`: 개발 환경에서 사용할 데이터베이스 이름을 `codingon-dev`로 설정합니다.
+- `DATABASE_PW`: 개발 환경에서 사용할 데이터베이스 비밀번호를 `dev4321`로 설정합니다.
+
+### 3) 배포 환경 변수 파일 (.env.production)
+
+#### `env-variable/.env.production`
+
+```env
+# 개발환경, 테스트환경, 배포환경 모두 .env가 다른 경우가 많음.
+# 현재 프로젝트에선 개발환경 배포환경 두 가지가 다른 경우를 예제함.
+
+# 배포환경
+DATABASE_NAME=codingon-prod
+DATABASE_PW=5678prod
+```
+
+- `DATABASE_NAME`: 배포 환경에서 사용할 데이터베이스 이름을 `codingon-prod`로 설정합니다.
+- `DATABASE_PW`: 배포 환경에서 사용할 데이터베이스 비밀번호를 `5678prod`로 설정합니다.
+
+<br>
+
+## 3. 애플리케이션 코드 설정
+
+### 1) 환경 변수 로드 및 사용
+
+#### `env-variable/app.js`
+
+```js
+const express = require(`express`);
+const path = require(`path`);
+const dotenv = require(`dotenv`); // 환경 변수 로드를 위한 모듈
+const app = express();
+
+// dotenv 모듈을 이용해서 .env 파일의 환경 변수를 불러옴
+dotenv.config({
+    // 기본 .env 파일을 로드
+    path: path.resolve(__dirname, `.env`)
+});
+
+dotenv.config({
+    // NODE_ENV에 따라서 적절한 .env 파일을 로드(.env.development, .env.production)
+    path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`),
+    override: true // 오버라이드 설정 (덮어쓰기)
+});
+
+// process.env 객체를 통해 환경 변수에 접근
+const port = process.env.PORT || 5000;
+const dbName = process.env.DATABASE_NAME;
+const dbPW = process.env.DATABASE_PW;
+
+app.listen(port, () => {
+    console.log(`${port}에 성공적으로 연결됨.`);
+    console.log(`Database 이름은 ${dbName}, 패스워드는 ${dbPW}`);
+});
+```
+
+- `dotenv` 모듈을 사용하여 환경 변수를 로드합니다.
+- `dotenv.config()`를 두 번 호출하여 기본 `.env` 파일과 `NODE_ENV`에 따라 적절한 `.env` 파일을 로드합니다.
+  - `path`: 불러올 환경 변수 파일의 경로를 설정합니다.
+  - `override: true`: 동일한 키의 값이 있으면 덮어씁니다.
+- `process.env` 객체를 통해 환경 변수에 접근하여 서버 포트(`PORT`), 데이터베이스 이름(`DATABASE_NAME`), 비밀번호(`DATABASE_PW`)를 설정합니다.
+
+<br>
+
+## 4. npm 스크립트 설정
+
+### `package.json`
+
+```json
+{
+  "dependencies": {
+    "cross-env": "^7.0.3", // NODE_ENV 환경 변수를 설정하는 데 사용
+    "dotenv": "^16.4.5",  // 환경 변수 파일을 로드하는 데 사용
+    "express": "^4.19.2"
+  },
+  "name": "19-env-variable",
+  "version": "1.0.0",
+  "main": "app.js",
+  "devDependencies": {},
+
+  // 스크립트에 따라서 app.js에서 작성한
+  // dotenv.config 안의 .env.${process.env.NODE_ENV} 값이 달라짐.
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js", 
+    "dev": "nodemon app.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon app.js",
+    "start:prod": "cross-env NODE_ENV=production node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+```
+
+- `dependencies`: 프로젝트에서 사용할 패키지를 명시합니다.
+  - `cross-env`: NODE_ENV 환경 변수를 설정하는 데 사용합니다.
+  - `dotenv`: 환경 변수 파일을 로드하는 데 사용합니다.
+  - `express`: Node.js 웹 애플리케이션 프레임워크입니다.
+- `scripts`: npm 스크립트를 정의합니다.
+  - `start`: 기본적으로 `node app.js`를 실행합니다.
+  - `dev`: `nodemon app.js`를 실행하여 파일 변경 시 자동으로 서버를 재시작합니다.
+  - `start:dev`: `cross-env NODE_ENV=development nodemon app.js`를 실행하여 개발 환경에서 서버를 시작합니다.
+  - `start:prod`: `cross-env NODE_ENV=production node app.js`를 실행하여 배포 환경에서 서버를 시작합니다.
+
+<br>
+
+## 5. 스크립트 실행 및 출력 확인
+
+### 1) 기본 환경에서 서버 실행
+
+```sh
+npm run start
+```
+
+- 출력:
+  ```
+  3000에 성공적으로 연결됨.
+  Database 이름은 codingon, 패스워드는 1234
+  ```
+
+- 기본 환경에서는 `.env` 파일의 값이 로드되며, 만약 정상적으로 불러오지 않았을 경우라면 로드되지 않기 때문에 `undefined`로 표시됩니다.
+
+**참고 사항**
+```sh
+npm start
+```
+- 위와 같이 `run`을 생략해도 동일하게 작동합니다.
+- `start`는 npm에서 특별한 의미를 가지는 기본 스크립트입니다. 만약 `package.json`에 `start` 스크립트가 정의되어 있다면, `npm start` 명령어를 통해 해당 스크립트를 실행할 수 있습니다. (`test`스크립트도 동일)
+- 다른 스크립트들은 반드시 `npm run <script-name>` 형식을 사용해야 합니다.
+
+### 2) 개발 환경에서 서버 실행
+
+```sh
+npm run start:dev
+```
+
+- 출력:
+  ```
+  3000에 성공적으로 연결됨.
+  Database 이름은 codingon-dev, 패스워드는 dev4321
+  ```
+
+- `start:dev` 스크립트는 **`cross-env NODE_ENV=development nodemon app.js`**를 실행합니다. 
+- `NODE_ENV` 환경 변수를 `development`로 설정하여 app.js 에서 작성한 `dotenv.config`를 통해 `.env.development` 파일의 값을 로드합니다. 
+- 데이터베이스 이름은 `codingon-dev`, 패스워드는 `dev4321`으로 설정됩니다. `nodemon`은 파일 변경 시 자동으로 서버를 재시작합니다.
+
+### 3) 배포 환경에서 서버 실행
+
+```sh
+npm run start:prod
+```
+
+- 출력:
+  ```
+  3000에 성공적으로 연결됨.
+  Database 이름은 codingon-prod, 패스워드는 5678prod
+  ```
+
+- `start:prod` 스크립트는 **`cross-env NODE_ENV=production node app.js`**를 실행합니다. 
+- `NODE_ENV` 환경 변수를 `production`로 설정하여 app.js 에서 작성한 `dotenv.config`를 통해 `.env.production` 파일의 값을 로드합니다. 
+- 데이터베이스 이름은 `codingon-prod`, 패스워드는 `5678prod`으로 설정됩니다. `node`는 서버를 시작하고 종료하지 않습니다.
