@@ -1,0 +1,296 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 쿠키(Cookie)"
+date: 2024-08-03  
+categories: Node.js
+---
+
+# Express와 쿠키(Cookie)
+
+## 0. 쿠키란?
+
+쿠키는 클라이언트의 웹 브라우저에 저장되는 작은 데이터 조각입니다. 서버에서 클라이언트로 보내져 브라우저에 저장되며, 이후 클라이언트가 같은 서버에 다시 요청할 때마다 함께 전송됩니다. 이를 통해 서버는 클라이언트의 상태를 유지하고, 사용자에게 개인화된 경험을 제공할 수 있습니다.
+
+<br>
+
+## 1. 쿠키의 사용 목적
+
+- 세션 관리
+   - 사용자가 로그인하면 서버는 사용자의 세션 ID를 쿠키에 저장합니다. 이후 사용자가 페이지를 이동하더라도 세션 ID를 통해 로그인 상태를 유지할 수 있습니다.
+   - (예시) 로그인 상태 유지, 장바구니 내용 저장 등
+
+- 사용자 맞춤 설정
+   - 사용자가 선택한 테마나 언어 설정을 쿠키에 저장하여, 다음 번 방문 시에도 동일한 설정을 유지할 수 있습니다.
+   - (예시) 테마 설정, 언어 선택 등
+
+- 추적 및 분석
+   - 쿠키를 사용하여 사용자의 방문 기록이나 행동을 추적하고, 이를 분석하여 웹사이트의 개선점을 찾거나 마케팅 전략을 세울 수 있습니다.
+   - (예시) 웹사이트 방문 기록, 사용자 행동 분석 등
+
+<br>
+
+## 2. 환경 변수 설정
+
+### `.env` 파일
+
+애플리케이션의 환경 변수를 정의하는 `.env` 파일을 사용하여 서버 포트와 쿠키 비밀 키를 설정합니다.
+
+```
+PORT=5000
+COOKIE_SECRET=thiscookiesecretkeyhihello9876
+```
+
+- `COOKIE_SECRET`: 쿠키의 서명을 위한 비밀 키입니다. 이 값을 통해 쿠키가 변조되지 않았음을 검증할 수 있습니다. 
+- 아무 문자열이나 넣어 유추하지 못하게 하는 것이 좋습니다.
+
+<br>
+
+## 3. 쿠키의 종류
+
+### 1) 평문 쿠키
+
+```js
+// 평문 쿠키 설정
+app.use(cookieParser(process.env.COOKIE_SECRET));
+
+const cookieConfig = {
+    httpOnly: true, 
+    maxAge: 60 * 1000,
+};
+```
+
+- `httpOnly` 옵션을 사용하여 자바스크립트에서 접근하지 못하도록 하고, `maxAge`를 통해 쿠키의 유효 기간을 설정합니다.
+- 평문 쿠키는 암호화되지 않은 일반 텍스트로 저장됩니다. 클라이언트가 이 쿠키를 수정하거나 위조할 수 있으며, 서버는 이를 검증할 방법이 없습니다.
+- 평문 쿠키는 클라이언트에서 쉽게 수정될 수 있으며, 중요한 데이터를 저장하기에는 적합하지 않습니다. 평문 쿠키는 단순한 상태 정보를 저장하는 데 사용될 수 있지만, 보안이 중요한 정보는 서명된 쿠키를 사용하는 것이 좋습니다.
+
+<br>
+
+### 2) 서명된 쿠키
+- `signed` 옵션을 `true`로 설정하여 쿠키 값을 서명합니다.
+- 서명된 쿠키는 쿠키 값에 서명을 추가하여 무결성을 보장합니다. 서명된 쿠키는 클라이언트에서 수정할 수 없으며, 서버에서 서명을 검증하여 쿠키가 변조되지 않았음을 확인할 수 있습니다.
+- 서버는 쿠키 값을 서명할 때 사용한 비밀 키와 클라이언트로부터 받은 서명을 비교하여 쿠키의 무결성을 검증합니다.
+```js
+app.use(cookieParser(process.env.COOKIE_SECRET));
+
+const cookieConfig = {
+    httpOnly: true,
+    maxAge: 60 * 1000,
+    signed: true // 서명된 쿠키
+};
+
+res.cookie('myKeyTest', 'myValueTest', cookieConfig); // (키, 값, 옵션)
+```
+<br>
+
+#### (1) 서명된 쿠키의 주요 옵션
+
+- 쿠키 이름 (key): `'myKeyTest'`
+
+   - 쿠키의 이름을 지정합니다. 쿠키는 이름과 값의 쌍으로 저장됩니다. 클라이언트의 브라우저는 이 이름을 사용하여 쿠키를 식별하고 서버에 전송합니다.
+
+- 쿠키 값 (value): `'myValueTest'`
+
+   - 쿠키에 저장할 값을 지정합니다. 이 값은 클라이언트의 브라우저에 저장됩니다.
+
+- 옵션 (options): `cookieConfig`
+
+   - 쿠키의 동작 방식을 설정하는 다양한 옵션들을 포함합니다. 이 옵션들은 쿠키의 보안, 유효 기간, 접근 권한 등을 제어합니다.
+
+<br>
+
+#### (2) 서명된 쿠키의 `주요 옵션`
+
+- `httpOnly`
+  - `true`로 설정되면, 쿠키는 클라이언트 측 JavaScript에서 접근할 수 없습니다. 이는 XSS(교차 사이트 스크립팅) 공격으로부터 쿠키를 보호하는 데 도움이 됩니다.
+  - (예시) `httpOnly: true`
+
+- `maxAge` 
+  - 쿠키의 유효 기간을 설정합니다. 쿠키가 생성된 시간부터 이 시간이 지나면 쿠키는 만료됩니다. 시간은 밀리초 단위로 설정합니다.
+  - (예시) `maxAge: 60 * 1000` (1분)
+
+- `expires`
+  - 쿠키의 만료 날짜와 시간을 설정합니다. `maxAge`와 비슷하지만, `expires`는 절대적인 날짜와 시간을 지정합니다.
+  - (예시) `expires: new Date(Date.now() + 60 * 1000)`
+
+- `domain`
+  - 쿠키가 유효한 도메인을 설정합니다. 이 도메인에서만 쿠키가 전송됩니다.
+  - (예시) `domain: 'example.com'`
+
+- `path`
+  - 쿠키가 유효한 URL 경로를 설정합니다. 이 경로에 해당하는 URL에서만 쿠키가 전송됩니다.
+  - (예시) `path: '/'`
+
+- `secure`
+  - `true`로 설정되면, 쿠키는 HTTPS 연결을 통해서만 전송됩니다. 이 옵션은 쿠키의 보안을 강화합니다.
+  - (예시) `secure: true`
+
+- `sameSite`
+  - 쿠키의 SameSite 속성을 설정하여 CSRF(사이트 간 요청 위조) 공격을 방지합니다. `Strict`, `Lax`, `None` 중 하나로 설정할 수 있습니다.
+  - (예시) `sameSite: 'Strict'`
+
+- `signed`
+  - `true`로 설정하면, 쿠키의 값에 서명을 추가하여 쿠키의 무결성을 검증합니다. 서명된 쿠키는 서버에서 서명을 확인하여 변조되지 않았음을 보장할 수 있습니다.
+  - (예시) `signed: true`
+
+<br>
+
+#### (3) 서명된 쿠키 예시
+
+서명된 쿠키는 다음과 같은 형태로 서버와 클라이언트 간에 전달됩니다.
+
+```
+s%3AmyValueTest.hJ%2B5zrjA0i%2BCMvWo8bV5ldOFBkahM3DUIlM99CDAM88
+```
+
+- `s%3A`: 서명된 쿠키의 접두사로, 쿠키 값이 서명됨을 나타냅니다.
+- `myValueTest`: 실제 쿠키 값입니다.
+- 서명 문자열: 쿠키 값을 서명하기 위해 생성된 문자열입니다.
+
+<br>
+
+#### (4) 서명된 쿠키 검증 방식
+
+- 서버가 `"서명된 쿠키"`를 받으면, `"s%3A"`를 보고 서명된 쿠키임을 인식합니다.
+- 서버의 `비밀키(process.env.COOKIE_SECRET)`를 사용해 다시 서명하고 받은 서명이랑 비교합니다.
+- 두 값이 일치하면 쿠키가 변조되지 않았음을 신뢰하고 사용합니다.
+
+<br>
+
+## 4. `cookie-parser` 미들웨어
+
+### 1) `cookie.js`
+
+Express 애플리케이션에서 쿠키를 설정하고 처리하기 위해 `cookie-parser` 미들웨어를 사용합니다.
+
+```js
+const express = require('express');
+const cookieParser = require('cookie-parser'); // 쿠키 설정, 처리
+const path = require('path');
+const dotenv = require('dotenv');
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set('./views', './views');
+
+// 환경변수를 로드
+dotenv.config({
+    path: path.resolve(__dirname, '.env')
+});
+
+const port = process.env.PORT; // 참고: 환경변수보다 위에 위치하면 undefined 뜸.
+
+
+// cookie-parser 미들웨어를 사용하여 쿠키를 해석
+app.use(cookieParser(process.env.COOKIE_SECRET));
+const cookieConfig = {
+    httpOnly: true, // 서버를 통해서만 쿠키에 접근 가능 -> 프론트 js에서 document.cookie로 접근 차단
+    maxAge: 60 * 1000, // 쿠키의 수명 (ms, 밀리초 단위)
+    signed: true, // // 쿠키 암호화 (req.signedCookies), 쿠키에 서명을 추가하여 변조를 방지
+};
+
+
+// 기본 페이지 렌더링
+app.get('/', (req, res) => {
+    // 서버가 클라이언트한테 응답을 "함"
+    res.render('cookie');
+});
+
+
+// 서명된 쿠키 설정
+app.get('/setCookie', (req, res) => {
+    // res.cookie(키, 값, 옵션);
+    // 쿠키를 설정하는 메서드 
+    // 서버가 클라이언트한테 응답하는 게 아니라 "쿠키를 설정" (응답하기 전인 상태)
+    res.cookie('myKeyTest', 'myValueTest', cookieConfig);
+    res.send('Set signed cookie!');
+});
+
+
+// 쿠키 확인
+app.get('/getCookie', (req, res) => {
+    // req.signedCookies
+    // cookie-parser가 만든 요청의 서명된 쿠키 해석
+    res.send(req.signedCookies);
+});
+
+
+// 쿠키 삭제
+app.get('/clearCookie', (req, res) => {
+    // res.clearCookie(키, 값, 옵션)
+    // 쿠키를 삭제하는 메서드 (서버가 클라이언트에 응답하는 것이 아님)
+    // 쿠키를 생성할 때의 키, 값, 옵션이 일치해야 함 (단, maxAge/expires 키는 일치할 필요 없음)
+    res.clearCookie('myKeyTest', 'myValueTest', cookieConfig);
+    res.send('Deleted signed cookie!');
+});
+
+app.listen(port, () => {
+    console.log(`${port} 연결 성공`);
+    console.log('쿠키 비밀키 :', process.env.COOKIE_SECRET);
+});
+```
+<br>
+
+### 2) `cookie-parser` 사용법
+
+#### (1) cookie-parser 미들웨어
+
+- 요청에 실려온 쿠키를 해석해서 req.cookies 객체로 만듭니다.
+
+<br>
+
+#### (2) 미들웨어 설정
+
+  ```js
+  // 기본형태: cookieParser(secretKey, optionObj)
+  app.use(cookieParser(process.env.COOKIE_SECRET));
+  ```
+- secretKey: 비밀키
+    - 비밀키의 값을 통해 해당 쿠키가 이서버가 만든 쿠키임을 검증합니다.
+    - 쿠키는 클라이언트에 저장되는 정보이다보니 위조가 쉬워서 비밀키를 통해 만든 서명을 쿠키 뒤에 붙입니다.
+
+- optionObj: 쿠키에 사용되는 옵션입니다.
+
+<br>
+
+#### (3) 서명된 쿠키 설정
+
+- `res.cookie` 메서드를 사용하여 서명된 쿠키를 설정합니다. `signed` 옵션을 `true`로 설정하면 쿠키에 서명이 추가되어 변조를 방지합니다.
+
+  ```js
+  app.get('/setCookie', (req, res) => {
+
+      res.cookie('myKeyTest', 'myValueTest', cookieConfig); // res.cookie
+
+      res.send('Set signed cookie!');
+  });
+  ```
+
+<br>
+
+#### (4) 쿠키 확인
+
+- `req.signedCookies`를 사용하여 클라이언트로부터 받은 서명된 쿠키를 확인합니다.
+
+  ```js
+  app.get('/getCookie', (req, res) => {
+
+      res.send(req.signedCookies); // req.signedCookies
+
+  });
+  ```
+
+<br>
+
+#### (5) 쿠키 삭제
+
+- `res.clearCookie` 메서드를 사용하여 쿠키를 삭제합니다. 
+- 쿠키를 삭제할 때는 쿠키를 설정할 때 사용한 키와 값, 옵션을 동일하게 지정해야 합니다.
+
+  ```js
+  app.get('/clearCookie', (req, res) => {
+
+      res.clearCookie('myKeyTest', 'myValueTest', cookieConfig); // res.clearCookie
+
+      res.send('Deleted signed cookie!');
+  });
+  ```
