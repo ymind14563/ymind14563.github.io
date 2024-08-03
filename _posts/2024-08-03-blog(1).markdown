@@ -47,8 +47,8 @@ npm install express dotenv cross-env
 
 #### `env-variable/.env`
 
-```env
-# 주석
+```
+# 주석 표시 방법은 '#' 을 사용.
 # .env 파일은 .gitignore 파일에 추가해서 깃 관리를 하지 않는 것이 바람직함.
 # 현재 프로젝트는 연습용이니까 깃으로 관리함.
 PORT=3000
@@ -64,7 +64,7 @@ DATABASE_PW=1234
 
 #### `env-variable/.env.development`
 
-```env
+```
 # 개발환경, 테스트환경, 배포환경 모두 .env가 다른 경우가 많음.
 # 현재 프로젝트에선 개발환경 배포환경 두 가지가 다른 경우를 예제함.
 
@@ -80,7 +80,7 @@ DATABASE_PW=dev4321
 
 #### `env-variable/.env.production`
 
-```env
+```
 # 개발환경, 테스트환경, 배포환경 모두 .env가 다른 경우가 많음.
 # 현재 프로젝트에선 개발환경 배포환경 두 가지가 다른 경우를 예제함.
 
