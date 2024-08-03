@@ -32,7 +32,20 @@ categories: Node.js
 
 <br>
 
-## 2. 환경 변수 설정
+## 2. 필요한 npm 패키지 설치
+
+```sh
+npm install express dotenv cross-env cookie-parser
+```
+
+- `express`: Node.js 웹 애플리케이션 프레임워크입니다.
+- `dotenv`: 환경 변수 파일을 로드하는 모듈입니다.
+- `cross-env`: 플랫폼에 상관없이 환경 변수를 설정할 수 있는 모듈입니다.
+- `cookie-parser`: 쿠키와 관련된 설정 및 처리하는 모듈입니다.
+
+<br>
+
+## 3. 환경 변수 설정
 
 ### `.env` 파일
 
@@ -48,7 +61,7 @@ COOKIE_SECRET=thiscookiesecretkeyhihello9876
 
 <br>
 
-## 3. 쿠키의 종류
+## 4. 쿠키의 종류
 
 ### 1) 평문 쿠키
 
@@ -161,7 +174,7 @@ s%3AmyValueTest.hJ%2B5zrjA0i%2BCMvWo8bV5ldOFBkahM3DUIlM99CDAM88
 
 <br>
 
-## 4. `cookie-parser` 미들웨어
+## 5. `cookie-parser` 미들웨어
 
 ### 1) `cookie.js`
 
