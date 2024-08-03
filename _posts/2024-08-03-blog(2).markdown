@@ -237,8 +237,6 @@ app.listen(port, () => {
 
 ### 2) `cookie-parser` 사용법
 
-<br>
-
 #### (1) cookie-parser 미들웨어
 
 - 요청에 실려온 쿠키를 해석해서 req.cookies 객체로 만듭니다.
