@@ -1,0 +1,286 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 세션(Session)"
+date: 2024-08-04  
+categories: Node.js
+---
+
+# 세션(Session)
+
+<hr>
+<br>
+
+## 0. 세션(Session)이란?
+
+세션(Session)은 서버에서 클라이언트와의 상태를 유지하기 위해 사용하는 정보 저장 방식입니다. 클라이언트가 서버에 요청할 때마다 특정 세션 ID를 함께 전송하여, 서버가 클라이언트의 상태를 유지하고 식별할 수 있게 합니다.
+
+<br>
+
+## 1. 세션의 동작 원리
+
+### 1) 세션의 동작 원리
+
+세션은 서버와 클라이언트 간의 상태를 유지하기 위해 중요한 역할을 합니다.
+
+#### (1) 서버가 웹 브라우저(클라이언트)에게 세션 값을 보냅니다.
+   - 사용자가 웹사이트에 처음 접속하면 서버는 고유한 세션 ID(sid)를 생성합니다. 이 세션 ID는 클라이언트를 구별할 수 있는 식별자 역할을 합니다.
+   - 서버는 이 세션 ID를 클라이언트에게 쿠키를 통해 전송합니다. 이 쿠키는 클라이언트의 브라우저에 저장됩니다.
+
+#### (2) 클라이언트는 요청마다 자신이 갖는 세션 ID를 서버에 전달합니다.
+   - 클라이언트는 서버로 요청을 보낼 때마다 이전에 저장된 세션 ID를 함께 전송합니다. 이 세션 ID는 쿠키에 포함되어 자동으로 전송됩니다.
+   - 예를 들어, 사용자가 웹사이트의 다른 페이지로 이동하거나, 폼을 제출하는 등의 요청을 보낼 때마다 세션 ID가 포함된 쿠키가 서버로 전송됩니다.
+
+#### (3) 서버는 클라이언트의 세션 ID(req.sessionID)를 통해 유저의 데이터를 구별할 수 있습니다.
+   - 서버는 클라이언트로부터 전달받은 세션 ID를 사용하여 해당 클라이언트의 세션 데이터를 식별하고 접근할 수 있습니다.
+   - 서버는 세션 ID를 기반으로 세션 스토어(메모리, 데이터베이스 등)에 저장된 세션 데이터를 조회하여 사용자의 상태를 유지합니다. 이를 통해 로그인 상태, 장바구니 정보 등 사용자별 데이터를 관리할 수 있습니다.
+
+   ```js
+   app.get('/name', (req, res) => {
+       console.log('req.session >> ', req.session);
+       res.send({ id: req.sessionID, name: req.session.name });
+   });
+   ```
+
+<br>
+
+### 2) 세션의 작동 예시
+
+#### (1) 사용자가 웹사이트에 접속하면
+   - 서버는 고유한 세션 ID를 생성하고, 이를 클라이언트에게 쿠키를 통해 전송합니다.
+   - 클라이언트의 브라우저는 이 쿠키를 저장합니다.
+
+#### (2) 사용자가 페이지 이동 등 요청을 할 때마다
+   - 브라우저는 저장된 세션 ID를 쿠키에 포함하여 서버로 요청을 보냅니다.
+
+#### (3) 서버는 요청을 받을 때마다
+   - 요청에 포함된 세션 ID를 사용하여 클라이언트를 식별하고, 해당 세션 ID에 저장된 세션 데이터를 조회합니다.
+
+<br>
+
+## 2. 쿠키와 세션의 차이점
+
+쿠키와 세션은 비슷한 역할을 하며 동작 원리도 유사합니다. 둘 다 클라이언트와 서버 간의 상태를 유지하기 위해 사용되지만, 몇 가지 중요한 차이점이 있습니다.
+
+- 서버 자원 사용:
+  - 쿠키: 서버의 자원을 사용하지 않고 클라이언트에 저장됩니다.
+  - 세션: 서버의 자원을 사용하여 서버에 저장됩니다.
+
+- 속도:
+  - 쿠키: 클라이언트에 저장되므로 속도가 빠릅니다.
+  - 세션: 서버에서 데이터를 처리하므로 상대적으로 속도가 느릴 수 있습니다.
+
+- 보안:
+  - 쿠키: 클라이언트에 저장되므로 변조될 가능성이 있습니다.
+  - 세션: 세션 ID만 클라이언트에 저장되고 나머지 데이터는 서버에서 처리되므로 비교적 안전합니다.
+
+- 만료 기간:
+  - 쿠키: 만료 기간을 설정할 수 있으며, 설정된 기간 동안 유효합니다.
+  - 세션: 만료 기간을 설정할 수 있지만, 브라우저가 종료되면 만료 기간과 상관없이 세션이 삭제됩니다. 그러나 세션 스토어와 같은 외부 저장소를 사용하거나 세션 쿠키의 `maxAge`나 `expires` 속성을 적절히 설정하면, 브라우저가 종료된 후에도 세션을 유지할 수 있습니다.
+
+일반적으로 '오늘 그만 보기', '아이디 기억하기' 등은 쿠키로 많이 사용되고, '로그인 며칠 동안 유지' 등의 기능은 세션으로 많이 사용됩니다.
+
+<br>
+
+**참고 사항**
+> [session store](https://velog.io/@daeseongkim/Node.js-session-store%EC%9D%98-%EB%AC%BC%EB%A6%AC%EC%A0%81-%EC%9C%84%EC%B9%98)
+
+<br>
+
+## 3. 필요한 npm 패키지 설치
+
+```sh
+npm install express dotenv cross-env express-session
+```
+
+- `express`: Node.js 웹 애플리케이션 프레임워크입니다.
+- `dotenv`: 환경 변수 파일을 로드하는 모듈입니다.
+- `cross-env`: 플랫폼에 상관없이 환경 변수를 설정할 수 있는 모듈입니다.
+- `express-session`: 세션을 관리하는 모듈입니다.
+
+<br>
+
+## 4. 환경 변수 설정
+
+### `.env` 파일
+
+애플리케이션의 환경 변수를 정의하는 `.env` 파일을 사용하여 서버 포트와 쿠키 비밀 키를 설정합니다.
+
+```
+PORT=5000
+COOKIE_SECRET=thiscookiesecretkeyhihello9876
+```
+
+- `COOKIE_SECRET`: 세션의 서명을 위한 비밀 키입니다. 이 값을 통해 세션이 변조되지 않았음을 검증할 수 있습니다. 
+- 아무 문자열이나 넣어 유추하지 못하게 하는 것이 좋습니다.
+
+<br>
+
+## 5. `express-session` 미들웨어
+
+### 1) `session.js`
+
+```js
+const express = require('express');
+const session = require('express-session'); // 세션 설정, 처리
+const dotenv = require('dotenv');
+const path = require('path');
+const app = express();
+
+// 환경변수: 상단에 위치해야 아래 코드에서 process.env를 정상적으로 불러올 수 있음 (뒤에 위치하면 undefined가 뜸)
+dotenv.config({
+    path: path.resolve(__dirname, '.env'),
+}); 
+
+const port = process.env.PORT; 
+
+app.set('view engine', 'ejs');
+app.set('views', './views');
+
+app.use(session({
+    secret: process.env.COOKIE_SECRET,  // 필수 옵션, 세션 암호화하는 데 사용하는 키
+    resave: false, // 세션이 변경되지 않더라도 매번 다시 저장할지를 설정
+    saveUninitialized: false, // 초기화되지 않은 세션도 저장할지를 설정
+
+    // 세션 쿠키 설정 (세션 관리할 때 클라이언트로 보내는 쿠키)
+    cookie: {
+        httpOnly: true, // 클라이언트에서 쿠키를 확인하지 못하게 설정.
+        secure: false, // http에서도 사용 가능하도록 설정 (true라면 https에서만 가능)
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일 동안 유효한 쿠키 (일 * 시간 * 분 * 초 * 밀리초)
+        // expires: 만료 기간 설정
+    }
+}));
+
+
+
+// 기본 페이지 렌더링
+app.get('/', (req, res) => {
+    res.render('session');
+});
+
+// 세션 설정
+app.get('/set', (req, res) => {
+    // req.session.키 = 값
+    // 세션 값을 설정. 사용자가 특정 데이터를 전송하지 않을 경우 기본 값을 설정.
+    if (req.query.name) {
+        req.session.name = req.query.name;
+        req.session.age = req.query.age;
+    } else {
+        req.session.name = '바나나';
+        req.session.age = 10;
+    }
+    res.send('세션 설정 완료!');
+});
+
+// 세션 사용 (조회)
+app.get('/name', (req, res) => {
+    // req.session.키
+    // 세션 값을 조회. 클라이언트로부터 받은 세션 ID를 통해 세션 데이터를 가져옴.
+    res.send({ id: req.sessionID, name: req.session.name });
+});
+
+// 세션 삭제
+app.get(`/destroy`, (req, res) => {
+    // req.destroy
+    // 세션을 삭제. 세션 삭제 후 클라이언트를 리다이렉트.
+    req.session.destroy((err) => {
+        if(err) throw err;
+        // res.send(`세션 삭제 완료!`)
+        res.redirect(`/name`); // send 대신에 redirect(경로변경)
+    });
+});
+
+app.listen(port, () => {
+    console.log(`${port} 연결 성공`);
+});
+```
+
+<br>
+
+### 2) `express-session` 미들웨어
+
+#### (1) `express-session` 미들웨어
+
+- 로그인 등 세션을 구현하거나 특정 클라이언트에 대한 데이터를 저장할 때 사용자 별로 req.session 객체 안에 유지합니다.
+- 인자로 세션에 대한 설정 객체를 넣습니다.
+
+#### (2) 세션 미들웨어 설정
+
+`express-session` 미들웨어를 사용하여 세션을 설정합니다. 미들웨어는 세션 ID를 생성하고 클라이언트의 쿠키에 저장합니다. 서버는 이 세션 ID를 통해 클라이언트를 식별할 수 있습니다.
+
+```js
+app.use(session({
+    secret: process.env.COOKIE_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일 동안 유효한 쿠키
+    }
+}));
+```
+
+- `secret`: 세션을 암호화하는 데 사용하는 비밀 키입니다. 세션 ID에 서명을 추가하여 무결성을 보장하며, 클라이언트가 세션 ID를 변조하지 못하도록 합니다.
+
+- `resave`: 세션이 변경되지 않더라도 매번 다시 저장할지를 설정합니다. `false`로 설정하면 세션이 수정되지 않은 경우 서버의 세션 저장소에 세션을 다시 저장하지 않습니다. 이는 불필요한 세션 저장을 방지하여 성능을 최적화합니다.
+
+- `saveUninitialized`: 초기화되지 않은 세션도 저장할지를 설정합니다. `false`로 설정하면, 세션이 초기화되지 않은 상태에서는 세션을 저장하지 않습니다. 이는 사용되지 않은 세션이 서버 저장소에 저장되는 것을 방지하여 서버의 리소스를 절약합니다.
+
+- `cookie`: 세션 쿠키의 설정을 정의합니다. 쿠키의 다양한 속성을 설정할 수 있습니다.
+  - `httpOnly`: `true`로 설정하면, 클라이언트 측 JavaScript에서 쿠키에 접근할 수 없습니다. 이는 보안상의 이유로 XSS(교차 사이트 스크립팅) 공격을 방지합니다.
+  - `secure`: `false`로 설정하면, HTTP에서도 쿠키가 전송될 수 있습니다. `true`로 설정하면, HTTPS 연결에서만 쿠키가 전송됩니다.
+  - `maxAge`: 쿠키의 유효 기간을 밀리초 단위로 설정합니다. 예를 들어, `7 * 24 * 60 * 60 * 1000`은 7일 동안 유효한 쿠키를 의미합니다. 이 설정을 통해 브라우저가 종료된 후에도 지정된 기간 동안 세션이 유지됩니다.
+
+<br>
+
+#### (3) 세션 설정
+
+세션을 설정하려면 `req.session.키 = 값` 형태로 값을 설정합니다. 이 값은 서버에서 유지되며, 클라이언트가 요청을 보낼 때마다 해당 값을 사용할 수 있습니다.
+
+```js
+app.get('/set', (req, res) => {
+
+    if (req.query.name) {
+        req.session.name = req.query.name;
+        req.session.age = req.query.age;
+
+    } else {
+        req.session.name = '바나나';
+        req.session.age = 10;
+    }
+
+    res.send('세션 설정 완료!');
+});
+```
+
+<br>
+
+#### (4) 세션 조회
+
+세션 값을 조회하려면 `req.session.키`를 사용합니다. 클라이언트가 요청을 보낼 때마다 서버에서 세션 값을 확인할 수 있게 합니다.
+
+```js
+app.get('/name', (req, res) => {
+    
+    res.send({ id: req.sessionID, name: req.session.name });
+
+});
+```
+
+<br>
+
+#### (5) 세션 삭제
+
+세션을 삭제하려면 `req.session.destroy` 메서드를 사용합니다. 세션을 제거하고 클라이언트의 세션 ID 쿠키를 삭제합니다.
+
+```js
+app.get(`/destroy`, (req, res) => {
+
+    req.session.destroy((err) => {
+        if(err) throw err;
+
+        res.redirect(`/name`);
+    });
+});
+```

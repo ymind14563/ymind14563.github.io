@@ -5,7 +5,7 @@ date: 2024-08-03
 categories: Node.js
 ---
 
-# Express와 쿠키(Cookie)
+# 쿠키(Cookie)
 
 <hr>
 <br>
