@@ -1,0 +1,248 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 비밀번호 암호화"
+date: 2024-08-04  
+categories: Node.js
+---
+
+# Node.js에서 비밀번호 암호화
+
+<hr>
+<br>
+
+## 1. 암호화 방식 비교
+
+비밀번호 암호화를 구현할 때 여러 가지 암호화 방식이 있습니다. 여기서는 `bcrypt`와 `crypto` 모듈을 사용하는 방법을 비교해보겠습니다.
+
+### (1) bcrypt
+
+- **장점**: 비밀번호 암호화에 특화되어 있으며, 해시 생성 시간이 비교적 느리기 때문에 무차별 대입 공격에 강합니다. 솔트를 자동으로 생성하고 관리하여 암호화 과정을 단순화합니다.(bcrypt에서 솔트와 해싱 동시 처리)
+- **단점**: 양방향 암호화는 지원하지 않으며, 범용성이 떨어집니다. 비밀번호 암호화 외의 용도로 사용하기에는 적합하지 않습니다.
+
+<br>
+
+### (2) crypto
+
+- **장점**: Node.js의 내장 모듈로 범용성이 큽니다. 다양한 암호화 알고리즘을 지원하며, 다양한 암호화 요구사항에 대응할 수 있습니다. 비밀번호뿐만 아니라 다른 데이터의 암호화에도 사용할 수 있습니다.
+- **단점**: 해시 함수는 같은 입력에 대해 같은 출력이 생성되기 때문에, 같은 비밀번호에 대해 동일한 해시 값이 생성됩니다. 솔트를 직접 관리해야 하며, 암호화 과정이 상대적으로 복잡할 수 있습니다. (해쉬값과 솔트값 저장 후 활용)
+
+
+- 비밀번호 암호화에는 `bcrypt`와 `crypto` 모듈 모두 사용할 수 있지만, 비밀번호 저장과 같은 특정 용도에는 `bcrypt`가 더 적합합니다. 범용적인 암호화가 필요한 경우에는 `crypto` 모듈을 사용하는 것이 좋습니다.
+
+<br>
+
+## 2. 솔트(Salt)란?
+
+### 1) 솔트의 정의
+- 솔트(Salt)는 암호화를 강화하기 위해 사용되는 임의의 데이터입니다. 솔트는 비밀번호와 결합하여 해시 함수에 입력되며, 동일한 비밀번호라도 솔트가 다르면 다른 해시 값을 생성하게 됩니다. 
+- 이를 통해 레인보우 테이블 공격과 같은 사전 공격을 방지할 수 있습니다. 같은 비밀번호를 가진 사용자들도 솔트를 사용하면 각각 다른 솔트 값을 가지므로 서로 다른 해시 값을 가지게 되어 보안성이 높아집니다.
+
+<br>
+
+### 2) 솔트의 작동 원리 예시
+
+비밀번호 "1234"를 해싱한다고 가정해보겠습니다.
+
+#### (1) 솔트 없이 해싱
+
+```js
+const crypto = require('crypto');
+
+const createHashedPw = (pw) => {
+    return crypto.createHash('sha512').update(pw).digest('base64');
+}
+
+const password = '1234';
+const hashedPw = createHashedPw(password);
+console.log(`Hashed password without salt: ${hashedPw}`);
+```
+
+위의 코드에서는 비밀번호 "1234"를 해싱하여 항상 동일한 해시 값을 생성합니다.
+
+<br>
+
+#### (2) 솔트를 사용하여 해싱
+
+```js
+const crypto = require('crypto');
+
+const saltAndHashPw = (pw) => {
+    const salt = crypto.randomBytes(16).toString('base64');
+    const iterations = 100000;
+    const keylen = 64;
+    const digest = 'sha512';
+
+    const hash = crypto.pbkdf2Sync(pw, salt, iterations, keylen, digest).toString('base64');
+    return { salt, hash };
+}
+
+const password = '1234';
+const { salt, hash } = saltAndHashPw(password);
+console.log(`Salt: ${salt} // Hashed password with salt: ${hash}`);
+```
+
+- 비밀번호 "1234"를 해싱할 때 임의의 솔트를 사용하여 항상 다른 해시 값을 생성합니다. 
+- `다른` 사용자가 `같은` 비밀번호를 사용하더라도 솔트를 사용함에 따라 `다른 해쉬값`이 생성됩니다.
+- `솔트는 해시와 함께 저장`되며, 사용자 별로 솔트 값을 저장해놓고 나중에 비밀번호를 확인할 때 사용됩니다.
+- 이는 원래 비밀번호를 알아내는 것이 아니라, 동일한 솔트와 입력된 비밀번호를 이용해 해싱을 다시 수행하여 기존의 해시 값과 비교하는 것입니다.
+
+<br>
+
+## 3. bcrypt 모듈 사용
+
+### 1) bcrypt란?
+
+bcrypt는 비밀번호 암호화에 자주 사용하는 모듈입니다. 양방향 암호화는 지원하지 않으며, 비밀번호 암호화에 특화된 모듈로 비밀번호 같은 민감한 정보를 안전하게 보호할 수 있습니다.
+
+<br>
+
+### 2) bcrypt 설치
+
+bcrypt를 사용하기 위해서는 외부 라이브러리를 설치해야 합니다.
+
+```sh
+npm install bcrypt
+```
+
+<br>
+
+### 3) bcrypt 코드
+
+```js
+// bcrypt 모듈 불러오기
+const bcrypt = require('bcrypt');
+
+// 솔트 생성 라운드 수 -> 2의 거듭제곱 형태
+// rounds: 해시 함수를 반복하는 횟수
+const saltRounds = 10; // 2^10 = 1024회 반복 (10~12 사이의 값을 보통 씀)
+// 솔트 라운드 숫자가 커지면, 해시 생성 시간 느려지지만 보안성이 향상됨
+
+// 비밀번호 해싱 함수 정의 
+const hashPw = (pw) => {
+    return bcrypt.hashSync(pw, saltRounds); // 비밀번호를 솔트와 함께 해싱
+}
+
+// 비밀번호 정답 검증 함수 정의
+const comparePw = (inputPw, hashedPw) => {
+    // compareSync(평문_비밀번호, 암호화된_비밀번호)
+    // 사용자가 입력한 평문과 해시값을 비교하여 boolean 형태로 반환
+    return bcrypt.compareSync(inputPw, hashedPw); // 입력 비밀번호와 해시된 비밀번호 비교
+}
+
+// -------------------------------------------------
+
+// 정답 비밀번호 정의
+const originalPw = '1234';
+
+const hashedPw = hashPw(originalPw); // 비밀번호 해싱
+console.log(`Hashed Password: ${hashedPw}`); // 해시된 비밀번호 출력
+
+const isMatch = comparePw(originalPw, hashedPw); // 해시된 비밀번호와 입력 비밀번호 비교
+console.log(isMatch ? '비밀번호 일치' : '비밀번호 불일치'); // 일치 여부 출력
+
+const isMatch2 = comparePw('12344', hashedPw); // 다른 비밀번호로 비교
+console.log(isMatch2 ? '비밀번호 일치' : '비밀번호 불일치'); // 일치 여부 출력
+```
+
+- `bcrypt` 모듈을 불러옵니다.
+- 정답 비밀번호를 정의합니다.
+- 솔트 생성 라운드 수를 정의합니다. 이는 해시 함수를 반복하는 횟수를 나타내며, 값이 클수록 해시 생성 시간이 느려지지만 보안성이 향상됩니다.
+- 비밀번호 해싱 함수를 정의합니다. 이 함수는 입력받은 비밀번호를 해싱하여 반환합니다.
+- 비밀번호 정답 검증 함수를 정의합니다. 이 함수는 입력받은 비밀번호와 해시된 비밀번호를 비교하여 일치 여부를 반환합니다.
+- 정답 비밀번호를 해싱하고, 해싱된 비밀번호와 입력받은 비밀번호를 비교하여 일치 여부를 출력합니다.
+
+<br>
+
+## 4. crypto 모듈 사용
+
+### 1) crypto란?
+
+crypto는 Node.js의 내장 모듈로, 다양한 암호화 기능을 제공합니다. bcrypt 모듈보다 범용성이 큽니다.
+
+<br>
+
+### 2) 해싱 (SHA-512) 코드
+
+```js
+// crypto 내장 모듈을 불러오기
+const crypto = require('crypto');
+
+// SHA-512 알고리즘으로 비밀번호를 해싱하는 함수
+const createHashedPw = (pw) => {
+    return crypto.createHash('sha512').update(pw).digest('base64'); // SHA-512 알고리즘으로 해싱
+}
+
+// -------------------------------------------------
+
+// 해시 함수의 한계: 같은 input에 대해서 같은 암호화된 output이 출력됨
+// -> 평문(input)으로 되돌아 갈 수는 없지만 output이 동일하다면 input이 동일함까지는 유추가능
+// (레인보우 테이블에서도 암호화된 output을 역추적해서 찾아낼 수도 있음)
+
+console.log(createHashedPw('1234')); // 같은 비밀번호에 대해 항상 동일한 해시 값 생성
+console.log(createHashedPw('1234')); // 같은 비밀번호에 대해 항상 동일한 해시 값 생성
+console.log(createHashedPw('1233')); // 다른 비밀번호는 다른 해시 값을 생성 (미세한 변화에도 hash 값은 완전히 다름)
+```
+
+- `createHashedPw` 함수는 입력받은 비밀번호를 SHA-512 알고리즘으로 해싱합니다.
+- 같은 비밀번호는 항상 동일한 해시 값을 생성하고, 다른 비밀번호는 다른 해시 값을 생성합니다.
+
+<br>
+
+### 3) 솔트와 함께 PBKDF2를 사용한 해싱 코드
+
+- `saltAndHashPw` 함수는 랜덤 솔트를 생성하여 비밀번호와 결합한 후, PBKDF2 알고리즘을 사용하여 해싱합니다.
+
+```js
+// crypto 내장 모듈을 불러오기
+const crypto = require('crypto');
+
+// 단방향 암호화를 생성하는 함수
+// saltAndHashPw: 임의의 salt값을 생성한 후, pbkdf2Sync함수를 사용해서 해당 솔트와 비밀번호를 기반으로 해시를 생성
+const saltAndHashPw = (pw) => {
+    const salt = crypto.randomBytes(16).toString('base64'); // 랜덤 솔트 생성
+    const iterations = 100000; // 반복 횟수
+    const keylen = 64; // 생성할 키의 길이
+    const digest = 'sha512'; // 해시 알고리즘
+
+    // pbkdf2Sync(비밀번호_원문, 솔트, 반복횟수, 키의 길이, 알고리즘)
+    // 솔트와 비밀번호를 결합하여 해싱
+    const hash = crypto.pbkdf2Sync(pw, salt, iterations, keylen, digest) // pw 값을 암호화 
+    .toString('base64'); // 암호화된 Buffer 형식의 데이터를 "base64 문자열로 변환"해서 저장하거나 전송하기 쉽도록 함
+
+    return { salt, hash }; // 솔트와 해시 반환
+}
+```
+
+<br>
+
+### 4) 비밀번호 비교 함수
+
+- `comparePw` 함수는 입력된 비밀번호와 저장된 솔트를 결합하여 해싱한 후, 저장된 해시 값과 비교합니다.
+
+```js
+// 비밀번호 비교 함수 정의
+const comparePw = (inputPw, savedSalt, savedHash) => {
+    // saltAndHashPw 함수에서 정의한 값들이랑 일치
+    const iterations = 100000; // 반복 횟수
+    const keylen = 64; // 생성할 키의 길이
+    const digest = 'sha512'; // 해시 알고리즘
+
+    const hash = crypto.pbkdf2Sync(inputPw, savedSalt, iterations, keylen, digest).toString('base64'); // 입력된 비밀번호와 저장된 솔트를 결합하여 해싱
+    return hash === savedHash; // 해시 값 비교
+}
+
+// -------------------------------------------------
+
+// 암호 비교 예제
+const password = '1234!'; // 원래 비밀번호
+
+// 비밀번호를 해싱하여 솔트와 해시 값 생성
+const { salt, hash } = saltAndHashPw(password);
+console.log(`Salt: ${salt} // Hash: ${hash}`); // 솔트와 해시 값 출력
+
+const inputPassword = '1234!#'; // input에 입력된 비밀번호
+const isMatch = comparePw(inputPassword, salt, hash); 
+console.log(`비밀번호가 ${isMatch ? '일치합니다.' : '일치하지 않습니다.'}`); // 일치 여부 출력
+```
+
+
