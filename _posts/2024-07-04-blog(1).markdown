@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "SQL 명령어 (MySQL)"
+title: "[SeSACx코딩온] SQL 명령어 (MySQL)"
 date: 2024-07-04
 categories: Database
 ---
