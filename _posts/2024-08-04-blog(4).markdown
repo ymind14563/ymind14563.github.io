@@ -533,6 +533,8 @@ socket.on('sendMessage', (res) => {
 
 - 메시지를 전송하고, 서버로부터 수신한 메시지를 화면에 표시합니다.
 
+<br>
+
 ## 9. 전체 코드
 
 #### `socket.io/package.json`
