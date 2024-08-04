@@ -96,13 +96,20 @@ npm install express socket.io ejs
 ```js
 const express = require('express'); // Express 모듈 가져옴
 const http = require('http'); // node.js 기본 내장 모듈인 HTTP 모듈 가져옴 (HTTP 서버와 클라이언트 기능을 제공)
-const { Server } = require('socket.io'); // Socket.IO 모듈에서 Server 클래스 가져옴
-const path = require('path'); // 경로 모듈 가져옴
+const { send } = require('process');
+// node.js 기본 내장 모듈인 'http' 불러오기.
+// 'http' 모듈은 HTTP 서버와 클라이언트 기능을 제공.
+
+const socketIO = require('socket.io');
+// 'socket.io' 모듈 불러오기.
+// WebSocket 기반, 실시간 양방향 데이터 전송 지원 라이브러리.
 
 const app = express(); // Express 애플리케이션 생성
 const server = http.createServer(app); // HTTP 서버 생성
 
-const io = new Server(server); // Socket.IO 서버 생성
+const io = socketIO(server)
+// HTTP 서버 'server'를 'socket.io'에 바인딩하여 WebSocket 기능을 추가한 서버를 생성.
+// 이러면 클라이언트-서버 간에 실시간 양방향 통신을 할 수 있음.
 
 const nickObjs = {}; // 닉네임을 저장할 객체 생성
 

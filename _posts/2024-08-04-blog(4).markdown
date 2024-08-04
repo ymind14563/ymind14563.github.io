@@ -1,0 +1,926 @@
+---
+layout: post
+title: "[SeSACx코딩온] Socket.IO를 활용한 실시간 채팅방"
+date: 2024-08-05
+categories: Node.js
+---
+
+# Node.js와 Socket.IO로 실시간 채팅방 만들기
+
+<hr>
+<br>
+
+## 1. Socket.IO의 주요 객체 설명
+
+- `io` 객체
+  - Socket.IO 인스턴스를 나타내는 객체로, 전체 소켓 서버를 관리합니다.
+
+- `io.sockets`
+  - 현재 연결된 모든 소켓들을 관리하는 객체로, 소켓들의 상태를 관리하고 다양한 소켓 관련 작업을 수행합니다.
+
+- `io.sockets.adapter`
+  - 소켓 서버 간의 상태를 관리하는 역할을 담당하는 객체로, 소켓들의 연결 상태와 방(room) 정보를 관리합니다.
+
+- `io.sockets.adapter.room`
+  - 모든 방(room) 정보를 저장하고 있는 객체로, 각 방에 접속한 클라이언트들의 정보를 포함합니다.
+
+- `get(room)`
+  - 위 객체에서 특정 방(room) ID에 해당하는 정보를 가져오는 역할을 하며, 해당 방에 접속한 클라이언트들의 소켓 ID 들을 Set 형태로 반환합니다.
+
+<br>
+
+## 2. 초기 설정
+
+### 1) 프로젝트 폴더 구조
+
+```
+socket.io/
+│
+├── views/
+│   └── client.ejs
+├── server.js
+└── package.json
+```
+
+<br>
+
+### 2) 필요한 패키지 설치
+
+터미널에서 다음 명령어를 실행하여 필요한 패키지를 설치합니다:
+
+```sh
+npm install express socket.io ejs
+```
+
+- `express`: Node.js 웹 애플리케이션 프레임워크입니다.
+- `socket.io`: 실시간 양방향 통신을 위한 라이브러리입니다.
+- `ejs`: 서버 사이드 템플릿 엔진입니다.
+
+<br>
+
+## 3. 기본 서버 설정
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+const express = require(`express`);
+const http = require(`http`);
+const socketIO = require(`socket.io`);
+
+const app = express();
+const PORT = 8000;
+
+const server = http.createServer(app); // http 서버 생성
+const io = socketIO(server); // socket 서버 생성
+
+// 미들웨어 설정
+app.set(`view engine`, `ejs`);
+
+// 라우터 설정
+app.get(`/`, (req, res) => {
+    res.render(`client`); // 클라이언트 페이지 렌더링
+});
+
+// 서버 실행
+server.listen(PORT, () => {
+    console.log(`http://localhost:${PORT}`);
+});
+```
+
+- `express`, `http`, `socket.io` 모듈을 사용하여 서버를 설정합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        #body {
+            width: 100%;
+            height: 70vh;
+            position: relative;
+            background-color: aquamarine;
+        }
+
+        #chat {
+            position: absolute;
+            bottom: 0px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #notice {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            color: gray;
+        }
+
+        #notice p {
+            margin: 0;
+        }
+
+        .my-chat {
+            display: flex;
+            justify-content: end;
+            padding: 2px 0px;
+        }
+
+        .my-chat p {
+            margin: 0;
+            padding: 10px;
+            background-color: yellow;
+            border-radius: 10px;
+            margin-right: 10px;
+        }
+
+        .other-chat {
+            display: flex;
+            justify-content: start;
+            padding: 2px 0px;
+        }
+
+        .other-chat p {
+            margin: 0px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+
+        .secret-chat p {
+            background-color: pink;
+        }
+    </style>
+</head>
+<body>
+    <h1>채팅방</h1>
+    <!-- 채팅방 설정 -->
+    <div id="main">
+        <form id="room">
+            <input type="text" id="roomName" placeholder="채팅방 만들기">
+            <input type="text" id="userName" placeholder="사용자 이름 입력">
+            <button>생성</button>
+        </form>
+        <!-- 채팅방 목록 리스트 -->
+        <h3>채팅방 목록</h3>
+        <ul id="lists"></ul>
+    </div>
+
+    <!-- 채팅창 화면 -->
+    <div id="body" hidden>
+        <div id="message">
+            <div id="notice"></div>
+        </div>
+        <!-- 채팅 입력 구간 -->
+        <form id="chat">
+            <select id="userList"></select>
+            <input type="text" id="chatMessage" placeholder="메세지 입력">
+            <button>입력</button>
+        </form>
+    </div>
+
+    <script>
+
+        // 변수 정의
+        const socket = io();
+
+        socket.on(`connect`, () => {
+            console.log("클라이언트 연결 완료 :: ", socket.id);
+        })
+
+        const roomForm = document.querySelector('#room');
+        const chatForm = document.querySelector('#chat');
+        const notice = document.querySelector('#notice');
+        const message = document.querySelector('#message');
+        let myName = ``; // 내 닉네임 (빈 값) 정의
+
+    </script>
+</body>
+</html>
+```
+
+- 클라이언트 페이지 설정과 소켓 연결을 위한 스크립트를 작성합니다.
+
+<br>
+
+## 4. 채팅방 생성 기능
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+io.on('connection', (socket) => {
+    console.log("서버 연결 완료 :: ", socket.id);
+
+    // 채팅방 만들기
+    socket.on('create', (res) => {
+        console.log("res >>> ", res);
+        // { roomName: '방제목', userName: '아이디' }
+        // join(방제목) : 해당 방 제목이 없으면 생성, 존재하면 입장
+        console.log(res.roomName); // 방제목
+        socket.join(res.roomName);
+        console.log('방 생성 후', socket.rooms);
+        
+        // 사용자 정보 저장
+        socket.roomName = res.roomName; // socket 객체에 없는 메소드 생성
+        socket.userName = res.userName;
+        console.log("socket.roomName >>> ", socket.roomName);
+    });
+});
+```
+
+- 클라이언트에서 채팅방을 생성할 때, 서버에서 방을 생성하거나 기존 방에 입장합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+    <script>
+        // 채팅방 생성
+        roomForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
+            const roomName = roomForm.querySelector('#roomName').value; // 채팅방 제목
+            const userName = roomForm.querySelector('#userName').value; // 유저 이름
+
+            if (roomName === '' || userName === '') {
+                alert('방 제목과 닉네임을 입력하세요');
+                return;
+            }
+
+            socket.emit('create', { roomName, userName }); // 서버에 'create' 이벤트 전송
+            const main = document.querySelector('#main'); 
+            const body = document.querySelector('#body'); 
+            main.hidden = true; // 채팅방 생성 폼 숨기기
+            body.hidden = false; // 채팅 화면 표시
+
+            myName = userName; // 입력된 사용자 이름을 전역 변수에 저장
+        });
+    </script>
+```
+
+- 사용자가 입력한 방 제목과 닉네임을 서버에 전송하여 방을 생성하거나 입장합니다.
+
+<br>
+
+## 5. 공지 알림 기능
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+io.on('connection', (socket) => {
+    console.log("서버 연결 완료 :: ", socket.id);
+
+    // 채팅방 만들기
+    socket.on('create', (res) => {
+        
+        // { roomName: '방제목', userName: '아이디' }
+        // join(방제목) : 해당 방 제목이 없으면 생성, 존재하면 입장
+        socket.join(res.roomName);
+        console.log('방 생성 후', socket.rooms);
+        
+        // 사용자 정보 저장
+        socket.roomName = res.roomName; // socket 객체에 없는 메소드 생성
+        socket.userName = res.userName;
+        
+        /* 공지 알림 (본인 제외) */
+        // 나를 제외한 모든 방 사람들에게 메세지 전달
+        socket.to(res.roomName).emit('notice', `${socket.userName} 님이 입장하셨습니다.`);
+    });
+});
+```
+
+- 새 사용자가 방에 입장했을 때 다른 사용자들에게 공지합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+    <script>
+        // 공지 알림 (본인 제외)
+        socket.on('notice', (res) => {
+            const div = document.createElement('div');
+            const p = document.createElement('p');
+            console.log('notice >>> ', res);
+            p.textContent = res; // 서버로부터 전달받은 공지 내용을 p 요소에 설정
+            div.appendChild(p); // p 요소를 div 요소에 추가
+            notice.appendChild(div); // div 요소를 공지사항 표시 요소에 추가
+        });
+    </script>
+```
+
+- 서버로부터 공지 메시지를 받아 화면에 표시합니다.
+
+<br>
+
+## 6. 유저 리스트 갱신 기능
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+// 유저 리스트 갱신 함수
+function getUserList(room) {
+    // room에 접속한 모든 사용자 정보를 저장할 배열 초기화
+    const users = [];
+    // 특정 채팅방에 접속한 socket.id 집합 값 찾기
+    const clients = io.sockets.adapter.rooms.get(room);
+    
+    if (clients) {
+        // 각 socket.ID에 대해 반복 실행
+        clients.forEach((client) => {
+            // socket.ID로 소켓 객체 가져오기
+            const userSocket = io.sockets.sockets.get(client);
+            // 사용자 정보 객체 생성
+            const info = { userName: userSocket.userName, key: client };
+            // 배열에 저장
+            users.push(info);
+        });
+    }
+    return users; // 유저 리스트 반환
+}
+
+// 유저 리스트 갱신
+const userList = getUserList(res.roomName);
+console.log(`userList >>>> `, userList);
+io.to(res.roomName).emit(`userList`, userList);
+```
+
+- 특정 채팅방에 접속한 사용자의 리스트를 갱신합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+    <script>
+        // 유저 리스트 갱신
+        socket.on('userList', (res) => {
+            console.log("클라이언트 측의 userList :: ", res);
+            const lists = document.querySelector('#userList'); // 사용자 리스트 표시 요소 선택
+            let options = `<option value='all'>전체</option>`; // '전체' 옵션 추가
+
+            for (let i of res) {
+                // 본인을 제외한 유저 목록 보이게 함
+                if (i !== socket.id) {
+                    options += `<option value='${i.key}'>${i.userName}</option>`; // 사용자 옵션 생성
+                }
+            }
+            lists.innerHTML = options; // 생성된 옵션을 사용자 리스트 표시 요소에 추가
+        });
+    </script>
+```
+
+- 서버로부터 유저 리스트를 받아 드롭다운 리스트를 갱신합니다.
+
+<br>
+
+## 7. 채팅방 목록 갱신 기능
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+// 채팅방 목록 초기화
+const roomList = [];
+
+io.on(`connection`, (socket) => {
+    console.log("서버 연결 완료 :: ", socket.id);
+
+    // 채팅방 목록 미리보기
+    io.emit(`roomList`, roomList);
+});
+
+// 채팅방 목록 갱신
+if (!roomList.includes(res.roomName)) {
+    // 중복이 아니라면 추가
+    roomList.push(res.roomName);
+    // 갱신된 목록
+    console.log("res.roomName >>>> ", roomList);
+    io.emit('roomList', roomList);
+}
+```
+
+- 방 목록을 초기화하고, 새로운 방이 생성될 때마다 목록을 갱신합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+    <script>
+        // 개설된 채팅방 리스트
+        socket.on('connect', () => {
+            socket.on('roomList', (res) => {
+                console.log("res >>> ", res);
+                const lists = document.querySelector('#lists'); // 채팅방 목록 표시 요소 선택
+                lists.innerHTML = ''; // 리스트 초기화
+
+                res.forEach((room) => {
+                    const li = document.createElement('li'); // 새로운 li 요소 생성
+                    li.textContent = `${room}`; // 채팅방 이름 설정
+                    lists.appendChild(li); // li 요소를 채팅방 목록 표시 요소에 추가
+                });
+            });
+        });
+    </script>
+```
+
+- 서버로부터 방 목록을 받아 화면에 표시합니다.
+
+<br>
+
+## 8. 메시지 전송 및 수신 기능
+
+### 1) 서버 설정 (`server.js`)
+
+#### `server.js`
+
+```js
+// 메세지 전송
+socket.on('sendMessage', (res) => {
+    console.log('sendMessage >>> ', res); // {message:'안녕', user:'아이디', select:all}
+    const { message, user, select } = res; // 구조 분해 할당
+    // res 객체에서 속성 추출하여 각각 변수에 할당.
+    if (select === 'all') {
+        // 특정 방에 전체 사용자에게 메세지 보내기
+        io.to(socket.roomName).emit('newMessage', { message, user, dm: false });
+    } else { 
+        // 특정 방에 DM 대상자에게 메세지 보내기
+        io.to(select).emit('newMessage', { message, user, dm: true});
+        // 자기 자신에게 메세지 보이기 (나한테서 보이기)
+        socket.emit('newMessage', { message, user, dm: true });
+    }
+});
+```
+
+- 클라이언트로부터 메시지를 받아 전체 사용자 또는 특정 사용자에게 전송합니다.
+
+<br>
+
+### 2) 클라이언트 설정 (`client.ejs`)
+
+#### `views/client.ejs`
+
+```html
+    <script>
+        // 메세지 전송
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const chatMessage = chatForm.querySelector('#chatMessage'); // 입력된 채팅 메시지 가져오기
+            const user = chatForm.querySelector('#userList'); // 선택된 사용자 가져오기
+            socket.emit('sendMessage', { message: chatMessage.value, user: myName, select: user.value }); // 서버에 'sendMessage' 이벤트 전송
+            chatMessage.value = ''; // 메시지 입력 필드 비우기
+        });
+
+        // 메세지 수신
+        socket.on('newMessage', (res) => {
+            console.log("newMessage >>>> ", res);
+
+            const div = document.createElement('div');
+            const p = document.createElement('p');
+
+            if (myName === res.user) {
+                // data에 있는 nick이 본인 것이라면
+                // 오른쪽에 표시하기 위해 my-chat 클래스 추가
+                div.classList.add('my-chat');
+            } else {
+                // data에 있는 nick이 본인 것이 아니라면
+                // 왼쪽에 표시하기 위해 other-chat 클래스 추가
+                div.classList.add('other-chat');
+            }
+
+            if (data.dm) {
+                // 만약 data에 dm 이 있다면 
+                // 다른 스타일을 적용하여 표시하기 위해 secret-chat 클래스 추가
+                div.classList.add('secret-chat');
+            }
+
+            p.textContent = `${res.user} : ${res.message}`; // 메시지 내용 설정
+            div.appendChild(p); 
+            message.appendChild(div);
+        });
+    </script>
+```
+
+- 메시지를 전송하고, 서버로부터 수신한 메시지를 화면에 표시합니다.
+
+## 9. 전체 코드
+
+#### `socket.io/package.json`
+
+```json
+{
+  "name": "22-socket.io-room",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
+```
+
+#### `socket.io/views/client.ejs`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        #body {
+            width: 100%;
+            height: 70vh;
+            position: relative;
+            background-color: aquamarine;
+        }
+
+        #chat {
+            position: absolute;
+            bottom: 0px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #notice {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            color: gray;
+        }
+
+        #notice p {
+            margin: 0;
+        }
+
+        .my-chat {
+            display: flex;
+            justify-content: end;
+            padding: 2px 0px;
+        }
+
+        .my-chat p {
+            margin: 0;
+            padding: 10px;
+            background-color: yellow;
+            border-radius: 10px;
+            margin-right: 10px;
+        }
+
+        .other-chat {
+            display: flex;
+            justify-content: start;
+            padding: 2px 0px;
+        }
+
+        .other-chat p {
+            margin: 0px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+
+        .secret-chat p {
+            background-color: pink;
+        }
+    </style>
+</head>
+<body>
+    <h1>채팅방</h1>
+    <!-- 채팅방 설정 -->
+    <div id="main">
+        <form id="room">
+            <input type="text" id="roomName" placeholder="채팅방 만들기">
+            <input type="text" id="userName" placeholder="사용자 이름 입력">
+            <button>생성</button>
+        </form>
+        <!-- [5] 채팅방 목록 리스트 -->
+        <h3>채팅방 목록</h3>
+        <ul id="lists"></ul>
+    </div>
+
+    <!-- 채팅창 화면 -->
+    <div id="body" hidden>
+        <div id="message">
+            <div id="notice"></div>
+        </div>
+        <!-- 채팅 입력 구간 -->
+        <form id="chat">
+            <select id="userList"></select>
+            <input type="text" id="chatMessage" placeholder="메세지 입력">
+            <button>입력</button>
+        </form>
+    </div>
+
+    <script>
+        // [1] 변수 정의
+        const socket = io();
+
+        socket.on(`connect`, () => {
+            console.log("클라이언트 연결 완료 :: ", socket.id);
+        })
+
+        const roomForm = document.querySelector('#room');
+        const chatForm = document.querySelector('#chat');
+        const notice = document.querySelector('#notice');
+        const message = document.querySelector('#message');
+        let myName = ``; // 내 닉네임 (빈 값) 정의
+
+        // ---------------------------
+        // 폼 이벤트 (서버에게 요청)
+        // ---------------------------
+
+        // [2] 채팅방 생성 !
+        roomForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
+            const roomName = roomForm.querySelector('#roomName').value; // 채팅방 제목
+            const userName = roomForm.querySelector('#userName').value; // 유저 이름
+
+            if(roomName === '' || userName === '') {
+                alert('방 제목과 닉네임을 입력하세요');
+                return;
+            }
+
+            socket.emit('create', {roomName, userName});
+            const main = document.querySelector('#main');
+            const body = document.querySelector('#body');
+            main.hidden = true;
+            body.hidden = false;
+
+            // 전역변수에 입력한 닉네임 저장.
+            myName = userName;
+            
+        })
+
+        // [6] 메세지 전송
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const chatMessage = chatForm.querySelector('#chatMessage');
+            const user = chatForm.querySelector('#userList');
+            socket.emit('sendMessage', { message : chatMessage.value, user : myName, select : user.value });
+            chatMessage.value = '';
+        })
+
+
+        // ---------------------------
+        // 소켓 이벤트
+        // ---------------------------
+
+        // [3] 공지 알림 (본인 제외)
+        socket.on('notice', (res) => {
+            const div = document.createElement('div');
+            const p = document.createElement('p');
+            console.log('notice >>> ', res);
+            p.textContent = res;
+            div.appendChild(p);
+            notice.appendChild(div);
+        })
+
+        // [4] 유저 리스트 갱신
+        socket.on('userList', (res) => {
+            console.log("클라이언트 측의 userList :: ", res);
+            const lists = document.querySelector('#userList');
+            let options = `<option value='all'>전체</option>`;
+            
+            for (let i of res) {
+                if (i !== socket.id) {
+                    options += `<option value='${i.key}'>${i.userName}</option>`;
+                }
+            }
+            lists.innerHTML = options;
+        })
+
+        // [5] 개설된 채팅방 리스트
+        socket.on('connect', () => {
+            socket.on('roomList', (res) => {
+                console.log("res >>> ", res);
+                const lists = document.querySelector('#lists');
+                lists.innerHTML = ''; // 리스트 초기화
+
+                res.forEach((room) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${room}`;
+                    lists.appendChild(li);
+                })
+            })
+        })
+
+        // [6] 메세지
+        socket.on('newMessage', (res) => {
+            console.log("newMessage >>>> ", res);
+            // {message: '안녕', user: '리자몽', dm: false}
+            // {message: '야', user: '리자몽', dm: true}
+
+            const div = document.createElement('div');
+            const p = document.createElement('p');
+
+            if (myName === res.user) {
+                // 내가 입력한 텍스트
+                div.classList.add('my-chat');
+            } else {
+                // 상대방이 입력한 텍스트
+                div.classList.add('other-chat');
+            }
+            // 개인 메시지 일 때
+
+            if(res.dm) {
+                div.classList.add('secret-chat');
+            }
+
+            p.textContent = `${res.user} : ${res.message}`
+            div.appendChild(p);
+            message.appendChild(div);
+        })
+      </script>
+</body>
+</html>
+```
+
+#### `socket.io/server.js`
+
+```js
+const express = require(`express`);
+const http = require(`http`);
+const socketIO = require(`socket.io`);
+
+const app = express();
+const PORT = 8000;
+
+const server = http.createServer(app); // http 서버
+const io = socketIO(server); // socket 서버
+
+// 미들웨어
+app.set(`view engine`, `ejs`);
+
+// 라우터
+app.get(`/`, (req, res) => {
+    res.render(`client`);
+})
+
+// [4] 유저 리스트
+// 사용자 정보 갱신 함수
+
+// Ex) 
+// 사용자 A (socket.id:"1234", userName: "Ace")
+// 사용자 B (socket.id:"5678", userName: "Bob")
+
+function getUserList(room) {
+    // room에 접속한 모든 사용자 정보를 저장할 배열 초기화.
+    const users = [];
+
+    // room에는 접속한 룸 id
+    // 특정 채팅방에 접속한 socket.id 집합 값을 찾음
+    const clients = io.sockets.adapter.rooms.get(room);
+    // Set {"1234", "5678"}; // 중복 값 제외
+
+    //'io' 객체
+    // - Socket IO 인스턴스를 나타내는 객체 :: 전체 소켓 서버를 관리.
+
+    // 'io.sockets'
+    // - 현재 연결된 모든 소켓들을 관리하는 객체 :: 소켓들의 상태를 관리하고 다양한 소켓 관련 작업 수행.
+
+    // 'io.sockets.adapter'
+    // - 소켓 서버 간의 상태를 관리하는 역할을 담당하는 객체 :: 소켓들의 연결 상태와 방(room) 정보를 관리.
+
+    // 'io.sockets.adapter.room'
+    // - 모든 방(room) 정보를 저장하고 있는 객체 :: 각 방에 접속한 클라이언트들의 정보를 포함.
+
+    // 'get(room)'
+    // - 위 객체에서 특정 방(room) ID에 해당하는 정보를 가져오는 역할 :: 해당 방에 접속한 클라이언트들의 소켓 ID 들을 Set형태로 반환.
+
+    // 방에 클라이언트가 있는 경우에 실행 !
+    if(clients) {
+        // 각 socket.ID에 대해 반복 실행
+        clients.forEach((client) => {
+            console.log("client >>> ", client);
+
+            // socket.ID로 소켓 객체 가져오기.
+            // io.sockets.sockets : socket.id가 할당한 변수들의 객체 값.
+            const userSocket = io.sockets.sockets.get(client);
+            console.log('userSocket >>>> ', userSocket);
+
+            // 사용자 정보 객체 생성
+            const info = { userName : userSocket.userName, key: client };
+
+            // 상단에 설정한 빈 배열에 저장
+            users.push(info);
+        });
+    }
+    return users; // users = [{userName: "Ace", key: "1234"}, {userName: "Bob", key: "5678"}]
+}
+
+// [5] 채팅방 리스트
+// 채팅방 목록 초기화
+const roomList = [];
+
+io.on(`connection`, (socket) => {
+    // socket : 접속한 웹 브라우저
+    // io : 접속해 있는 모든 웹 브라우저
+    // 웹 브라우저가 접속이 되면 고유한 id 값이 생성됨.
+    // ==> socket.id 로 확인 가능
+    console.log("서버 연결 완료 :: ", socket.id);
+
+    // [5] 채팅방 목록 미리보기
+    // 전부에게 보여져야함.
+    io.emit(`roomList`, roomList);
+
+    // [2] 채팅방 만들기
+    socket.on('create', (res) => {
+        console.log("res >>> ", res);
+        // { roomName: '방제목', userName: '아이디' }
+
+        // join(방제목) : 해당 방 제목이 없으면 생성, 존재하면 입장.
+        console.log(res.roomName); // 방제목
+        socket.join(res.roomName);
+        console.log('방 생성 후', socket.rooms);
+        
+        // 사용자 정보 저장 = socket 객체 안에 원하는 값을 할당.
+        socket.roomName = res.roomName; // socket 객체에 없는 메소드를 생성.
+        socket.userName = res.userName;
+        console.log("socket.roomName >>> ", socket.roomName);
+        
+        // [3] 공지 알림 (본인 제외)
+        // 나를 제외한 모든 방 사람들에게 메세지 전달.
+        socket.to(res.roomName).emit('notice', `${socket.userName} 님이 입장하셨습니다.`);
+
+        // [4] 유저 리스트 갱신
+        const userList = getUserList(res.roomName);
+        console.log(`userList >>>> `, userList);
+        io.to(res.roomName).emit(`userList`, userList);
+
+        // [5] 채팅방 목록 갱신
+        if (!roomList.includes(res.roomName)) {
+            // 중복이 아니라면 추가 !
+            roomList.push(res.roomName);
+            // 갱신된 목록
+            console.log("res.roomName [5] >>>> ", roomList);
+            io.emit('roomList', roomList);
+        }
+
+    })
+
+    // [6] 메세지 전송
+    socket.on('sendMessage', (res) => {
+        console.log('sendMessage >>> ', res); // {message:'안녕', user:'아이디', select:all}
+        const { message, user, select } = res; // 구조 분해 할당
+        // res 객체에서 속성 추출하여 각각 변수에 할당.
+        if (select === 'all') {
+            // 특정 방에 전체 사용자에게 메세지 보내기
+            io.to(socket.roomName).emit('newMessage', { message, user, dm: false });
+        } else { 
+            // 특정 방에 DM 대상자에게 메세지 보내기
+            io.to(select).emit('newMessage', { message, user, dm: true});
+            // 자기 자신에게 메세지 보내기 (나한테서 보이기)
+            socket.emit('newMessage', { message, user, dm: true })
+        }
+    })
+
+
+})
+
+server.listen(PORT, () => {
+    console.log(`http://localhost:8000`);
+})
+```
