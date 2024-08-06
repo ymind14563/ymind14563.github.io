@@ -1,0 +1,186 @@
+---
+layout: post  
+title: "[SeSACx코딩온] React Component"  
+date: 2024-08-06  
+categories: React.js  
+---
+
+# 리액트 컴포넌트 (React Component)
+
+<hr>
+<br>
+
+## 1. 리액트의 장점
+
+리액트는 페이스북에서 개발한 자바스크립트 라이브러리로, 사용자 인터페이스를 구축하기 위해 사용됩니다.
+
+- 컴포넌트 기반 구조로 코드의 재사용성이 높고 유지보수가 쉽습니다.
+- 단방향 데이터 흐름을 통해 예측 가능성이 높고 디버깅에 용이합니다.
+- 가상 DOM을 사용하여 성능을 향상시킵니다.
+- 풍부한 생태계를 통해 다양한 라이브러리와 도구가 지원되어 개발 생산성이 높습니다.
+
+## 2. 리액트 설치 방법
+
+리액트를 설치하려면 Node.js와 npm(Node Package Manager)이 필요합니다.
+
+### 1) Node.js와 npm 설치합니다.
+
+### 2) 새로운 리액트 프로젝트 생성합니다.
+
+    ```
+    npx create-react-app (my-app) <!-- (작성하고자 하는 폴더명) -->    
+    cd my-app
+    npm start
+    ```
+- `npm start` 명령을 실행하면, `index.js` 파일이 실행되고, 그 안에서 `App.js`가 루트 컴포넌트로 렌더링됩니다. 이를 통해 애플리케이션이 브라우저에서 실행됩니다.
+
+<br>
+
+## 3. 코드 연결과 동작 설명
+
+- App.js(루트컴포넌트)
+    - 리액트 애플리케이션의 루트 컴포넌트입니다. 
+    - 애플리케이션의 주요 구조를 정의하고, 다른 하위 컴포넌트를 포함합니다. 여기서 스타일링, JSX 문법, 조건부 렌더링 등을 적용할 수 있습니다.
+
+- index.js(진입점)
+    - 리액트 애플리케이션의 진입점입니다. 
+    - ReactDOM.createRoot를 사용하여 루트 DOM 요소에 루트 컴포넌트(App 컴포넌트)를 렌더링합니다. 또한, React.StrictMode를 사용하여 개발 모드에서 문제를 감지하고 경고를 표시합니다.
+
+- Larva.js(컴포넌트)
+    - 개별 컴포넌트를 정의합니다. 
+    - 특정 UI 요소를 구성하는 컴포넌트를 정의하며, 필요에 따라 다른 컴포넌트에서 재사용할 수 있습니다.
+
+<br>
+
+## 4. 컴포넌트 작성 예제
+
+### 1) App.js
+
+App.js 파일은 리액트 애플리케이션의 `루트 컴포넌트`입니다. 여기서 다른 컴포넌트를 불러오고 렌더링합니다.
+
+```js
+import './App.css'; // App.css 파일을 가져와 스타일을 적용
+import Larva from './Larva'; // Larva 컴포넌트를 가져옴
+
+function App() {
+  const name = 'apple';
+  const student = 'sesac';
+  const styles = {
+    backgroundColor: 'yellow',
+    color: 'blue',
+    fontSize: '48px'
+  }
+  return (
+    <> {/* 의미 없는 div 요소를 피하기 위해 <></>를 사용하여 여러 요소를 하나로 감쌀 수 있음 */}
+
+    <div className='App'>  {/* App.css의 스타일을 적용하기 위해 class 대신에 className을 사용 */}
+      <div>{name} 안녕?</div> {/* name 변수를 출력 */}
+      <div>
+        {student === 'sesac' ? <span>새싹 크루</span> : <span>새싹이 뭔지 몰라요..</span>} {/* student 변수에 따라 조건부 렌더링을 수행 */}
+      </div>
+
+      {/* 객체로 정의된 스타일을 적용 */}
+      <div style={styles}>스타일 적용</div> 
+      <div style={{
+        backgroundColor: 'pink',
+        color: 'blue',
+        fontSize: '48px'
+      }}>
+        스타일 적용2
+      </div>
+
+      {/* Larva 컴포넌트(Larva.js) 를 렌더링함 */}
+      <Larva /> 
+
+      </div>
+    </>
+  );
+}
+
+export default App; // App 컴포넌트를 기본 내보내기로 설정함. default는 파일당 하나만 사용할 수 있음.
+```
+
+- JSX 문법: JSX는 자바스크립트의 확장 문법으로 HTML을 작성하는 것과 비슷합니다. JSX를 사용하면 리액트 컴포넌트의 구조를 직관적으로 표현할 수 있습니다.
+
+- Fragment 문법: 의미 없는 `div` 요소를 피하기 위해 `<></>`를 사용하여 여러 요소를 하나로 감쌀 수 있습니다. 
+
+- JS 문법 사용: `{}`로 감싸면 자바스크립트 표현식을 사용할 수 있습니다. 삼항 연산자를 사용하여 조건부 렌더링이 가능합니다. 그러나 JSX 내부에서는 `if`나 `for`문을 사용할 수 없습니다. 사용하고자 한다면 JSX 외부에서 사용 후 변수를 JSX 내부에서 사용하는 식으로 작성해야 합니다.
+
+  ```jsx
+  {student === 'sesac' ? <span>새싹 크루</span> : <span>새싹이 뭔지 몰라요..</span>}
+  ```
+
+- 스타일 속성: 리액트에서 DOM 요소에 스타일을 적용할 때 문자열이 아닌 객체를 사용해야 합니다. 스타일 이름 중 하이픈(-)이 포함된 경우 camelCase로 작성해야 합니다 (예: `backgroundColor`). 기존 CSS에서 사용하던 `font-size`는 사용할 수 없습니다. JSX에서는 - 는 진짜 빼기를 의미합니다.
+
+- className 사용: HTML의 `class` 속성 대신 `className` 속성을 사용해야 합니다.
+
+- 종료 태그: 종료 태그가 없는 태그를 사용할 때도 `<input />`과 같이 종료 태그를 작성해야 합니다.
+
+- `export default App;`: `App` 컴포넌트를 기본 내보내기로 설정합니다. `default`를 빼면 `import` 시 중괄호 `{}`를 사용해야 합니다.
+
+  ```js
+    import Larva from './Larva'; // Larva 컴포넌트의 export가 default 인 경우
+    import { Larva } from './Larva'; // Larva 컴포넌트의 export가 default가 아닌 경우
+  ```
+
+<br>
+
+### 2) index.js
+
+index.js 파일은 리액트 애플리케이션의 진입점입니다. 여기서 루트 컴포넌트를 DOM에 렌더링합니다.
+
+```js
+import React from 'react'; // 리액트를 불러옴
+import ReactDOM from 'react-dom/client'; // ReactDOM을 불러옴
+import './index.css'; // index.css 파일을 가져와 스타일을 적용함
+import App from './App'; // App 컴포넌트를 가져옴
+import Clock from './Clock'; // Clock 컴포넌트를 가져옴
+
+const root = ReactDOM.createRoot(document.getElementById('root')); // 루트 DOM 요소를 생성함
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode> // 개발 모드에서만 작동하는 특수 컴포넌트. 문제 감지나 경고하기 위해 사용
+); // 루트 DOM 요소에 App 컴포넌트를 렌더링함
+```
+
+- ReactDOM.createRoot: 리액트 애플리케이션을 DOM에 렌더링하는 데 사용됩니다. 여기서는 `root` 요소에 렌더링합니다.
+
+- React.StrictMode: 개발 모드에서만 작동하는 특수 컴포넌트로, 잠재적인 문제를 감지하고 경고를 표시합니다. 
+
+<br>
+
+### 3) Larva.js
+
+Larva.js 파일은 개별적인 컴포넌트입니다. 이를 다른 컴포넌트에서 사용할 수 있도록 할 수 있습니다.
+
+```js
+import './Larva.css' // Larva.css 파일을 가져와 스타일을 적용함
+
+function Larva() {
+    return (
+        <>
+            <div className='larva'>
+                <div className='body body1'>
+                    <div className='eye eye-white'>
+                        <div className='eye eye-black'></div>
+                    </div>
+                </div>
+                <div className='body body2'></div>
+                <div className='body body3'></div>
+                <div className='body body4'></div>
+                <div className='body body5'></div>
+                <div className='body body6'></div>
+            </div>
+        </>
+    )
+}
+
+export default Larva;
+```
+
+- 함수형 컴포넌트를 정의하고 `return` 문 안에 HTML을 작성합니다. 이를 호출할 때 `<함수명 />` 형태로 사용할 수 있습니다.
+
+- 컴포넌트를 정의할 때 화살표 함수를 사용할 수도 있습니다. 예를 들어, `const Larva = () => {}`와 같이 작성할 수 있습니다.
+
+- 컴포넌트를 사용하면 반복적인 HTML 코드를 축약할 수 있으며, 큰 페이지나 자주 변경되는 UI에서 유용합니다.
