@@ -73,8 +73,6 @@ export default App;
 
 ### 2) Button.js
 
-Button 컴포넌트는 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
-
 ```js
 import './Button.css'; // 스타일을 적용하기 위해 CSS 파일을 가져옴
 import PropTypes from 'prop-types'; // PropTypes를 불러옴
@@ -124,8 +122,6 @@ export default Button;
 
 ### 3) ClassComponent.js
 
-ClassComponent는 클래스형 컴포넌트로 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
-
 ```js
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -159,8 +155,6 @@ export default ClassComponent;
 <br>
 
 ### 4) FunctionComponent.js
-
-FunctionComponent는 함수형 컴포넌트로 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
 
 ```js
 import React from 'react';
