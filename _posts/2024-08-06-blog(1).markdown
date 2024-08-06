@@ -27,11 +27,11 @@ categories: React.js
 
 ### 2) 새로운 리액트 프로젝트 생성합니다.
 
-    ```
-    npx create-react-app (my-app) <!-- (작성하고자 하는 폴더명) -->    
-    cd my-app
-    npm start
-    ```
+```
+npx create-react-app (my-app) <!-- (작성하고자 하는 폴더명) -->    
+cd my-app
+npm start
+```
 
 - `npm start` 명령을 실행하면, `index.js` 파일이 실행되고, 그 안에서 `App.js`가 루트 컴포넌트로 렌더링됩니다. 이를 통해 애플리케이션이 브라우저에서 실행됩니다.
 
