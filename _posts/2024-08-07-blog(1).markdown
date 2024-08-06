@@ -1,0 +1,274 @@
+---
+layout: post
+title: "[SeSACx코딩온] 클래스형 컴포넌트와 함수형 컴포넌트"
+date: 2024-08-07
+categories: React.js
+---
+
+# 클래스형 컴포넌트와 함수형 컴포넌트
+
+<hr>
+<br>
+
+## 1. 클래스형 컴포넌트
+
+클래스형 컴포넌트는 ES6 클래스 문법을 사용하여 정의됩니다. 이 컴포넌트는 `React.Component`를 상속받아 상태(state)와 생명주기 메서드(lifecycle methods)를 사용할 수 있습니다. 클래스형 컴포넌트는 주로 복잡한 로직이나 상태 관리를 필요로 하는 경우에 유용합니다.
+
+### `ClassComponent.js`
+
+```js
+/* 이렇게도 작성가능
+// import { Component } from 'react';
+// class ClassComponent extends Component { } */
+
+import React from 'react'; // 리액트를 불러옴
+
+class ClassComponent extends React.Component {
+    // 클래스 인스턴스 속성, 키워드 없이 정의 (let, const, var 필요 없음)
+    student = '홍길동';
+
+    // 클래스형 컴포넌트는 render 메서드 필수
+    render() {
+        const teacher = 'Damon'; // render 메서드 내부의 지역변수
+        const { name } = this.props; // props를 구조분해할당으로 받음
+        console.log('props: ', this.props); // name : "SeSAC 6기"
+
+        return (
+            <>
+                <h1>Hello, {teacher}</h1>
+                <h1>Hi, {this.student}</h1>
+                <p>여기는 Class Component!</p>
+                <p>이름은 <b>{name}</b></p> {/* props 사용 */}
+            </>
+        );
+    }
+}
+
+export default ClassComponent;
+```
+
+- 클래스형 컴포넌트는 `React.Component`를 상속받아 정의됩니다.
+- 클래스 인스턴스 속성은 키워드 없이 정의되며, 클래스 메서드 내에서 `this.속성명`으로 접근할 수 있습니다.
+- `render` 메서드는 JSX를 반환하며, props는 `this.props`로 접근하고 구조분해할당을 통해 사용할 수 있습니다.
+
+<br>
+
+## 2. 함수형 컴포넌트
+
+함수형 컴포넌트는 함수로 정의되며, 함수의 인자로 props를 받아 화면에 렌더링합니다. 함수형 컴포넌트는 클래스형 컴포넌트에 비해 간결하고, 리액트 훅(Hooks)을 사용하여 상태 관리와 생명주기 메서드를 구현할 수 있습니다.
+
+### `FunctionComponent.js`
+
+```js
+// class는 상속때문에 import가 필요했지만 여기서는 필요없음
+
+// 함수형 컴포넌트는 간단한 함수로 정의됨
+const FunctionComponent = (props) => {
+    console.log("Function props >>>", props); // { name : "xxx"}
+    const { name } = props; // props를 구조분해할당으로 받음
+    const teacher = "Damon";
+
+    return (
+        <p>
+            <h1>Hi~ {teacher}!</h1>
+            <p>여기는 Functional Component!</p>
+            <p>새로운 컴포넌트의 이름은 <b>{name}</b></p> {/* props 사용 */}
+        </>
+    );
+}
+
+export default FunctionComponent;
+```
+
+- 함수형 컴포넌트는 함수로 정의됩니다.
+- `return` 문을 사용하여 JSX를 반환합니다.
+- 클래스형 컴포넌트와 달리 상속받을 필요가 없습니다.
+
+<br>
+
+## 3. App.js에서의 사용
+
+App.js 파일에서는 클래스형 컴포넌트와 함수형 컴포넌트를 모두 불러와 사용합니다.
+
+### `App.js`
+
+```js
+import './App.css'; // 스타일을 적용하기 위해 CSS 파일을 가져옴
+import ClassComponent from './ClassComponent'; // 클래스형 컴포넌트를 가져옴
+import FunctionComponent from './FunctionComponent'; // 함수형 컴포넌트를 가져옴
+
+function App() {
+  return (
+    <div className="App">
+      <ClassComponent /> {/* 클래스형 컴포넌트를 렌더링 */}
+      <ClassComponent name="SeSAC 6기" /> {/* 클래스형 컴포넌트에 props를 전달 */}
+      <hr />
+      <FunctionComponent /> {/* 함수형 컴포넌트를 렌더링 */}
+      <FunctionComponent name="SeSAC 6기" /> {/* 함수형 컴포넌트에 props를 전달 */}
+    </div>
+  );
+}
+
+export default App;
+```
+
+- `name` props는 부모 컴포넌트인 `App` 컴포넌트에서 자식 컴포넌트인 `ClassComponent`와 `FunctionComponent`로 전달됩니다.
+- props는 컴포넌트 간 데이터를 전달하는 데 사용됩니다. 
+- 부모 컴포넌트에서 자식 컴포넌트로만 전달할 수 있습니다. 반대로 자식 컴포넌트에서 부모 컨포넌트로 전달은 허용되지 않습니다.
+
+<br>
+
+### `ClassComponent.js`
+
+```js
+import React from 'react';
+
+class ClassComponent extends React.Component {
+    student = '홍길동';
+
+    render() {
+        const teacher = 'Damon';
+        const { name } = this.props; // props를 구조분해할당으로 받음
+
+        return (
+            <>
+                <h1>Hello, {teacher}</h1>
+                <h1>Hi, {this.student}</h1>
+                <p>여기는 Class Component!</p>
+                <p>이름은 <b>{name}</b></p> {/* 부모 컴포넌트로부터 받은 name props를 사용 */}
+            </>
+        );
+    }
+}
+
+export default ClassComponent;
+```
+
+- `ClassComponent`는 `App` 컴포넌트로부터 전달된 `name` props를 `this.props`로 접근합니다.
+- 구조분해할당을 통해 `name` props를 간결하게 사용할 수 있습니다.
+- 전달된 `name` props는 JSX에서 `{name}`을 사용하여 렌더링됩니다.
+
+<br>
+
+### `FunctionComponent.js`
+
+```js
+const FunctionComponent = (props) => {
+    const { name } = props; // props를 구조분해할당으로 받음
+    const teacher = "Damon";
+
+    return (
+        <>
+            <h1>Hi~ {teacher}!</h1>
+            <p>여기는 Functional Component!</p>
+            <p>새로운 컴포넌트의 이름은 <b>{name}</b></p> {/* 부모 컴포넌트로부터 받은 name props를 사용 */}
+        </>
+    );
+}
+
+export default FunctionComponent;
+```
+
+- `FunctionComponent`는 `App` 컴포넌트로부터 전달된 `name` props를 함수의 인자로 받습니다.
+- 구조분해할당을 통해 `name` props를 간결하게 사용할 수 있습니다.
+- 전달된 `name` props는 JSX에서 `{name}`을 사용하여 렌더링됩니다.
+
+<br>
+
+## 4. 주요 차이점
+
+### 1) 선언 방식
+- 클래스형 컴포넌트: ES6 클래스 문법을 사용하여 정의됩니다. `render()` 메서드를 반드시 포함해야 합니다.
+- 함수형 컴포넌트: 간단한 함수로 정의되며, `return` 문을 사용하여 JSX를 반환합니다.
+
+### 2) 상태 관리
+- 클래스형 컴포넌트: `state`를 사용하여 상태를 관리할 수 있습니다.
+- 함수형 컴포넌트: 리액트의 훅(Hooks)을 사용하여 상태를 관리할 수 있습니다. `useState` 훅이 있습니다.
+
+### 3) 생명주기 메서드
+- 클래스형 컴포넌트: `componentDidMount`, `componentDidUpdate`, `componentWillUnmount` 등의 생명주기 메서드를 사용하여 컴포넌트의 생명주기를 관리할 수 있습니다.
+- 함수형 컴포넌트: `useEffect` 훅을 사용하여 생명주기 메서드와 유사한 기능을 구현할 수 있습니다.
+
+<br>
+
+## 5. 생명주기 메서드와 훅
+
+- 리액트 컴포넌트는 생성부터 소멸까지 여러 단계의 생명주기를 거칩니다. 각 단계마다 특정 메서드나 훅을 사용할 수 있습니다. 
+- 클래스형 컴포넌트에서는 생명주기 메서드를, 함수형 컴포넌트에서는 훅(Hooks)을 사용하여 이러한 작업을 처리할 수 있습니다.
+
+<br>
+
+### 1) 클래스형 컴포넌트의 생명주기 메서드
+
+생명주기 메서드는 클래스형 컴포넌트에서 컴포넌트의 특정 시점에 실행되는 메서드입니다. 이러한 메서드를 통해 컴포넌트가 마운트, 업데이트, 언마운트되는 시점에 추가 작업을 수행할 수 있습니다.
+
+- `componentDidMount`: 컴포넌트가 처음 화면에 렌더링된 직후에 호출됩니다. 초기 데이터 로딩 작업에 사용됩니다.
+- `componentDidUpdate`: 컴포넌트가 업데이트된 직후에 호출됩니다. 상태나 props의 변화에 따른 후속 작업을 처리할 때 사용됩니다.
+- `componentWillUnmount`: 컴포넌트가 화면에서 사라지기 직전에 호출됩니다. 타이머 정리나 구독 해제 등의 작업에 사용됩니다.
+
+```js
+import React from 'react';
+
+class ClassComponent extends React.Component {
+    componentDidMount() {
+        console.log('컴포넌트가 마운트되었습니다.');
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        console.log('컴포넌트가 업데이트되었습니다.');
+    }
+
+    componentWillUnmount() {
+        console.log('컴포넌트가 언마운트될 것입니다.');
+    }
+
+    render() {
+        return (
+            <div>
+                <h1>클래스형 컴포넌트</h1>
+            </div>
+        );
+    }
+}
+
+export default ClassComponent;
+```
+
+<br>
+
+### 2) 함수형 컴포넌트의 훅 (Hooks)
+
+함수형 컴포넌트에서는 훅을 사용하여 상태를 관리하거나, 생명주기와 유사한 작업을 수행할 수 있습니다. 훅은 함수 내부에서 호출될 수도 있습니다.
+
+- `useState`: 상태 관리를 위해 사용됩니다. 초기 상태값을 인자로 받아 현재 상태값과 상태를 업데이트하는 함수를 반환합니다.
+- `useEffect`: 컴포넌트의 생명주기와 유사한 작업을 수행하기 위해 사용됩니다. 첫 번째 인자로 전달된 함수는 컴포넌트가 마운트된 후와 업데이트된 후에 실행됩니다. 두 번째 인자로 빈 배열([])을 전달하면 컴포넌트가 마운트될 때만 실행되고, 특정 값이 변경될 때만 실행되도록 설정할 수도 있습니다.
+
+```js
+import React, { useState, useEffect } from 'react';
+
+const FunctionComponent = () => {
+    const [message, setMessage] = useState('Hello, World!');
+
+    useEffect(() => {
+        console.log('컴포넌트가 마운트되었습니다.');
+
+        return () => {
+            console.log('컴포넌트가 언마운트될 것입니다.');
+        };
+    }, []); // 빈 배열을 전달하여 마운트 시 한 번만 실행
+
+    useEffect(() => {
+        console.log('message 상태가 업데이트되었습니다.');
+    }, [message]); // message 상태가 변경될 때마다 실행
+
+    return (
+        <div>
+            <h1>함수형 컴포넌트</h1>
+            <p>{message}</p>
+            <button onClick={() => setMessage('Hello, React!')}>변경</button>
+        </div>
+    );
+};
+
+export default FunctionComponent;
+```
