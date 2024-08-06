@@ -1,0 +1,195 @@
+---
+layout: post  
+title: "[SeSACx코딩온] PropTypes와 DefaultProps"  
+date: 2024-08-07  
+categories: React.js  
+---
+
+# 클래스형 컴포넌트와 함수형 컴포넌트의 PropTypes와 DefaultProps
+
+<hr>
+<br>
+
+## 1. PropTypes와 DefaultProps란?
+
+### 1) Props란?
+
+Props는 컴포넌트 간에 데이터를 전달하기 위해 사용되는 속성입니다. 부모 컴포넌트에서 자식 컴포넌트로 props를 전달하여 자식 컴포넌트가 해당 데이터를 사용할 수 있도록 합니다. Props는 읽기 전용이므로 자식 컴포넌트에서 props를 직접 수정할 수 없습니다. Props를 통해 컴포넌트의 재사용성을 높이고, 동적인 데이터를 전달할 수 있습니다.
+
+<br>
+
+### 2) PropTypes와 DefaultProps
+
+리액트에서는 `PropTypes`와 `DefaultProps`를 사용하여 컴포넌트의 props를 검증하고 기본값을 설정할 수 있습니다. 이를 통해 컴포넌트의 안정성과 예측 가능성을 높일 수 있습니다.
+
+- **PropTypes**: props의 타입을 정의하여, 전달된 props가 올바른 타입인지 검증합니다.
+- **DefaultProps**: props가 전달되지 않았을 때 사용할 기본값을 정의합니다.
+
+<br>
+
+## 2. 코드 설명
+
+### 1) App.js
+
+App.js 파일에서는 `ClassComponent`, `FunctionComponent`, 그리고 `Button` 컴포넌트를 사용하여 props를 전달하고 있습니다.
+
+```js
+import './App.css';
+import ClassComponent from './ClassComponent'; // 클래스형 컴포넌트를 가져옴
+import FunctionComponent from './FunctionComponent'; // 함수형 컴포넌트를 가져옴
+import Button from './Button'; // Button 컴포넌트를 가져옴
+
+function App() {
+  return (
+    <div className="App">
+      <ClassComponent /> 
+      <ClassComponent name="SeSAC 6기" /> {/* props를 전달 */}
+      <hr />
+
+      <FunctionComponent /> 
+      <FunctionComponent name="SeSAC 6기" /> {/* props를 전달 */}
+      <FunctionComponent name="SeSAC 6기" /> {/* props를 전달 */}
+
+      <FunctionComponent name={3} /> {/* 출력은 되지만, propTypes 검증에서 오류 발생 */}
+      <hr />
+
+
+      {/* props를 전달 */}
+      <Button style={{backgroundColor: 'red'}} link="https://www.google.com">Google</Button> 
+
+      {/* 기본값을 사용 */}
+      <Button></Button> 
+    </div>
+  );
+}
+
+export default App;
+```
+
+- `ClassComponent`와 `FunctionComponent`는 각각 props를 전달받아 화면에 렌더링합니다.
+- `Button` 컴포넌트는 스타일, 링크, 자식 요소를 props로 전달받아 사용하며, 전달되지 않은 경우 기본값을 사용합니다.
+
+<br>
+
+### 2) Button.js
+
+Button 컴포넌트는 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
+
+```js
+import './Button.css'; // 스타일을 적용하기 위해 CSS 파일을 가져옴
+import PropTypes from 'prop-types'; // PropTypes를 불러옴
+
+const Button = (props) => {
+    console.log('Button props >>>', props);
+    const { link, children, style } = props; // props를 구조분해할당으로 받음
+    return (
+        <>
+            <a href={link}>
+                {/* <button className="Button">{props.children}</button>  
+                구조분해할당이 없을 경우 이렇게도 작성 가능 */}
+
+                <button style={style} className="Button">{children}</button>
+            </a>
+        </>
+    );
+};
+
+// props가 전달되지 않았을 때 사용할 기본값을 정의
+Button.defaultProps = {
+    children: '네이버', // 기본값: 네이버
+    link: 'https://www.naver.com', // 기본 링크: 네이버
+    style: { backgroundColor: 'blue' } // 기본 스타일: 배경색 파란색
+};
+
+// props의 타입을 정의하여, 전달된 props가 올바른 타입인지 검증
+Button.propTypes = {
+    children: PropTypes.string, // children은 문자열 타입이어야 함
+    link: PropTypes.string, // link는 문자열 타입이어야 함
+    style: PropTypes.object // style은 객체 타입이어야 함
+};
+
+export default Button;
+```
+
+- `defaultProps`: props가 전달되지 않았을 때 사용할 기본값을 정의합니다. 여기서는 기본적으로 버튼의 텍스트를 "네이버", 링크를 `"https://www.naver.com"`, 스타일을 배경색 파란색으로 설정합니다.
+- `propTypes`: props의 타입을 정의하여 전달된 props가 올바른 타입인지 검증합니다. 여기서는 `children`, `link`, `style`의 타입을 각각 문자열, 문자열, 객체로 지정합니다.
+
+<br>
+
+### children
+
+- `props.children`은 부모 컴포넌트에서 자식 컴포넌트를 호출할 때 태그 사이에 작성된 내용을 전달받기 위해 사용됩니다. 이 내용은 문자열, 숫자, JSX, 배열 등 다양한 형태로 전달될 수 있습니다. 예를 들어, <U>`<Button>Click me</Button>`에서 "Click me"가 `props.children`으로 전달됩니다.</U>
+
+<br>
+
+### 3) ClassComponent.js
+
+ClassComponent는 클래스형 컴포넌트로 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
+
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
+
+class ClassComponent extends React.Component {
+    render() {
+        const { name } = this.props; // props를 구조분해할당으로 받음
+        return (
+            <>
+                <h1>Hello, {name}</h1>
+                <p>여기는 Class Component!</p>
+            </>
+        );
+    }
+
+    static defaultProps = {
+        name: '춘향전' // props가 전달되지 않았을 때 사용할 기본값
+    };
+
+    static propTypes = {
+        name: PropTypes.string, // name은 문자열 타입이어야 함
+    };
+}
+
+export default ClassComponent;
+```
+
+- `defaultProps`: props가 전달되지 않았을 때 사용할 기본값을 정의합니다. 여기서는 `name`의 기본값을 "춘향전"으로 설정합니다.
+- `propTypes`: props의 타입을 정의하여 전달된 props가 올바른 타입인지 검증합니다. 여기서는 `name`의 타입을 문자열로 지정합니다.
+
+<br>
+
+### 4) FunctionComponent.js
+
+FunctionComponent는 함수형 컴포넌트로 `PropTypes`와 `DefaultProps`를 사용하여 props를 검증하고 기본값을 설정합니다.
+
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const FunctionComponent = (props) => {
+    const { name } = props; // props를 구조분해할당으로 받음
+    return (
+        <>
+            <h1>Hi~ {name}!</h1>
+            <p>여기는 Functional Component!</p>
+        </>
+    );
+};
+
+FunctionComponent.defaultProps = {
+    name: '야호' // props가 전달되지 않았을 때 사용할 기본값
+};
+
+// propTypes는 컴포넌트의 props 타입을 지정하거나 필수 props를 지정할 때 사용
+// TypeScript가 아닌 JavaScript의 유연한 특성 때문에 발생할 수 있는 문제를 방지하는 데 유용
+FunctionComponent.propTypes = {
+    // props의 자료형을 객체 형태로 지정하여 FunctionComponent.propTypes에 저장
+    name: PropTypes.string, // name은 문자열 타입이어야 함
+    // name: PropTypes.string.isRequired // 필수값으로 지정할 경우 사용
+};
+
+export default FunctionComponent;
+```
+
+- `defaultProps`: props가 전달되지 않았을 때 사용할 기본값을 정의합니다. 여기서는 `name`의 기본값을 "야호"로 설정합니다.
+- `propTypes`: props의 타입을 정의하여 전달된 props가 올바른 타입인지 검증합니다. 여기서는 `name`의 타입을 문자열로 지정합니다. 또한, `propTypes`를 사용하여 컴포넌트의 필수 props를 지정하거나 props 타입을 지정할 수 있습니다. JavaScript의 유연한 특성 때문에 발생할 수 있는 문제를 방지하는 데 유용합니다.
