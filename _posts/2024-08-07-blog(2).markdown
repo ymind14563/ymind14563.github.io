@@ -176,10 +176,13 @@ FunctionComponent.defaultProps = {
 
 // propTypes는 컴포넌트의 props 타입을 지정하거나 필수 props를 지정할 때 사용
 // TypeScript가 아닌 JavaScript의 유연한 특성 때문에 발생할 수 있는 문제를 방지하는 데 유용
+
 FunctionComponent.propTypes = {
     // props의 자료형을 객체 형태로 지정하여 FunctionComponent.propTypes에 저장
+
     name: PropTypes.string, // name은 문자열 타입이어야 함
-    // name: PropTypes.string.isRequired // 필수값으로 지정할 경우 사용
+
+    // name: PropTypes.string.isRequired // 필수값으로 지정할 경우 `isRequired` 사용
 };
 
 export default FunctionComponent;
