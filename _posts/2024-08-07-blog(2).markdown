@@ -116,7 +116,7 @@ export default Button;
 
 ### children
 
-- `props.children`은 부모 컴포넌트에서 자식 컴포넌트를 호출할 때 태그 사이에 작성된 내용을 전달받기 위해 사용됩니다. 이 내용은 문자열, 숫자, JSX, 배열 등 다양한 형태로 전달될 수 있습니다. 예를 들어, <U>`<Button>Click me</Button>`에서 "Click me"가 `props.children`으로 전달됩니다.</U>
+- `props.children`은 부모 컴포넌트에서 자식 컴포넌트를 호출할 때 태그 사이에 작성된 내용을 전달받기 위해 사용됩니다. 이 내용은 문자열, 숫자, JSX, 배열 등 다양한 형태로 전달될 수 있습니다. 예를 들어, <U>`"<Button>Click me</Button>"`에서 "Click me"가 `props.children`으로 전달됩니다.</U>
 
 <br>
 
