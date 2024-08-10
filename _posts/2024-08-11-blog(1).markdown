@@ -1,0 +1,321 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Event Handling"  
+date: 2024-08-11
+categories: React.js  
+---
+
+# Event Handling
+
+<hr>
+<br>
+
+## 1. React에서의 이벤트 처리(Event Handling)
+
+- React에서는 브라우저의 기본 DOM 이벤트를 처리할 수 있는 방법을 제공합니다. 
+- 하지만, 브라우저마다 이벤트 처리 방식이 다를 수 있기 때문에, React는 자체적으로 '합성 이벤트(Synthetic Event)'라는 개념을 도입하여 일관된 이벤트 처리를 할 수 있도록 합니다.
+
+<br>
+
+## 2. 코드 설명
+
+### 1) App.js
+
+```js
+import './App.css';
+import ClassBind from './ClassBind';
+import Counter from './Counter';
+import SyntheticEvent from './SyntheticEvent';
+
+function App() {
+  return (
+    <div className="App">
+      <SyntheticEvent />
+      <hr />
+
+      <ClassBind />
+      <hr />
+
+      <Counter />
+    </div>
+  );
+}
+
+export default App;
+```
+
+<br>
+
+### 2) SyntheticEvent.js
+
+```js
+import React from 'react'
+
+export default function SyntheticEvent() {
+    function systhenticEvent(e) {
+        console.log("SyntheticEvent 버튼 클릭");
+        console.log(e);
+        // 콘솔에 찍히는 e 객체는 합성 이벤트
+        // React가 브라우저의 이벤트 객체를 동일하게 처리하기 위해 만든 인공적인 이벤트 객체
+        // 모든 브라우저에서 일관된 이벤트 처리가 가능하도록 도와줌
+    }
+
+    function printInputValue(evt) {
+        console.log(evt.target.value); // input 요소에 입력된 값을 출력
+    }
+  return (
+    <div>
+        <h1>SyntheticEvent</h1>
+        <button onClick={systhenticEvent}>SyntheticEvent 콘솔에 찍기</button>
+        <br />
+        <input type="text" placeholder='입력하세요' onChange={printInputValue} />
+    </div>
+  )
+}
+```
+
+- **합성 이벤트**는 React가 브라우저 간의 차이를 해결하기 위해 제공하는 이벤트 객체입니다. 
+- 브라우저마다 다른 방식으로 이벤트를 처리하기 때문에 문제가 발생할 수 있습니다.
+- **합성 이벤트** 통해 모든 브라우저에서 일관된 방식으로 이벤트를 처리할 수 있습니다.
+- `printInputValue` 함수는 `input` 요소에 입력된 값을 실시간으로 콘솔에 출력합니다. 이때 `evt.target`은 이벤트가 발생한 `input` 요소를 가리킵니다.
+
+<br>
+
+### 3) ClassBind.js
+
+```js
+import React, { Component } from 'react'
+
+export default class ClassBind extends Component {
+    constructor(props) {
+        super(props);  // 부모 클래스인 Component의 생성자를 호출하여 초기화
+        console.log("constructor this : ", this);  // 현재 컴포넌트의 인스턴스를 가리킴
+
+        this.state = {
+            name : "sesac",  // 초기 상태를 설정
+        }
+
+        // #1. 생성자에서 바인딩하기
+        this.printConsole = this.printConsole.bind(this);
+        // 바인딩(Binding)은 특정 함수가 호출될 때 해당 함수 내에서 사용할 `this`가 무엇을 가리키는지 명확히 정의하는 과정
+
+        // 클래스형 컴포넌트에서 이벤트 핸들러 메서드를 정의할 때, 
+        // 기본적으로 `this`는 메서드를 호출한 객체를 가리키지 않음
+        // 따라서 `bind()` 메서드를 통해 `this`를 명확하게 바인딩해야 함
+    }
+
+    // bind 사용하기
+    printConsole() {
+        console.log("printConsole - this : ", this); // 컴포넌트 인스턴스를 가리킴
+        console.log("printConsole - state : ", this.state); // 컴포넌트의 상태 출력
+        console.log('--------------------------------');
+    }
+
+    // #2. 화살표 함수에서 이벤트 사용 - 바인딩 필요 없음
+    // 화살표 함수는 'this'가 상위 스코프의 'this'를 참조하므로 바인딩이 필요 없음.
+    printConsole2 = (evt, msg, e) => {
+        console.log("evt >>> ", evt);  // 이벤트 객체 출력
+        console.log("evt.target >>> ", evt.target);  // 이벤트가 발생한 실제 요소 출력
+        console.log("evt.currentTarget >>> ", evt.currentTarget);  // 이벤트 핸들러가 바인딩된 요소 출력
+        console.log("msg >>> ", msg);  // 전달된 메시지 출력
+        console.log("e >>> ", e);  // 추가로 전달된 인자 출력
+        console.log("this >>> ", this); // 클래스 인스턴스, 상위 스코프의 this를 참조
+    }
+
+  render() {
+    return (
+      <div>
+        <h1>Class Component Event</h1>
+
+        {/* 인자 없이 호출 */}
+        <button onClick={this.printConsole}>printConsole(인자 X)</button>
+
+        {/* 이벤트 객체와 인자를 전달 */}
+        <button onClick={(e) => this.printConsole2(e, "msg", "msg2")}>printConsole2(인자 O)</button>
+
+        {/* 이벤트 객체만 전달, 추가 인자는 undefined */}
+        <button onClick={this.printConsole2}>printConsole2(인자 X)</button>
+      </div>
+    )
+  }
+}
+```
+
+- **바인딩(Binding)**: 특정 함수가 호출될 때 해당 함수 내에서 사용할 `this`가 무엇을 가리키는지 명확히 정의하는 과정입니다. 클래스형 컴포넌트에서 이벤트 핸들러 메서드를 정의할 때, 기본적으로 `this`는 메서드를 호출한 객체를 가리키지 않기 때문에, `bind()` 메서드를 통해 `this`를 명확하게 바인딩해야 합니다. (아래 3. 바인딩(Binding)에서 상세히 설명)
+
+- `evt.target`은 실제 이벤트가 발생한 요소를 가리키며, `evt.currentTarget`은 이벤트 핸들러가 바인딩된 요소를 가리킵니다. (아래 4. `e.target`과 `e.currentTarget`의 차이에서 상세히 설명)
+
+<br>
+
+### 4) Counter.js
+
+```js
+import React, { useState } from 'react'
+
+const Counter = () => {
+    const [number, setNumber] = useState(0);  // 상태 변수 number와 상태를 업데이트하는 함수 setNumber 정의, 초기 값은 0
+
+    const increase = () => {
+        setNumber(number + 1);  // 상태 값을 1 증가시킴
+    }
+
+    // 인자 1개
+    const alertMsg = (msg) => {
+        alert(`${msg} ~ 현재 숫자는 ${number} 입니다.`);  // 전달된 메시지와 현재 숫자를 alert창에 출력
+    }
+
+    // 인자 2개
+    const consoleMsg = (e, msg) => {
+        console.log(e.target);  // 이벤트가 발생한 실제 요소 출력
+        console.log(`${msg} ~ 현재 숫자는 ${number} 입니다.`);  // 전달된 메시지와 현재 숫자를 콘솔에 출력
+    }
+
+    // e.target은 부모로부터 이벤트가 위임되어 발생하는 자식의 위치, 내가 클릭한 자식 요소
+    // e.currentTarget은 이벤트 핸들러가 있는 요소
+    const handleEvent = (e) => {
+        console.log(e.target);  // 클릭된 자식 요소(span) 출력
+        console.log(e.currentTarget);  // 이벤트 핸들러가 바인딩된 버튼 요소 출력
+    }
+
+  return (
+    <div>
+        <h1>Number Counter</h1>
+        <h2>{number}</h2>
+
+        {/* 함수에 인자가 없는 경우 : 함수 이름만 전달 */}
+        <button onClick={increase}>더하기</button>
+
+        {/* 함수에 인자 보내기 */}
+        <button onClick={() => {alertMsg('hello')}}>alert 출력</button>
+        <button onClick={(e) => {consoleMsg(e, 'hello')}}>console 출력</button>
+
+        {/* e.target vs e.currentTarget */}
+        <button onClick={handleEvent}>
+            <span>handle Event</span>
+        </button>
+    </div>
+  )
+}
+
+export default Counter
+```
+
+- 함수형 컴포넌트에서는 `useState` 훅을 사용하여 상태를 관리합니다. `increase` 함수는 `setNumber`를 사용하여 `number` 값을 1씩 증가시킵니다.
+- 이벤트 핸들러에 인자를 전달할 때는 화살표 함수(`() => {}`)를 사용하여 이벤트 객체 또는 추가 인자를 전달할 수 있습니다.
+- **e.target과 e.currentTarget**: `e.target`은 이벤트가 발생한 실제 요소를 가리키며, `e.currentTarget`은 이벤트 핸들러가 등록된 요소를 가리킵니다.
+
+<br>
+
+## 3. 바인딩(Binding)
+
+### 1) 바인딩이란 무엇인가?
+
+- 바인딩은 특정 함수가 호출될 때, 그 함수 내부에서 `this`가 가리키는 대상을 명확히 설정하는 과정입니다. 자바스크립트에서는 함수가 호출되는 방식에 따라 `this`가 달라질 수 있습니다. 클래스형 컴포넌트에서 메서드를 사용할 때, `this`가 의도한 컴포넌트를 가리키지 않는 경우가 발생할 수 있는데, 이를 해결하기 위해 `bind()` 메서드를 사용해 `this`를 명확하게 설정해줍니다.
+
+<br>
+
+### 2) 클래스형 컴포넌트에서의 바인딩 필요성
+
+- 클래스형 컴포넌트에서 메서드를 정의할 때, 해당 메서드 내에서 `this`는 기본적으로 `undefined`입니다. 이는 JavaScript에서 `this`가 함수 호출 방식에 따라 달라지기 때문입니다.
+  
+- 예를 들어, 이벤트 핸들러 메서드에서 `this.setState`를 호출하려고 할 때, `this`가 컴포넌트 인스턴스를 가리키지 않으면 `setState` 메서드를 찾을 수 없다는 오류가 발생합니다. 이를 방지하기 위해 생성자(constructor)에서 `bind()` 메서드를 사용하여 `this`를 컴포넌트 인스턴스에 바인딩해줍니다.
+
+<br>
+
+### 3) 바인딩 예시
+
+```js
+import React, { Component } from 'react';
+
+class ExampleComponent extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            count: 0,
+        };
+
+        // 메서드를 this에 바인딩하지 않으면, 호출 시 this는 undefined가 됨
+        this.handleClick = this.handleClick.bind(this);  // this를 명확히 컴포넌트 인스턴스로 바인딩
+    }
+
+    handleClick() {
+        this.setState({ count: this.state.count + 1 });  // this가 제대로 바인딩되지 않으면 에러 발생
+    }
+
+    render() {
+        return (
+            <div>
+                <p>Count: {this.state.count}</p>
+                <button onClick={this.handleClick}>Click me</button>
+            </div>
+        );
+    }
+}
+
+export default ExampleComponent;
+```
+
+- `handleClick` 메서드는 기본적으로 `this`가 컴포넌트 인스턴스를 가리키지 않기 때문에, `bind()`를 통해 `this`를 컴포넌트 인스턴스에 바인딩합니다. 이렇게 바인딩해야만 `handleClick` 메서드 내부에서 `this.setState`를 정상적으로 호출할 수 있습니다.
+
+<br>
+
+### 4) 화살표 함수와 바인딩
+
+- 화살표 함수의 특징: 화살표 함수는 자신만의 `this`를 가지지 않고, 상위 스코프의 `this`를 참조하는 특성을 가지고 있습니다. 따라서 화살표 함수를 사용하면, 클래스형 컴포넌트에서 `this`를 바인딩할 필요가 없습니다.
+
+```js
+class ExampleComponent extends Component {
+    state = {
+        count: 0,
+    }
+
+    // 화살표 함수를 사용하면 바인딩이 필요 없음
+    handleClick = () => {
+        this.setState({ count: this.state.count + 1 });
+    }
+
+    render() {
+        return (
+            <div>
+                <p>Count: {this.state.count}</p>
+                <button onClick={this.handleClick}>Click me</button>
+            </div>
+        );
+    }
+}
+```
+
+- 화살표 함수를 사용했기 때문에, `this`가 상위 스코프(즉, 컴포넌트 인스턴스)를 자동으로 참조합니다. 이로 인해 추가적인 바인딩 과정이 필요 없습니다.
+
+이처럼, 바인딩은 클래스형 컴포넌트에서 `this`가 예상치 못한 대상을 가리키는 문제를 해결하기 위해 중요합니다. 그러나 화살표 함수를 사용하면 이러한 바인딩 과정을 생략할 수 있습니다.
+
+<br>
+
+## 4. `e.target`과 `e.currentTarget`의 차이
+
+React에서 이벤트 처리 시, `e.target`과 `e.currentTarget`은 자주 혼동될 수 있는 개념입니다. 이 둘의 차이점을 자세히 살펴보겠습니다.
+
+### 1) `e.target`
+
+- `e.target`은 이벤트가 실제로 발생한 요소를 가리킵니다.
+- 예를 들어, 버튼 내부의 `span` 요소를 클릭했을 때, 이벤트가 발생한 `span`이 `e.target`이 됩니다.
+
+### 2) `e.currentTarget`
+
+- `e.currentTarget`은 이벤트 핸들러가 바인딩된 요소를 가리킵니다.
+- 예를 들어, 버튼 내부의 `span` 요소를 클릭해도, 이벤트 핸들러는 버튼에 바인딩되어 있기 때문에 `e.currentTarget`은 버튼 요소를 가리킵니다.
+
+### 3) 예시
+
+```js
+<button onClick={handleEvent}>
+  <span>Click Me</span>
+</button>
+```
+
+위 코드에서 버튼 내부의 `span` 요소를 클릭하면:
+
+- `e.target`은 `span` 요소를 가리킵니다.
+- `e.currentTarget`은 `button` 요소를 가리킵니다.
+
+이벤트 위임에서 중요한 역할을 합니다. 이벤트 위임을 사용할 때, 이벤트 핸들러는 부모 요소에 바인딩되지만, 실제로는 자식 요소에서 이벤트가 발생합니다. 이때 `e.target`을 사용하면 자식 요소를, `e.currentTarget`을 사용하면 부모 요소를 참조할 수 있습니다.
