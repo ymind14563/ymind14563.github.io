@@ -1,0 +1,188 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 이벤트 핸들러와 이벤트 객체"  
+date: 2024-08-11
+categories: React.js  
+---
+
+# 이벤트 핸들러와 이벤트 객체
+
+<hr>
+<br>
+
+## 1. 이벤트 핸들러와 이벤트 객체란?
+
+React에서 이벤트 핸들러는 사용자가 특정 UI 요소와 상호작용할 때(예: 클릭, 입력, 마우스 이동 등) 실행되는 함수를 의미합니다. 이 함수는 일반적으로 이벤트 객체(event)를 매개변수로 받아, 발생한 이벤트와 관련된 정보를 처리합니다.
+
+### 1) 정의
+
+#### (1) 이벤트 핸들러(Event Handler)
+- 특정 이벤트가 발생했을 때 실행되는 함수입니다. 이 함수는 이벤트 객체를 통해 이벤트에 대한 정보를 접근하고 처리할 수 있습니다.
+
+#### (2) 이벤트 객체(Event Object)
+- 이벤트가 발생한 요소와 관련된 정보를 담고 있는 객체로, 이벤트 핸들러에 의해 전달됩니다.
+
+### 2) 이벤트 객체의 역할
+
+- 이벤트 객체는 이벤트가 발생한 요소, 발생한 위치, 이벤트 타입 등 다양한 정보를 포함하고 있습니다. 이러한 정보는 이벤트 핸들러에서 이벤트에 대한 상세한 처리를 가능하게 합니다.
+- React에서 이벤트 핸들러는 기본적으로 'event' 객체를 자동으로 전달받습니다.하지만 브라우저마다 이벤트 객체를 전달하는 방식이 다를 수 있기 때문에, React에서는 합성 이벤트(Synthetic Event)를 통해 이 방식을 통일합니다.
+
+<br>
+
+## 2. 코드 설명
+
+### EventStudy.js
+
+`EventStudy.js` 파일에서는 다양한 방식으로 이벤트 핸들러를 정의하고, 이벤트 객체를 사용하는 방법을 설명합니다.
+
+```js
+import React, { useState } from 'react'
+
+export default function EventStudy() {
+    const [ count, setCount ] = useState(0);  // 클릭 횟수를 저장하는 상태 변수
+    const [ position, setPosition ] = useState({ x:0, y:0 })  // 클릭한 위치의 좌표를 저장하는 상태 변수
+    const [ message, setMessage ] = useState();  // 메시지를 저장하는 상태 변수
+
+    // 이벤트 객체 없이 상태 업데이트
+    const handleClick = () => {
+        setCount(count + 1);  // 클릭할 때마다 count 값을 1씩 증가
+    }
+
+    // 이벤트 객체를 사용한 상태 업데이트
+    const handleClickWithEvent = (e) => {
+      setCount(count + 1);
+      // 클릭한 위치의 좌표를 상태에 저장
+      console.log(e);  // 이벤트 객체 출력
+      setPosition({ x: e.clientX, y: e.clientY });  // 클릭한 위치의 X, Y 좌표를 상태로 저장
+    }
+
+    // 매개변수를 사용하는 핸들러
+    const handleClickWithParam = (e, message) => {
+      setCount(count + 1);  // 클릭할 때마다 count 값을 1씩 증가
+      setPosition({ x: e.clientX, y: e.clientY });  // 클릭한 위치의 좌표를 상태에 저장
+      setMessage(message);  // 전달된 메시지를 상태에 저장
+      console.log("message >>> ", message);  // 메시지를 콘솔에 출력
+    }
+
+    // 일반 함수 : 이벤트 객체를 매개변수로 받지 않음.
+    const messageFunc = (e) => {
+      setMessage(`호출: ${e}`);  // 전달된 매개변수를 포함한 메시지를 상태에 저장
+      console.log('messageFunc >>>', e);  // 매개변수를 콘솔에 출력
+    }
+
+    const messageClick = () => {
+      messageFunc('안녕');  // '안녕'이라는 문자열을 매개변수로 전달하여 messageFunc 호출
+    }
+
+  return (
+    <div>
+        {/* 이벤트 객체 없이 handleClick 함수 호출 */}
+        <button onClick={handleClick}>클릭</button>
+        <div>클릭 횟수: {count}</div>
+        <hr />
+
+        {/* onClick 핸들러 함수에서 이벤트 객체는 자동으로 매개변수 */}
+        {/* 이벤트 객체를 가지고 handleClickWithEvent 호출 */}
+        <button onClick={handleClickWithEvent}>클릭 (좌표 출력)</button>
+        <div>
+          클릭 위치 : X = {position.x}, Y = {position.y}
+        </div>
+
+        {/* 매개변수를 사용하여 handleClickWithParam 호출 */}
+        {/* e(event 객체)를 직접 보내는 이유는 핸들러 함수에 추가적인 매개변수를 전달하기 위함*/}
+        <button onClick={(e) => handleClickWithParam(e, "버튼 클릭됨 !")}>클릭 (메세지 출력)</button>
+ 
+        <div>
+          메세지 : { message }
+        </div>
+       <hr />
+
+        {/* 클릭 시 messageClick 호출 */}
+        <button onClick={messageClick}>messageClick 함수 호출</button>
+        <div>메세지 : {message} </div>
+    </div>
+  )
+}
+```
+
+### 1) `handleClick` 함수
+
+- `handleClick` 함수는 이벤트 객체를 매개변수로 **받지 않습니다.** 이 함수는 단순히 클릭 횟수를 증가시키는 역할을 합니다.
+-  `onClick` 이벤트에 직접 전달되어, 버튼 클릭 시 `count` 값을 1씩 증가시킵니다.
+
+```js
+<button onClick={handleClick}>클릭</button>
+<div>클릭 횟수: {count}</div>
+```
+
+### 2) `handleClickWithEvent` 함수
+
+- 이벤트 객체를 사용한 상태 업데이트: `handleClickWithEvent` 함수는 이벤트 객체를 매개변수로 받아, 클릭한 위치의 좌표를 상태에 저장합니다. 이벤트 객체 `e`는 클릭된 위치의 X, Y 좌표를 제공합니다.
+-  버튼 클릭 시, 클릭된 위치의 좌표를 출력하고, 상태로 저장하여 화면에 표시합니다.
+
+```js
+<button onClick={handleClickWithEvent}>클릭 (좌표 출력)</button>
+<div>
+  클릭 위치 : X = {position.x}, Y = {position.y}
+</div>
+```
+
+### 3) `handleClickWithParam` 함수
+
+- 매개변수를 사용하는 핸들러: `handleClickWithParam` 함수는 이벤트 객체와 추가적인 매개변수를 함께 사용합니다. 이 함수는 클릭된 위치의 좌표를 저장하고, 전달된 메시지를 상태로 저장하여 출력합니다.
+-  버튼 클릭 시, 이벤트 객체와 함께 메시지를 전달하여 처리합니다.
+
+```js
+<button onClick={(e) => handleClickWithParam(e, "버튼 클릭됨 !")}>클릭 (메세지 출력)</button>
+<div>
+  메세지 : { message }
+</div>
+```
+
+### 4) `messageFunc`와 `messageClick` 함수
+
+- 일반 함수로서의 사용: `messageFunc` 함수는 이벤트 객체를 매개변수로 받지 않으며, 전달된 매개변수를 처리하여 메시지를 출력합니다.
+-  `messageClick` 함수는 `messageFunc`을 호출하며, 특정 문자열을 전달합니다. 이때 전달된 문자열은 메시지로 상태에 저장됩니다.
+
+```js
+<button onClick={messageClick}>messageClick 함수 호출</button>
+<div>메세지 : {message} </div>
+```
+
+## 3. 이벤트 객체의 활용
+
+이벤트 객체는 이벤트가 발생한 요소에 대한 다양한 정보를 포함하고 있으며, 이벤트 핸들러에서 이를 활용하여 더욱 세밀한 처리가 가능합니다.
+
+### 1) 이벤트 객체가 제공하는 정보 예시
+
+- `e.target`: 이벤트가 발생한 실제 요소를 가리킵니다. 예를 들어, 버튼 내부의 `span` 요소를 클릭했을 때, `e.target`은 `span` 요소를 가리킵니다.
+- `e.currentTarget`: 이벤트 핸들러가 바인딩된 요소를 가리킵니다. 동일한 예시에서, `e.currentTarget`은 이벤트 핸들러가 바인딩된 `button` 요소를 가리킵니다.
+- `e.clientX`, `e.clientY`: 이벤트가 발생한 X, Y 좌표를 제공합니다. 이는 사용자가 화면에서 클릭한 위치를 알 수 있도록 도와줍니다.
+
+### 2) 이벤트 객체 활용 예시
+
+```js
+const handleClickWithEvent = (e) => {
+    setCount(count + 1);
+    console.log(e);
+    setPosition({ x: e.clientX, y: e.clientY });  // 클릭한 위치의 좌표를 상태로 저장
+}
+```
+
+위 코드에서 `e.clientX`와 `e.clientY`를 사용하여 사용자가 클릭한 위치를 추적하고, 이를 상태에 저장하여 화면에 표시합니다.
+
+## 4. 이벤트 핸들러에서 매개변수 전달하기
+
+React에서는 이벤트 핸들러에 추가적인 매개변수를 전달할 수 있습니다. 이를 위해 화살표 함수를 사용하여 이벤트 객체와 함께 다른 매개변수를 전달합니다.
+
+### 1) 매개변수 전달 예시
+
+```js
+<button onClick={(e) => handleClickWithParam(e, "버튼 클릭됨 !")}>클릭 (메세지 출력)</button>
+
+<div>
+    메세지 : { message }
+</div>
+```
+
+화살표 함수를 사용하여 `handleClickWithParam` 함수에 이벤트 객체 `e`와 추가 매개변수 `"버튼 클릭됨!"`을 전달합니다. 이로 인해 이벤트 발생 시, 해당 메시지가 처리되어 화면에 출력됩니다.
