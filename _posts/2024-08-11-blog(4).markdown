@@ -1,0 +1,274 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Ref: 함수형과 클래스형 컴포넌트에서의 사용"  
+date: 2024-08-11
+categories: React.js  
+---
+
+# React에서의 Ref
+
+<hr>
+<br>
+
+## 1. Ref란?
+
+React에서 `Ref`는 DOM 요소나 React 엘리먼트에 직접 접근하고 제어할 수 있는 방법을 제공합니다. 일반적으로 React는 데이터를 기반으로 UI를 선언적으로 업데이트하지만, 특정 상황에서는 DOM 요소에 직접 접근해야 할 필요가 있습니다. 이때 사용하는 것이 바로 `Ref`입니다.
+
+- `Ref`는 컴포넌트가 렌더링된 후에도 특정 DOM 요소에 접근하거나, 이를 제어할 수 있게 해줍니다. 예를 들어, 버튼을 클릭했을 때 특정 입력 필드에 포커스를 설정하거나, 스크롤 위치를 조정하거나, 동영상 플레이어를 제어할 수 있습니다. 이는 상태 관리만으로는 처리하기 어려운 작업입니다.
+
+- `Ref`는 주로 다음과 같은 상황에서 사용됩니다.
+  - **DOM 요소에 직접 접근이 필요한 경우**: 사용자가 버튼을 클릭했을 때 특정 입력 필드에 포커스를 설정하거나, 애니메이션을 제어하는 경우.
+  - **서드파티 라이브러리 통합**: jQuery와 같은 서드파티 라이브러리와 React를 함께 사용할 때, `Ref`를 사용해 DOM에 접근하고 제어할 수 있습니다.
+
+- React의 선언적 프로그래밍 방식과 `Ref`의 차이점은, 선언적 방식에서는 상태나 props의 변화를 통해 UI를 자동으로 업데이트하지만, `Ref`는 명령형으로 특정 DOM 요소에 접근하여 수동으로 조작할 수 있다는 점입니다. 따라서 React의 선언적 접근 방식과 `Ref`는 서로 보완적인 관계에 있습니다.
+
+<br>
+
+### 2. Ref가 필요한 이유와 사용하지 않았을 때의 문제점
+
+일반적으로 React에서 상태나 props를 통해 UI를 관리하지만, 몇몇 특정 상황에서는 이 방법만으로는 부족합니다. 이럴 때 `Ref`가 필요합니다.
+
+#### 1) 문제 상황 (포커스 제어)
+
+입력 필드에 포커스를 설정하고 싶을 때, 상태 관리만으로는 이를 구현하기 어렵습니다. 예를 들어, 버튼을 클릭할 때 특정 입력 필드로 포커스를 옮겨야 하는 경우를 생각해봅시다.
+
+#### (1) `Ref`를 사용하지 않고 포커스 제어
+
+```js
+import React, { useState } from 'react';
+
+export default function NoRefExample() {
+  const [focus, setFocus] = useState(false);
+
+  return (
+    <div>
+      <input
+        type="text"
+        style={{ outline: focus ? '2px solid blue' : 'none' }}
+      />
+      <button onClick={() => setFocus(true)}>Focus</button>
+    </div>
+  );
+}
+```
+
+- 위 예시에서는 `focus`라는 상태를 사용하여 스타일을 변경했습니다. 하지만 이 방법은 실제로 입력 필드에 포커스를 설정하지 않으며, 사용자가 직접 입력 필드를 클릭하지 않으면 커서가 나타나지 않습니다.
+
+#### (2) Ref를 사용하여 포커스 제어 (해결)
+
+```js
+import React, { useRef } from 'react';
+
+export default function RefExample() {
+  // useRef 훅을 사용해 Ref 객체를 생성
+  const inputRef = useRef();
+
+  // 버튼 클릭 시 실행되는 함수로, input 요소에 포커스를 설정
+  const handleFocus = () => {
+    // inputRef.current를 통해 input 요소에 접근하여 포커스를 설정
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      <input type="text" ref={inputRef} /> {/* input 요소에 Ref를 연결 */}
+      <button onClick={handleFocus}>Focus</button> {/* 버튼 클릭 시 handleFocus 함수가 실행 */}
+    </div>
+  );
+}
+```
+
+- `Ref`를 사용하면 실제로 입력 필드에 포커스를 설정할 수 있습니다. 버튼을 클릭하면 `handleFocus` 함수가 호출되어 `inputRef.current.focus()`를 통해 입력 필드로 포커스가 옮겨집니다. 이는 상태 관리만으로는 구현할 수 없는 중요한 기능입니다.
+
+<br>
+
+### 2) Ref가 필요한 상황
+
+- `Ref`는 DOM 조작이 필요한 특정 상황에서 반드시 필요합니다.
+
+- **텍스트 입력 필드 포커스**: 사용자가 특정 버튼을 클릭할 때, 자동으로 특정 입력 필드에 포커스를 설정해야 하는 경우.
+- **스크롤 제어**: 사용자가 페이지 내에서 특정 위치로 스크롤할 때, 자동으로 특정 요소로 스크롤을 이동해야 하는 경우.
+- **서드파티 라이브러리와의 통합**: jQuery와 같은 서드파티 라이브러리를 사용하여 DOM을 직접 조작해야 하는 경우. React만으로는 이 작업이 불가능하며, `Ref`를 통해 DOM 요소에 접근해야 합니다.
+
+<br>
+
+## 3. 함수형 컴포넌트에서의 Ref 사용
+
+### 1) `useRef` 훅
+
+함수형 컴포넌트에서 `Ref`를 사용하려면 `useRef` 훅을 사용해야 합니다.
+
+- `useRef` 훅은 Ref 객체를 반환합니다. 이 객체는 컴포넌트의 생애 동안 유지되며, `current` 속성을 통해 값을 저장합니다. `useRef`는 DOM 접근 외에도 값을 저장하는 용도로 사용할 수 있습니다. 예를 들어, 컴포넌트가 리렌더링될 때마다 특정 값을 유지하거나 참조하는 데 유용합니다.
+
+- 중요한 점은 `useRef`로 생성된 Ref 객체는 값이 변경되어도 컴포넌트가 리렌더링되지 않는다는 것입니다. 이는 `useState`와의 중요한 차이점으로, DOM 조작이나 값의 저장을 위해 `useRef`를 사용하는 이유 중 하나입니다.
+
+<br>
+
+### 2) 함수형 컴포넌트에서의 Ref 사용 예시
+
+```js
+import React, { useRef } from 'react'
+
+export default function RefSample1() {
+  // useRef 훅을 호출하여 Ref 객체를 생성
+  const inputRef = useRef();
+
+  // 버튼 클릭 시 실행되는 함수로, input 요소에 포커스를 설정
+  const handleFocus = () => {
+    // inputRef.current를 통해 input 요소에 접근하여 포커스를 설정
+    inputRef.current.focus();
+  }
+
+  return (
+    <div>
+        <p>함수형 컴포넌트에서 버튼 클릭 시 input에 focusing 처리해보기!</p>
+        {/* input 요소에 Ref를 연결 */}
+        <input type="text" ref={inputRef} />
+        <button onClick={handleFocus}>Focus</button> {/* 버튼 클릭 시 handleFocus 함수가 실행 */}
+    </div>
+  )
+}
+```
+
+- `useRef` 훅을 호출하여 `inputRef`라는 Ref 객체를 생성합니다. 이 Ref 객체는 컴포넌트가 렌더링된 후에도 유지되며, `inputRef.current`를 통해 해당 DOM 요소에 접근할 수 있습니다. 
+- 버튼을 클릭하면 `handleFocus` 함수가 호출되어 `inputRef.current.focus()`를 통해 `input` 요소에 포커스를 설정합니다. 이 방식은 React의 상태 관리만으로는 구현하기 어려운 DOM 조작을 가능하게 합니다.
+
+<br>
+
+### 3) Ref를 이용한 값 저장
+
+`useRef`는 DOM 접근 외에도 값 저장 용도로도 사용할 수 있습니다. 이때, `useRef`는 값이 변경되어도 리렌더링되지 않는다는 특성을 이용합니다. 아래 예시에서 `useRef`와 `useState`의 차이를 설명하겠습니다.
+
+```js
+import React, { useRef, useState } from 'react'
+
+export default function RefSample2() {
+  // useRef 훅을 사용해 Ref 객체를 생성
+  const id = useRef(7); // 초기값으로 7을 설정
+  const [number, setNumber] = useState(10); // useState 훅을 사용해 상태를 관리
+
+  // id.current의 값을 1씩 증가시키는 함수
+  const plusIdRef = () => {
+    id.current += 1; // Ref 객체의 current 값을 직접 수정
+  }
+
+  // number 상태를 1씩 증가시키는 함수
+  const plusNumState = () => {
+    setNumber(number + 1); // 상태를 업데이트하면 컴포넌트가 리렌더링
+  }
+
+  return (
+    <div>
+        <p>함수형 컴포넌트에서 버튼 클릭시 id 값을 1씩 증가</p>
+        <h2>Ref : {id.current}</h2> {/* Ref 객체의 current 값을 출력 */}
+        <button onClick={plusIdRef}>Plus</button>
+
+        <p>비교) State는 ref와 다르게, 값이 변경되면 리렌더링 되는 것을 확인</p>
+        <h2>State: {number}</h2> {/* 상태 값을 출력 */}
+        <button onClick={plusNumState}>Plus</button>
+    </div>
+  )
+}
+```
+
+- `useRef`로 관리되는 값은 변경되어도 리렌더링이 발생하지 않으며, `useState`로 관리되는 값은 변경될 때마다 컴포넌트가 리렌더링됩니다.
+
+- `useRef`는 값의 저장이나 DOM 접근이 필요하지만 리렌더링은 불필요할 때 유용합니다.
+
+<br>
+
+## 4. 클래스형 컴포넌트에서의 Ref 사용
+
+클래스형 컴포넌트에서도 `Ref`를 사용할 수 있으며, 이때는 `createRef`나 콜백 함수를 통해 `Ref`를 설정할 수 있습니다.
+
+### 1) 콜백 함수를 통한 Ref 설정
+
+클래스형 컴포넌트에서는 콜백 함수를 사용하여 `Ref`를 설정할 수 있습니다. 콜백 함수는 `ref`를 설정하는 가장 유연한 방법 중 하나로, 특정 조건에 따라 `Ref`를 설정하거나 변경할 수 있습니다.
+
+```js
+import React, { Component } from 'react'
+
+export default class RefSample3 extends Component {
+  // Ref를 사용하여 input 요소에 포커스를 설정하는 함수
+  handleFocus = () => {
+    this.inputRef.focus(); // Ref로 연결된 input 요소에 포커스를 설정
+  }
+
+  render() {
+    return (
+      <div>
+        <p>
+          클래스형 컴포넌트에서 버튼 클릭 시 input에 focusing 처리해보기!
+        </p>
+        {/* input 요소에 Ref를 콜백 함수로 설정 */}
+        <input 
+            type="text"
+            ref={(elementRef) => {
+                this.inputRef = elementRef; // elementRef를 this.inputRef에 할당하여 Ref로 설정
+            }}            
+        />
+        <button onClick={this.handleFocus}>Focus</button> {/* 버튼 클릭 시 handleFocus 함수가 실행 */}
+      </div>
+    )
+  }
+}
+```
+
+콜백 함수를 사용하여 `inputRef`를 설정하고, 이 `Ref`를 통해 `input` 요소에 접근합니다.
+
+<br>
+
+### 2) `createRef`를 통한 Ref 설정
+
+React에서 제공하는 `createRef` 메서드는 클래스형 컴포넌트에서 `Ref`를 설정하는 또 다른 방법입니다. `createRef`는 Ref 객체를 생성하고, 이를 특정 DOM 요소에 연결합니다.
+
+```js
+import React, { Component } from 'react'
+
+export default class RefSample4 extends Component {
+  // createRef를 사용해 Ref 객체를 생성
+  inputRef = React.createRef();
+
+  // Ref를 사용하여 input 요소에 포커스를 설정하는 함수
+  handleFocus = () => {
+    this.inputRef.current.focus(); // createRef로 생성된 Ref 객체의 current 속성에 접근하여 포커스를 설정
+  }
+
+  render() {
+    return (
+      <div>
+        <p>클래스형 컴포넌트에서 버튼 클릭 시 input에 focusing 처리해보기</p>
+        {/* ref prop 사용해서 ref 설정 */}
+        <input type="text" ref={this.inputRef}/> {/* input 요소에 createRef로 생성된 Ref를 연결 */}
+        <button onClick={this.handleFocus}>Focus</button> {/* 버튼 클릭 시 handleFocus 함수가 실행 */}
+      </div>
+    )
+  }
+}
+```
+
+- `createRef`를 사용하여 `Ref` 객체를 생성하고, 이를 `input` 요소에 연결하여 버튼 클릭 시 해당 입력 필드에 포커스를 설정합니다.
+- `createRef`는 Ref 객체를 반환하며, `current` 속성을 통해 해당 DOM 요소에 접근할 수 있습니다. 이는 클래스형 컴포넌트에서 Ref를 설정하는 가장 기본적인 방법입니다.
+
+<br>
+
+## 5. Ref 사용 시 주의사항 및 대안
+
+### 1) Ref 사용 시 주의사항
+
+`Ref`는 강력한 도구지만, 남용하면 React의 선언적 프로그래밍 패러다임을 해칠 수 있습니다. 선언적으로 해결할 수 있는 경우에는 `Ref`를 피하는 것이 좋습니다. 예를 들어, 입력 필드의 값을 추적하는 데 `Ref`를 사용할 필요 없이 `state`를 사용하는 것이 더 적합합니다. 
+
+### 2) Ref와 선언적 접근 방식의 차이
+
+React의 주된 장점은 선언적 프로그래밍 방식에 있습니다. 이는 컴포넌트의 상태와 UI를 동기화하는 방식을 의미합니다. 반면 `Ref`는 명령형으로 DOM에 접근하여 특정 작업을 수행하는 방식을 제공합니다. 따라서, 가능하다면 선언적 접근 방식을 우선시하고, 필요한 경우에만 `Ref`를 사용하는 것이 좋습니다.
+
+### 3) 꼭 Ref를 써야 하는가?
+
+`Ref`는 DOM 조작이 필수적이거나, 컴포넌트가 렌더링된 후 특정 작업을 수행해야 하는 경우에만 사용하는 것이 좋습니다. 예를 들어, 사용자가 버튼을 클릭했을 때 입력 필드에 포커스를 설정하거나, 특정 요소의 크기나 위치를 읽어야 할 때 `Ref`를 사용하는 것이 적절합니다.
+
+
+**참고 자료**
+- [https://legacy.reactjs.org/docs/refs-and-the-dom.html](https://legacy.reactjs.org/docs/refs-and-the-dom.html)
+- [https://react-ko.dev/learn/referencing-values-with-refs](https://react-ko.dev/learn/referencing-values-with-refs)
+- [https://velog.io/@yubiny289/%EB%A6%AC%EC%95%A1%ED%8A%B8-ref-DOM%EC%97%90-%EC%9D%B4%EB%A6%84-%EB%8B%AC%EA%B8%B0](https://velog.io/@yubiny289/%EB%A6%AC%EC%95%A1%ED%8A%B8-ref-DOM%EC%97%90-%EC%9D%B4%EB%A6%84-%EB%8B%AC%EA%B8%B0)
+- [https://chanhuiseok.github.io/posts/react-7/](https://chanhuiseok.github.io/posts/react-7/)
