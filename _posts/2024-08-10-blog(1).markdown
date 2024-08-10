@@ -1,0 +1,204 @@
+---
+layout: post  
+title: "[SeSACx코딩온] State(Class vs Function 컴포넌트)"
+date: 2024-08-10  
+categories: React.js  
+---
+
+# React 에서의 State(클래스형 vs 함수형 컴포넌트)
+
+<hr>
+<br>
+
+## 1. State란 무엇인가?
+
+### 1) State란?
+
+State는 React에서 컴포넌트가 동적으로 변할 수 있는 데이터를 관리하는 방법입니다. 예를 들어, 사용자가 버튼을 클릭할 때마다 화면에 표시되는 숫자가 증가하는 경우, 이 숫자를 `state`로 관리합니다. React는 이 `state`가 변경될 때마다 자동으로 UI를 업데이트합니다. 사용자가 입력한 텍스트, 클릭한 버튼의 카운트, 서버에서 받아온 데이터 등이 모두 `state`로 관리됩니다.
+
+<br>
+
+### 2) 클래스형 컴포넌트에서의 State 관리
+
+클래스형 컴포넌트에서는 `this.state` 객체를 통해 상태를 관리합니다. 이 객체는 컴포넌트가 초기화될 때 설정되며, 이후 상태가 변경될 때마다 `setState()` 메서드를 사용해 상태를 업데이트합니다.
+
+- `this.state`는 컴포넌트가 처음 생성될 때 초기 상태를 정의하는 객체입니다. 예를 들어, `this.state = { count: 0 }`과 같이 초기 값을 설정할 수 있습니다.
+- `setState()` 메서드를 호출하면 React는 변경된 상태를 반영해 컴포넌트를 재렌더링합니다.
+
+<br>
+
+### 3) 함수형 컴포넌트에서의 State 관리
+
+함수형 컴포넌트에서는 `useState`라는 React 훅을 사용해 상태를 관리합니다. 이 훅은 현재 상태 값과, 이 값을 업데이트할 수 있는 함수를 반환합니다.
+
+- `useState` 함수의 인자로 전달된 값이 초기 상태로 설정됩니다. 예를 들어, `const [count, setCount] = useState(0)`은 `count`의 초기 값을 0으로 설정합니다.
+- 상태를 업데이트하는 함수(`setCount`)를 호출하면 해당 상태가 변경되고, 컴포넌트가 재렌더링됩니다.
+
+<br>
+
+## 2. 코드 설명
+
+### 1) App.js
+
+```js
+import './App.css';
+import Counter from './Counter';
+import CounterFunction from './CounterFunction';
+import SayFunction from './SayFunction';
+
+function App() {
+  return (
+    <div className="App">
+      <Counter />  // 클래스형 컴포넌트
+      <hr />
+
+      <CounterFunction value={"Plus 1"} /> // 함수형 컴포넌트
+      <hr />
+
+      <SayFunction /> // 함수형 컴포넌트
+    </div>
+  );
+}
+
+export default App;
+```
+
+<br>
+
+### 2) Counter.js (클래스형 컴포넌트)
+
+
+```js
+import React, { Component } from 'react'
+
+export default class Counter extends Component {
+    // 클래스형 컴포넌트의 초기 상태를 설정
+    state = {
+        count: 0,  // count의 초기 값을 0으로 설정
+    }
+
+    render() {
+        const { count } = this.state  // this.state에서 구조 분해 할당하여 count를 추출
+        return (
+            <div>
+                <h1>Class Component State</h1>
+                
+                {/* 방법 #1: this.state를 통해 직접 count 값을 사용 */}
+                <h1>{this.state.count}</h1>
+                
+                {/* 방법 #2: 구조 분해 할당을 사용해 추출한 count 값을 사용 */}
+                <h1>{count}</h1>
+
+
+                {/* 버튼 클릭 시 setState()를 호출하여 count 값을 1 증가시킴 */}
+                <button onClick={() => {
+                    this.setState({ count: count + 1 })
+                    // setState({ 키, 값 })
+                    // setState({ 초기 객체, 구조분해하여 할당한 값 })
+                    // setState({ state = {count : 0,}에 있는 객체 count, const {count} = this.state;에 있는 값 count })
+                }}>+1</button>
+
+                {/* 버튼 클릭 시 현재 count 값을 alert창으로 표시 */}
+                <button onClick={() => {
+                    alert(count)
+                }}>Alert Number</button>
+            </div>
+        )
+    }
+}
+```
+
+- 클래스형 컴포넌트에서는 `state` 객체를 사용해 초기 상태를 정의합니다. 여기서는 `count`가 0으로 초기화됩니다.
+- `setState()` 메서드를 통해 `count` 값을 업데이트하면, React는 자동으로 UI를 재렌더링합니다.
+- `const { count } = this.state`로 `state` 객체에서 `count` 값을 추출하여 사용할 수 있습니다.
+
+<br>
+
+### 3) CounterFunction.js (함수형 컴포넌트)
+
+```js
+import React, { useState } from "react"
+
+const CounterFunction = (props) => {
+    // useState 훅을 사용하여 상태와 상태를 변경하는 함수를 정의
+    const [number, setNumber] = useState(0)  // number의 초기 값을 0으로 설정
+    
+    // onClickEnter 함수는 버튼 클릭 시 number 값을 1 증가시킴
+    const onClickEnter = () => {
+        setNumber(number + 1)
+    }
+
+    const { value } = props  // 부모 컴포넌트(App.js)로부터 전달받은 value 값을 추출
+    return (
+        <div>
+            <h1>{number}</h1>
+            {/* 첫 번째 버튼은 props로 전달된 value 값을 텍스트로 사용 */}
+            <button onClick={onClickEnter}>{value}</button>
+
+            {/* 두 번째 버튼은 "Plus 1"이라는 텍스트를 사용 */}
+            <button onClick={onClickEnter}>Plus 1</button>
+        </div>
+    )
+}
+
+export default CounterFunction
+```
+
+- `useState(0)`으로 `number`의 초기 값을 0으로 설정합니다.
+- `setNumber` 함수를 사용해 `number` 값을 1씩 증가시킵니다.
+- `props.value`를 버튼 텍스트로 사용하며, 이 값은 부모 컴포넌트로부터 전달됩니다.
+
+<br>
+
+### 4) SayFunction.js (함수형 컴포넌트)
+
+```js
+import React, { useState } from 'react'
+
+const SayFunction = () => {
+    // useState 훅을 사용하여 message 상태를 정의
+    const [message, setMessage] = useState("welcome!")  // message의 초기 값을 "welcome!"으로 설정
+
+    // onClickEnter 함수는 message 값을 "안녕하세요!"로 변경
+    const onClickEnter = () => {
+        setMessage('안녕하세요!')
+    }
+
+    // onClickLeave 함수는 message 값을 "안녕히 가세요!"로 변경
+    const onClickLeave = () => {
+        setMessage('안녕히 가세요!')
+    }
+
+    // handleClick 함수는 message 값을 토글하여 "welcome!"일 경우 "Hi"로, 그렇지 않으면 "Bye"로 변경
+    const handleClick = () => {
+        setMessage((currentMessage) => {
+            return currentMessage === 'welcome!' ? "Hi" : "Bye"
+        })
+    }
+
+    return (
+        <div>
+            <h1>Function Component State</h1>
+
+            <button onClick={onClickEnter}>입장</button>
+            <button onClick={onClickLeave}>퇴장</button>
+
+            {/* 클릭 시 message 상태를 토글 */}
+            <button onClick={handleClick}>HI</button>
+
+            {/* 현재 message 상태를 화면에 출력 */}
+            <h1>{message}</h1>
+        </div>
+    )
+}
+
+export default SayFunction
+```
+
+- `useState("welcome!")`으로 `message`의 초기 값을 설정합니다.
+- 각각의 함수는 버튼 클릭 시 `message` 값을 변경합니다.
+
+**참고 사항**
+>- HTML : onclick="onClickEvent()" -> 문자열 형식의 호출문 등록
+>- JS : addEventListener('click', onClickEvent) -> 괄호를 없애 함수를 바로 실행하지 않고, 클릭이 발생 했을 때 함수가 호출되도록 함.
+>- React : onClick={onCLickEvent} -> JS와 동일.
