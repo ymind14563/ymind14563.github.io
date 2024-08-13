@@ -1,6 +1,6 @@
 ---
 layout: post  
-title: "[SeSACx코딩온] map & filter
+title: "[SeSACx코딩온] map & filter"
 date: 2024-08-11
 categories: React.js  
 ---
