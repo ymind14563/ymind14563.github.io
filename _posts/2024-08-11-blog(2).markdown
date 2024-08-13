@@ -1,6 +1,6 @@
 ---
 layout: post  
-title: "[SeSACx코딩온] 이벤트 핸들러와 이벤트 객체"  
+title: "[SeSACx코딩온] Event Handler와 Event Object"  
 date: 2024-08-11
 categories: React.js  
 ---
