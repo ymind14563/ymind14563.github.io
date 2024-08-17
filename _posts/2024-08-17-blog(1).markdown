@@ -1,0 +1,110 @@
+---
+layout: post  
+title: "[SeSACx코딩온] useMemo"  
+date: 2024-08-17  
+categories: React.js  
+---
+
+# useMemo를 이용한 성능 최적화
+
+<hr>
+<br>
+
+## 1. useMemo란?
+
+`useMemo`는 메모이제이션(Memoization)을 통해 특정 계산의 결과를 기억해두고, 동일한 계산이 반복되지 않도록 최적화하는 훅입니다. 컴포넌트가 리랜더링될 때마다 계산을 반복하지 않고, 이전에 계산된 값을 재사용함으로써 성능을 개선할 수 있습니다. 특히, 연산 비용이 큰 작업이나 데이터가 많이 변하지 않는 경우 `useMemo`를 활용하면 불필요한 재계산을 방지할 수 있습니다.
+
+<br>
+
+## 2. 설명
+
+### 1) `UseMemoEx` 컴포넌트
+
+```js
+import React, { useState, useMemo } from 'react';
+
+// useMemo
+// - 메모이제이션으로 수행한 연산의 결과 값을 기억함으로써 불필요한 연산 최소화.
+export default function UseMemoEx() {
+    const [count, setCount] = useState(0);
+    const [input, setInput] = useState(''); // 재랜더링용
+
+    // [before]
+    const calc = () => {
+        console.log('열심히 계산 중...calc');
+        for (let i = 0; i < 1000000; i++) {} // 시간 소모적인 작업 예시
+        return count  2; // 제곱
+    }
+
+    // [after] useMemo 적용
+    const calcMemo = useMemo(() => {
+        console.log('열심히 계산 중...calcMemo');
+        for (let i = 0; i < 1000000; i++) {} // 시간 소모적인 작업 예시
+        return count  2; // 제곱
+    }, [count]); // count가 변경될 때만 계산 수행
+
+    return (
+        <div>
+            <h1>UseMemo ex</h1>
+            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
+            <button onClick={() => setCount(count + 1)}>Plus</button>
+            <p>count: {count}</p>
+
+            {/* [before] */}
+            <p>calc : {calc()}</p> {/* 함수 직접 호출, 랜더링과 동시에 실행 */}
+
+            {/* [after] useMemo 적용 */}
+            <p>calcMemo : {calcMemo}</p>
+        </div>
+    );
+}
+```
+
+<br>
+
+### 2) `calc`함수와 `calcMemo`함수의 차이점
+
+위 코드에서 `calc`와 `calcMemo` 함수는 모두 `count` 상태의 제곱 값을 계산하는 역할을 합니다. 그러나 이 두 함수는 중요한 차이가 있습니다.
+
+- `calc` 함수
+    - 컴포넌트가 리랜더링될 때마다 호출되며, 매번 동일한 계산을 반복합니다. 예를 들어, `count` 값이 변경되지 않더라도 `input` 상태가 변할 때마다 `calc` 함수가 호출되어 불필요한 계산이 수행됩니다. 이는 성능에 부정적인 영향을 미칠 수 있습니다.
+
+- `calcMemo` 함수
+    - `useMemo`를 사용해 최적화된 이 함수는 `count` 값이 변경될 때에만 계산을 수행하고, 그 외의 경우에는 이전에 계산된 값을 반환합니다. 이렇게 함으로써 불필요한 연산을 피할 수 있으며, 특히 연산 비용이 큰 작업에서 성능 이점을 얻을 수 있습니다.
+
+<br>
+
+### 3) 컴포넌트의 상태 변화와 `useMemo`의 작동 방식
+
+`UseMemoEx` 컴포넌트의 상태 변화는 `count`와 `input` 두 가지로 이루어집니다. 
+
+- `count` 상태
+    - `count` 상태는 버튼 클릭에 따라 증가합니다. `useMemo`의 의존성 배열에 `count`가 포함되어 있기 때문에, `count`가 변경될 때마다 `calcMemo`가 재계산됩니다. 이로 인해 계산 결과는 항상 최신 상태로 유지됩니다.
+
+- `input` 상태
+    - `input` 상태는 텍스트 입력에 따라 변경되며, 컴포넌트를 리랜더링하게 만듭니다. 
+    - 그러나 `input` 상태의 변화는 `calcMemo` 함수에 영향을 미치지 않습니다. 따라서 `calcMemo`는 `input` 상태가 변할 때 재계산되지 않으며, 이전의 계산된 값을 재사용합니다. 
+    - 이는 `useMemo`가 불필요한 계산을 방지하는 핵심 기능입니다.
+
+<br>
+
+## 3. `useMemo` vs `useEffect`
+
+- `useMemo`
+    - 컴포넌트가 리랜더링될 때 특정 값의 재계산을 피하기 위해 사용됩니다. 주로 연산 비용이 큰 함수의 결과를 메모이제이션하여 성능을 최적화합니다. 
+    - `useMemo`는 계산된 값을 반환하므로, 리턴된 값이 변화하지 않는 한 동일한 값을 재사용합니다.
+
+- `useEffect`
+    - 컴포넌트가 렌더링된 이후 특정 작업을 수행하기 위해 사용됩니다. 예를 들어, 데이터 가져오기, 구독 설정, DOM 조작 등 부수 효과(Side Effect)를 처리할 때 유용합니다. 
+    - `useEffect`는 의존성 배열에 포함된 값이 변경될 때마다 실행되며, 리턴된 값은 없습니다. 따라서 주로 컴포넌트의 생명 주기에 따른 작업을 처리할 때 활용됩니다.
+
+## 4. `useMemo` 사용 시 주의 사항
+
+- `useMemo`는 좋은 최적화 도구지만, 항상 사용해야 하는 것은 아닙니다.
+- 간단한 계산이거나, 의존성 값이 자주 변경되는 경우라면 `useMemo`의 이점이 크지 않을 수 있습니다. 오히려 메모이제이션을 유지하기 위한 오버헤드가 더 클 수 있습니다.
+
+<br>
+
+**참고 자료**
+- [https://d2.naver.com/helloworld/9223303](https://d2.naver.com/helloworld/9223303)
+- [https://velog.io/@lky5697/stop-using-usememo-now](https://velog.io/@lky5697/stop-using-usememo-now)
