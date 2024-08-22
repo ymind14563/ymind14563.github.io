@@ -18,8 +18,6 @@ React에서 Custom Hook은 여러 컴포넌트에서 재사용 가능한 로직�
 
 ## 2. Custom Hook 만들기 과정
 
-Custom Hook을 만들기 위해서는 다음과 같은 과정을 거쳐야 합니다:
-
 ### 1) 훅의 목적 정의
 - Custom Hook이 해결하려는 문제나 제공할 기능을 명확히 정의합니다. 예를 들어, 상태 관리, 데이터 페칭, 이벤트 처리 등 특정 기능을 추출합니다.
 
@@ -36,8 +34,6 @@ Custom Hook을 만들기 위해서는 다음과 같은 과정을 거쳐야 합�
 ### 1) `useToggle` Custom Hook
 
 `useToggle`은 boolean 상태를 쉽게 전환할 수 있는 Custom Hook입니다.
-
-<br>
 
 ```js
 import { useState } from 'react';
@@ -95,11 +91,11 @@ export default function Faq() {
   
 - `setIsFaqOpen` 함수는 클릭 이벤트에 연결되어, 사용자가 질문을 클릭할 때마다 상태가 전환되도록 합니다. `isFaqOpen`이 `true`라면 답변이 화면에 표시되고, `false`라면 답변이 숨겨집니다.
 
+<br>
+
 ### 2) `useTitle` Custom Hook
 
 `useTitle`은 페이지의 제목을 동적으로 변경하는 Custom Hook입니다. 컴포넌트가 마운트될 때 주어진 제목으로 페이지의 제목을 설정하고, 컴포넌트가 언마운트될 때 이전 제목으로 돌아갑니다.
-
-<br>
 
 ```js
 import { useEffect } from 'react';
