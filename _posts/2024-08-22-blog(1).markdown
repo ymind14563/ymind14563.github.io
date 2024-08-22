@@ -1,0 +1,123 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Custom Hook"
+date: 2024-08-22 
+categories: React.js  
+---
+
+# React에서 Custom Hook 만들기
+
+<hr>
+<br>
+
+## 1. Custom Hook이란?
+
+React에서 Custom Hook은 여러 컴포넌트에서 재사용 가능한 로직을 추출하여 독립적인 함수로 만든 것을 의미합니다. `useState`, `useEffect`와 같은 기본 훅을 이용하여 특정 기능을 수행하는 로직을 캡슐화함으로써 코드의 중복을 줄이고, 가독성을 높이는 데 도움을 줍니다. Custom Hook은 특정 문제를 해결하거나 기능을 제공하기 위해 만들어지며, 훅이기 때문에 `use`라는 접두사를 붙여 이름을 지정하는 것이 일반적입니다.
+
+<br>
+
+## 2. Custom Hook 만들기 과정
+
+Custom Hook을 만들기 위해서는 다음과 같은 과정을 거쳐야 합니다:
+
+### 1) 훅의 목적 정의
+- Custom Hook이 해결하려는 문제나 제공할 기능을 명확히 정의합니다. 예를 들어, 상태 관리, 데이터 페칭, 이벤트 처리 등 특정 기능을 추출합니다.
+
+### 2) 훅의 기능 설계
+- 훅에서 어떤 상태를 관리하고, 어떤 부수 효과를 처리할지 설계합니다. 필요하다면 `useState`, `useEffect`와 같은 기본 훅을 활용합니다.
+
+### 3) 훅 구현
+- 정의된 로직을 구현하고, 필요한 값이나 함수를 반환하도록 합니다. 반환되는 값의 형태는 객체, 배열 등으로 자유롭게 선택할 수 있습니다.
+
+<br>
+
+## 3. Custom Hook 예제
+
+### 1) `useToggle` Custom Hook
+
+`useToggle`은 boolean 상태를 쉽게 전환할 수 있는 Custom Hook입니다.
+
+<br>
+
+```js
+import { useState } from 'react';
+
+export default function useToggle(initValue = false) {
+    // 초기값으로 받은 initValue로 상태를 초기화함
+    const [value, setValue] = useState(initValue);
+
+    // 상태를 반전시키는 함수임
+    const toggleValue = () => {
+        setValue(!value);
+    };
+
+    // 현재 상태와 상태를 반전시키는 함수를 배열로 반환함
+    return [value, toggleValue];
+}
+```
+
+- `useState` 사용
+    - `value`는 현재 토글 상태를 나타내며, `setValue`는 이 상태를 변경하는 함수입니다. `initValue`는 초기값으로, 기본적으로 `false`로 설정됩니다.
+  
+- `toggleValue` 함수
+    - 현재 상태를 반전시키는 함수로, 버튼 클릭과 같은 이벤트 핸들러에 쉽게 연결할 수 있습니다. 이 함수는 `value`의 상태를 `true`에서 `false`로, 또는 `false`에서 `true`로 전환합니다.
+
+- 반환 값
+    - `useToggle`은 배열로 현재 상태(`value`)와 상태를 전환하는 함수(`toggleValue`)를 반환합니다. 이 구조는 훅을 사용하는 컴포넌트에서 쉽게 상태와 그 변화를 관리할 수 있도록 합니다.
+
+<br>
+
+#### `useToggle`을 사용하는 `Faq` 컴포넌트
+
+```js
+import React from 'react';
+import useToggle from '../hooks/useToggle';
+
+export default function Faq() {
+    // useToggle을 사용해 FAQ의 열림/닫힘 상태를 관리함
+    const [isFaqOpen, setIsFaqOpen] = useToggle(); 
+
+    return (
+        <div>
+            <h1>Custom Hook (useToggle) Example</h1>
+            {/* 질문을 클릭하면 FAQ가 열리거나 닫힘 */}
+            <div onClick={setIsFaqOpen} style={{ cursor: 'pointer' }}>
+                Q. 리액트에서 커스텀 훅을 만들 수 있습니까?
+            </div>
+            {/* FAQ가 열려 있을 때만 답변이 표시됨 */}
+            {isFaqOpen && <div>A. 네, 가능합니다.</div>}
+        </div>
+    );
+}
+```
+
+- `isFaqOpen` 상태는 `false`로 초기화되며, 사용자가 질문을 클릭할 때마다 `setIsFaqOpen` 함수가 호출되어 상태가 반전됩니다. 이를 통해 FAQ가 열리거나 닫히게 됩니다.
+  
+- `setIsFaqOpen` 함수는 클릭 이벤트에 연결되어, 사용자가 질문을 클릭할 때마다 상태가 전환되도록 합니다. `isFaqOpen`이 `true`라면 답변이 화면에 표시되고, `false`라면 답변이 숨겨집니다.
+
+### 2) `useTitle` Custom Hook
+
+`useTitle`은 페이지의 제목을 동적으로 변경하는 Custom Hook입니다. 컴포넌트가 마운트될 때 주어진 제목으로 페이지의 제목을 설정하고, 컴포넌트가 언마운트될 때 이전 제목으로 돌아갑니다.
+
+<br>
+
+```js
+import { useEffect } from 'react';
+
+export default function useTitle(customTitle) {
+    useEffect(() => {
+        // 컴포넌트가 마운트될 때 기존 제목을 저장하고, 새 제목으로 설정함
+        const previousTitle = document.title;
+        document.title = customTitle;
+
+        // 컴포넌트가 언마운트될 때 이전 제목으로 복원함
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [customTitle]); // customTitle이 변경될 때마다 useEffect가 실행됨
+}
+```
+
+- `useEffect`는 컴포넌트가 마운트될 때와 언마운트될 때 특정 작업을 수행할 수 있도록 합니다. 페이지의 제목을 동적으로 설정하고, 컴포넌트가 언마운트되면 원래 제목으로 돌아갑니다.
+  
+- `customTitle` 값이 변경될 때마다 `useEffect`가 다시 실행되어, 새로운 제목이 설정됩니다.
