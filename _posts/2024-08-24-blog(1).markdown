@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] 컨트롤드와 언컨트롤드 컴포넌트"  
 date: 2024-08-24  
-categories: React
+categories: React.js
 ---
 
 # 컨트롤드와 언컨트롤드 컴포넌트의 차이점 ( + React Hook Form )
