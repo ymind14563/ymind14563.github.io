@@ -1,0 +1,132 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 컨트롤드와 언컨트롤드 컴포넌트"  
+date: 2024-08-24  
+categories: React
+---
+
+# 컨트롤드와 언컨트롤드 컴포넌트의 차이점 ( + React Hook Form )
+
+<hr>  
+<br>
+
+## 1. 컨트롤드 컴포넌트 (Controlled Components)
+
+### 1) 개념
+
+컨트롤드 컴포넌트는 입력 요소의 상태가 React의 상태(state)에 의해 제어되는 방식입니다. 사용자가 입력하는 모든 값이 컴포넌트의 상태로 관리되며, 상태가 업데이트될 때마다 컴포넌트가 리랜더링됩니다.
+
+### 2) 특징
+
+- 입력 필드의 값이 컴포넌트의 상태로 관리되며, `onChange` 이벤트를 통해 상태가 업데이트됩니다.
+- 입력값이 변경될 때마다 컴포넌트가 리랜더링됩니다.
+- 실시간 입력값 검증이나 동적인 입력값 처리 등, 입력값이 즉시 반영되어야 하는 상황에 적합합니다.
+
+### 3) 예시
+
+```js
+import React, { useState } from 'react';
+
+function ControlledComponent() {
+  const [value, setValue] = useState('');
+
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  return (
+    <input type="text" value={value} onChange={handleChange} />
+  );
+}
+```
+
+<br>
+
+## 2. 언컨트롤드 컴포넌트 (Uncontrolled Components)
+
+### 1) 개념
+
+언컨트롤드 컴포넌트는 입력 요소의 상태가 DOM 자체에서 관리되는 방식입니다. React에서는 `ref`를 사용하여 입력 필드의 값을 직접 제어하고 접근할 수 있습니다.
+
+### 2) 특징
+
+- 입력 필드의 값이 DOM 요소에 의해 관리되며, React의 상태로 관리되지 않습니다.
+- 입력값이 변경되어도 컴포넌트가 리랜더링되지 않습니다.
+- 폼 제출 시점에만 입력값이 필요하거나, 성능 최적화를 위해 리랜더링을 최소화하고자 할 때 유용합니다.
+
+### 3) 예시
+
+```js
+import React, { useRef } from 'react';
+
+function UncontrolledComponent() {
+  const inputRef = useRef();
+
+  const handleSubmit = () => {
+    alert(`Input value: ${inputRef.current.value}`);
+  };
+
+  return (
+    <div>
+      <input type="text" ref={inputRef} />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  );
+}
+```
+
+<br>
+
+## 3. React Hook Form과 언컨트롤드 컴포넌트
+
+### 1) React Hook Form에서의 언컨트롤드 컴포넌트
+
+- React Hook Form은 언컨트롤드 컴포넌트를 기반으로 폼 데이터를 관리합니다. 이 과정에서 `register` 함수를 사용하면, 입력 요소가 자동으로 `ref`와 연결됩니다.
+- 개발자가 직접 `ref`를 관리할 필요가 없으며, React Hook Form이 이를 대신 처리합니다. 이는 폼의 성능을 최적화하고, 입력 요소의 상태를 간편하게 관리할 수 있습니다.
+
+### 2) 예시
+
+```js
+import React from 'react';
+import { useForm } from 'react-hook-form';
+
+function MyForm() {
+  const { register, handleSubmit } = useForm();
+
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('username')} placeholder="Username" />
+      <input {...register('email')} placeholder="Email" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+### 3) 주요 장점
+
+- 최적화: React Hook Form이 자동으로 `ref`를 제어하여, 필요할 때만 리렌더링을 수행하고 성능을 최적화합니다.
+- 유효성 검사: 다양한 유효성 검사 규칙을 쉽게 적용할 수 있습니다.
+- 코드 간결화: `register` 함수로 입력 요소와 연결하여 폼 데이터를 간편하게 처리할 수 있습니다.
+
+<br>
+
+## 4. 컨트롤드 vs 언컨트롤드 요약
+
+### 1) 상태 관리 방식
+
+- 컨트롤드 컴포넌트: 상태가 React에 의해 관리되며, 입력값이 변경될 때마다 리랜더링이 발생합니다.
+- 언컨트롤드 컴포넌트: 상태가 DOM에 의해 관리되며, 리랜더링이 발생하지 않습니다.
+
+### 2) 사용 사례
+
+- 컨트롤드 컴포넌트: 실시간 입력값 검증, 동적 처리 등이 필요한 경우.
+- 언컨트롤드 컴포넌트: 성능 최적화가 필요하거나, 입력값을 한 번에 처리할 때.
+
+### 3) React Hook Form
+
+- 언컨트롤드 방식 기반으로 폼 데이터를 관리하며, 폼 성능 최적화와 간편한 데이터 처리를 지원합니다.
