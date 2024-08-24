@@ -1,0 +1,306 @@
+---
+layout: post  
+title: "[SeSACx코딩온] React Hook Form" 
+date: 2024-08-25
+categories: React..js
+---
+
+# React Hook Form을 활용한 폼 관리
+
+<hr>  
+<br>
+
+## 1. React Hook Form  라이브러리 설치
+
+```sh
+npm install react-hook-form
+```
+
+<br>
+
+## 2. `useForm`
+
+### 1) 기본 설정
+
+React Hook Form의 핵심은 `useForm` 훅입니다. 이 훅을 사용하면 폼 상태를 관리하고, 유효성 검사를 처리할 수 있습니다.
+
+```js
+import { useForm } from 'react-hook-form';
+
+export default function Form() {
+    const {
+        register, // 입력 필드와 연결하고 값의 변경을 감지함
+        handleSubmit, // form submit 시 호출
+        formState: { errors }, // 폼 상태 객체
+        watch, // 특정 필드의 값을 실시간으로 추적
+    } = useForm();
+```
+
+#### (1) `register`  
+`register` 함수는 입력 요소를 React Hook Form에 등록하고, 유효성 검사 규칙을 설정하는 역할을 합니다. 이 함수는 다양한 속성을 포함한 객체를 반환하며, 이를 통해 입력 필드의 상태와 유효성 검사를 제어할 수 있습니다.
+
+#### (2) `handleSubmit`  
+`handleSubmit` 함수는 폼이 제출될 때 호출되며, 두 개의 콜백 함수를 인수로 받습니다. 첫 번째 함수는 폼이 유효할 때 실행되고, 두 번째 함수는 폼이 유효하지 않을 때 실행됩니다. 이 함수는 `form` 태그의 `onSubmit` 속성과 연결되어 폼 제출 시 유효성 검사를 처리합니다.
+
+#### (3) `formState.errors`  
+`formState.errors` 객체는 각 입력 필드의 유효성 검사 결과를 담고 있습니다. 유효성 검사가 실패한 필드에 대한 오류 메시지가 이 객체에 저장되며, 이를 통해 사용자가 올바르게 입력하지 않은 부분을 쉽게 확인할 수 있습니다.
+
+#### (4) `watch`  
+`watch` 함수는 특정 필드의 값을 실시간으로 모니터링하여, 값이 변경될 때마다 최신 값을 반환합니다. 예를 들어, 사용자가 `username` 필드에 입력하는 값을 실시간으로 추적하고 싶다면 `watch('username')`을 사용할 수 있습니다. 이 함수는 해당 필드의 값이 변경될 때마다 자동으로 최신 값을 반환해주어, 이를 활용하여 동적인 폼 데이터를 처리할 수 있습니다.
+
+```js
+console.log('watch >>>>> ', watch('username'));
+```
+
+<br>
+
+## 3. 폼 설정 및 유효성 검사
+
+### 1) 이름 유효성 검사
+
+React Hook Form을 사용하여 `username`을 설정할 수 있습니다. 
+`register` 함수를 통해 폼에 등록되며, 유효성 검사 규칙을 정의할 수 있습니다.
+
+```js
+<input
+  type="text"
+  placeholder="username"
+  {...register('username', {
+    required: '이름은 필수 항목입니다',
+    minLength: {
+      message: '이름은 최소 2글자 이상 작성해주세요',
+      value: 2,
+    },
+  })}
+/>
+{errors.username?.message}
+```
+
+#### (1) `required`  
+`required` 속성은 필드가 필수 입력 항목임을 지정하며, 사용자가 이 필드를 비워둔 채 제출하려 할 때 오류 메시지를 표시합니다.
+
+#### (2) `minLength`  
+`minLength` 속성은 입력값의 최소 길이를 지정하며, 사용자가 지정된 길이 미만으로 입력할 경우 오류 메시지를 출력합니다.
+
+#### (3) 오류 메시지 표시
+
+- 각 입력에 대한 오류 메시지는 `formState.errors` 객체를 통해 관리됩니다. 예를 들어, `username` 필드의 오류 메시지를 다음과 같이 표시할 수 있습니다.
+
+```js
+{errors.username?.message}
+```
+
+- 옵셔널 체이닝 연산자 `?.`는 객체 속성에 접근하기 위해 사용됩니다. 예를 들어, `errors` 객체에서 `username` 속성이 존재하지 않는 경우, `undefined`를 반환하여 런타임 에러를 방지할 수 있습니다. 이는 특히 객체의 중첩된 속성에 접근할 때 유용합니다.
+
+- 옵셔널 체이닝은 기존의 조건문을 사용하는 방식보다 간결하게 작성할 수 있다는 장점이 있습니다.
+
+```js
+{errors && errors.username && errors.username.message}
+```
+
+- 이 코드를 옵셔널 체이닝을 사용하면 간단하게 표현할 수 있습니다.
+
+```js
+{errors.username?.message}
+```
+
+<br>
+
+### 2) 이메일 유효성 검사
+
+```js
+<input
+  type="email"
+  placeholder="email"
+  {...register('email', {
+      required: '이메일을 입력해주세요',
+    pattern: {
+        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      message: '유효한 이메일 주소를 입력해주세요.',
+    },
+  })}
+/>
+{errors.email?.message}
+```
+
+- 이메일 필드에서는 필수 입력 검사와 함께 정규식을 사용하여 이메일 형식을 검사할 수 있습니다.
+
+- `pattern` 속성은 정규식을 사용하여 입력된 값이 특정 패턴과 일치하는지 검사합니다. 이메일 형식에 맞지 않으면 "유효한 이메일 주소를 입력해주세요"라는 오류 메시지를 표시합니다.
+
+<br>
+
+### 3) 커스텀 유효성 검사
+
+```js
+<input
+  type="email"
+  placeholder="email(gmail)"
+  {...register('email', {
+      required: '이메일을 입력해주세요',
+    validate: {
+        useGmail: (value) =>
+        value.includes('gmail.com') ||
+        'gmail로만 가입 가능합니다',
+    },
+  })}
+/>
+{errors.email?.message}
+```
+
+- React Hook Form에서는 `validate` 옵션을 사용하여 커스텀 유효성 검사를 추가할 수 있습니다. 예를 들어, 특정 도메인으로만 이메일 가입을 허용하는 규칙을 설정할 수 있습니다.
+
+- `validate` 옵션이 객체로 사용될 경우, 객체의 각 속성에 대해 개별적인 유효성 검사를 수행할 수 있습니다. 각 속성은 함수 형태로 정의되며, 이 함수들이 개별적인 유효성 검사 규칙을 적용합니다.
+
+- 예를 들어, `useGmail`이라는 이름의 함수는 `validate` 옵션 내부에서 정의되었으며, 사용자가 입력한 이메일 주소(`value`)에 `gmail.com`이 포함되어 있는지 확인합니다. 만약 포함되지 않았다면, "gmail로만 가입 가능합니다" 라는 오류 메시지가 반환됩니다.
+
+<br>
+
+### 4) 패스워드 설정
+
+```js
+<input
+  type="password"
+  placeholder="password"
+  {...register('password', {
+    required: '비밀번호는 필수 항목입니다',
+    minLength: {
+      value: 8,
+      message: '비밀번호는 최소 8자 이상이어야 합니다',
+    },
+  })}
+ />
+ {errors.password?.message}
+<br />
+
+```
+
+패스워드 필드도 같은 방식으로 `register` 함수를 사용하여 React Hook Form에 등록할 수 있습니다.
+
+<br>
+
+## 4. 스프레드 연산자(`...`)의 활용 주의점과 이유
+
+### 1) prop 이름과 객체 속성 이름의 일치 (주의점)
+
+스프레드 연산자를 사용할 때 중요한 점은, 객체의 속성 이름과 컴포넌트의 prop 이름이 일치해야 한다는 것입니다. 예를 들어, `person` 객체에 `name`과 `hobby`라는 속성이 있고, 이 속성들을 `MyComponent`에 전달하려면, `MyComponent`에서 기대하는 prop 이름도 `name`과 `hobby`여야 합니다. 그렇지 않으면 스프레드 연산자를 사용할 수 없고, 개별적으로 속성을 지정해야 합니다.
+
+```js
+const person = {
+  name: 'John',
+  hobby: 'Reading'
+};
+
+// 객체의 속성 이름과 prop 이름이 동일해야 함
+<MyComponent name={person.name} hobby={person.hobby}></MyComponent>
+
+// 스프레드 연산자를 사용하여 객체를 전달하는 경우
+<MyComponent {...person}></MyComponent>
+```
+<br>
+
+### 2) 코드 간소화와 유지보수성 향상 (이유)
+
+- 스프레드 연산자는 코드의 간소화와 가독성을 높일 수 있습니다.
+
+- 예를 들어, 입력값의 참조(ref), 값 변경 이벤트(onChange), 블러 이벤트(onBlur) 등을 각각 지정하려면 코드가 길어질 수 있습니다.
+
+```js
+<input
+  type="password"
+  name="password"
+  ref={register.password.ref} // 해당 DOM 요소에 대한 참조를 설정하는 함수
+  onChange={register.password.onChange} // 입력 값이 변경될 때 호출되는 함수
+  onBlur={register.password.onBlur} // 입력 필드가 포커스를 잃을 때 호출되는 함수
+/>
+```
+
+- 이와 같은 방식으로 개별 속성을 전달하는 코드는 복잡하고 반복적이기 때문에, 실수의 가능성이 높고 유지보수가 어려워질 수 있습니다.
+
+
+```js
+<input
+  type="password"
+  placeholder="password"
+  {...register('password')}
+/>
+```
+
+- 스프레드 연산자를 사용하면 `register` 함수가 반환하는 모든 속성을 한 번에 간편하게 전달할 수 있습니다. 이를 통해 코드가 훨씬 간결해집니다.
+
+- 각 속성을 일일이 나열할 필요 없이, `register` 함수가 관리하는 모든 속성이 자동으로 입력 요소에 적용됩니다.
+
+
+**참고** 
+
+```js
+console.log(register('password'))
+```
+
+- 객체를 열어보면 어떤 속성들이 포함되어 있는지 확인할 수 있습니다.
+
+
+
+<br>
+
+## 5. 폼 제출 처리
+
+폼이 제출될 때 `handleSubmit` 함수를 사용하여 유효성 검사를 처리합니다. 
+이 함수는 두 개의 콜백 함수를 인수로 받습니다. 
+
+- handleSubmit(func A [, func B])
+    - func A : "필수", 유효할 때 실행
+    - func B : "선택", 유효하지 않을 때 실행
+
+```js
+const onValid = (data) => {
+  console.log('onValid >>>>> ', data); // {username: '안녕'}
+};
+
+const onInValid = (err) => {
+  console.log('onInValid >>>>> ', err);
+};
+
+<form onSubmit={handleSubmit(onValid, onInValid)}>
+  ...
+</form>
+```
+
+### 1) `onValid` 함수
+
+폼이 유효할 때 호출되며, 제출된 데이터를 처리합니다.
+
+### 2) `onInValid` 함수
+
+폼이 유효하지 않을 때 호출되며, 유효성 검사를 통과하지 못한 필드들의 오류를 처리합니다.
+
+### 3) `handleSubmit` 함수의 역할
+
+`handleSubmit` 함수는 폼 제출 시 유효성 검사를 수행하고, 그 결과에 따라 `onValid` 또는 `onInValid` 함수를 호출합니다. `<form>` 태그의 `onSubmit` 속성과 연결되어 폼의 제출을 처리합니다.
+
+<br>
+
+## 6. 일반 폼 작성과 React Hook Form(RHF) 사용의 차이점
+
+### 1) 상태 관리 방식
+
+- 일반 폼은 `useState`를 사용하여 각 입력 필드의 상태를 관리해야 하며, 모든 입력값의 상태를 관리하고, 값이 바뀔 때마다 전체 컴포넌트가 리랜더링될 수 있습니다. 
+
+- RHF는 비제어 컴포넌트 즉, 언컨트롤드 컴포넌트를 사용하여 필요할 때만 리랜더링을 수행합니다.
+
+### 2) 검증 로직
+
+ - 일반 폼에서는 검증 로직을 직접 작성해야 합니다. 
+
+ - RHF는 다양한 검증 규칙을 쉽게 설정할 수 있으며, 기본적인 검증 기능이 내장되어 있습니다.
+
+### 3) 폼 데이터 수집
+
+- 일반 폼에서는 폼 제출 시 각 입력 필드의 상태를 수집하는 추가 작업이 필요합니다.
+
+- RHF는 `handleSubmit` 함수 하나로 모든 폼 데이터를 쉽게 관리할 수 있습니다.
+
+### 4) 사용 용도 
+
+- 일반 폼은 간단한 폼 양식을 작성할 때 적합합니다.
+
+- RHF는 복잡하고 대규모의 폼 양식을 작성할 때 유리합니다.
