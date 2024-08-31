@@ -1,0 +1,388 @@
+---
+layout: post
+title: "[SeSACx코딩온] React 스타일링(CSS Module, Sass, Styled Components)"
+date: 2024-08-31
+categories: React.js
+---
+
+
+# React 스타일링: CSS Module, Sass, Styled Components
+
+<hr>  
+<br>
+
+## 1. CSS Module
+
+### 1) CSS Module이란?
+
+- CSS Module은 CSS 클래스 이름의 충돌을 방지하기 위한 방법입니다. 
+- 일반적인 CSS 클래스는 전역적으로 적용되기 때문에, 여러 컴포넌트에서 동일한 클래스 이름을 사용할 경우 스타일이 충돌할 수 있습니다. 
+- CSS Module은 각 클래스 이름에 고유한 해시 값을 추가하여 문제를 해결합니다.
+
+<br>
+
+### 2) CSS Module 설정 및 사용
+
+#### (1) 프로젝트에 CSS Module 적용
+
+- React 프로젝트에서 CSS Module을 사용하려면 CSS 파일의 확장자를 `컴포넌트명.module.css`로 지정하면 됩니다. 이렇게 지정된 파일은 자동으로 CSS Module로 처리됩니다.
+
+- 별도의 설치 과정 없이 바로 사용 가능합니다.
+
+<br>
+
+#### (2) CSS Module 코드 
+
+```js
+import React from 'react'
+import styles from './styles/cssModule.module.css' // CSS Module을 import함
+
+// CSS Module을 사용하여 클래스 이름 중복을 방지함
+export default function CssModuleComponents() {
+  console.log(styles); // 콘솔에 styles 객체를 출력
+
+  return (
+    <div className={styles.container}>
+        {/* 두 클래스를 동시에 적용함 */}
+        {/* 배열의 요소들을 문자열로 합쳐서 클래스명을 한 줄로 만들어야 함 (join(' ') - 띄어쓰기용) */}
+        <div className={[styles.box, styles.red].join(' ')}>1</div>
+        <div className={[styles.box, styles.orange].join(' ')}>2</div>
+
+        {/* 템플릿 리터럴을 사용하여 두 클래스를 함께 적용 */}
+        {/* 가장 간단하며 가독성이 좋음 */}
+        <div className={`${styles.box} ${styles.yellow}`}>3</div>
+    </div>
+  )
+}
+```
+
+- `styles` 객체는 `cssModule.module.css` 파일에서 가져온 클래스 이름을 포함하고 있습니다. 
+- 이 객체에 저장된 각 클래스 이름은 해쉬값 추가로 인해 자동으로 고유한 값으로 변환됩니다.
+
+  ```js
+  console.log(styles);
+  // 해쉬값 적용으로 고유한 특징을 가지게 됨
+  // {
+  //   container: "cssModule_container__HsDaM", 
+  //   box: "cssModule_box__2fLzZ",
+  //   red: "cssModule_red__1FQWq",
+  //   orange: "cssModule_orange__1r24P",
+  //   yellow: "cssModule_yellow__3b1pF"
+  // }
+  ```
+
+- 클래스 결합
+  - 배열 결합: `[styles.box, styles.red].join(' ')`을 사용하여 여러 클래스를 결합합니다. 배열의 요소들을 공백으로 구분하여 하나의 문자열로 결합합니다.
+  - 템플릿 리터럴 사용: `` `${styles.box} ${styles.orange}` ``와 같은 템플릿 리터럴을 사용하면 클래스를 더 간결하게 결합할 수 있습니다.
+
+<br>
+
+### 3) CSS Module 스타일 코드
+
+```css
+/* cssModule.module.css */
+.container {
+    display: flex;
+}
+
+.box {
+    width: 100px;
+    height: 100px;
+}
+
+.red {
+    background-color: red;
+}
+
+.orange {
+    background-color: orange;
+}
+
+.yellow {
+    background-color: yellow;
+}
+```
+
+- container: 자식 요소들을 가로로 정렬합니다.
+- box: 각 박스의 크기를 100x100 픽셀로 설정합니다.
+- red, orange, yellow: 각각 빨간색, 주황색, 노란색 배경을 설정합니다.
+
+<br>
+
+### 4) CSS Module의 장단점
+
+- 장점: 클래스 이름이 고유해지므로 스타일 충돌을 방지할 수 있습니다. 컴포넌트 단위로 스타일을 독립적으로 관리할 수 있어 유지보수가 쉽습니다.
+- 단점: 전역 스타일을 관리하기 어려우며, 각 컴포넌트마다 파일을 관리해야 하므로 다소 번거로울 수 있습니다.
+
+<br>
+<br>
+
+## 2. Sass
+
+### 1) Sass란?
+
+- Sass(Syntactically Awesome Style Sheets)는 CSS의 확장 언어로, 변수($), 중첩(&), 믹스인(@mixin) 등 기능을 제공합니다. 
+- CSS를 더욱 구조적으로 작성하고 코드 재사용성을 높일 수 있습니다.
+
+<br>
+
+### 2) Sass 설치 및 설정
+
+#### (1) 프로젝트에 Sass 설치
+
+Sass를 사용하려면 `sass` 패키지를 설치해야 합니다. 이 패키지는 `.scss` 파일을 CSS로 컴파일해줍니다.
+
+```bash
+npm install sass
+```
+
+<br>
+
+#### (2) Sass 코드
+
+```js
+import React from 'react'
+import './styles/SassComponent.scss' // Sass 파일을 import함
+
+export default function SassComponent() {
+  return (
+    <>
+    <div className='container'>
+        <div className='box red'>1</div>
+        <div className='box orange'>2</div>
+        <div className='box yellow'>3</div>
+    </div>
+    <div className='box yellow'></div>
+    <button className='btn'>Button</button>
+    <button className='btn-primary'>Button Primary</button>
+    </>
+  );
+}
+```
+
+- 일반적인 CSS처럼 `className`을 통해 CSS 클래스 이름을 지정합니다. 
+- Sass 파일을 사용하므로 기존 CSS 문법과 동일하게 사용할 수 있습니다.
+
+<br>
+
+### 3) Sass 스타일 코드
+
+```scss
+// SassComponent.scss
+@import './variables'; // 변수 파일을 불러옴
+@import './utils'; // 믹스인 파일을 불러옴
+
+// Sass Styling
+.container {
+    display: flex;
+
+    .box {
+        // mixin 호출
+        @include box(150px); 
+
+        &.red {
+            background-color: $color-first;
+        }
+
+        &.orange {
+            background-color: $color-second;
+        }
+
+        &.yellow {
+            background-color: $color-third;
+        }
+
+        &:hover {
+            // 연산
+            $box-animation: $animation-duration * 2;
+            transform: translateY(-20px);
+            transition: transform $box-animation;
+        }
+    }
+}
+
+.btn {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid black;
+}
+
+.btn-primary {
+    // 확장 - 기존 선택자 스타일을 다른 선택자에게 상속
+    @extend .btn;
+    background-color: $color-third;
+}
+
+// 반응형 디자인 - 미디어 쿼리를 사용하여 화면 크기에 따라 스타일을 다르게 적용
+@media (max-width: #{$breakpoint-sm}) {
+    .container {
+        flex-direction: column;
+    }
+}
+
+// 문자열 보간 방법
+// #{} 구문을 사용하여 변수의 값을 문자열 내에 삽입
+$color-primary: blue;
+$breakpoint-sm: 600px;
+
+.container {
+    color: #{$color-primary}; // 변수 $color-primary의 값을 삽입하여 color 속성을 설정함
+}
+
+@media (max-width: #{$breakpoint-sm}) {
+    .container {
+        flex-direction: column;
+    }
+}
+```
+
+- 변수 사용($): `$color-first`, `$animation-duration`과 같은 변수를 사용하여 반복되는 스타일 값을 관리할 수 있습니다.
+
+- 믹스인 사용: `@include box(150px);`와 같이 공통적으로 사용하는 스타일 블록을 재사용할 수 있습니다.
+
+- 중첩(&): Sass에서는 부모 선택자에 대한 스타일을 자식 선택자 내에서 사용할 수 있도록 `&` 연산자를 사용합니다. 이를 통해 더 구조적이고 읽기 쉬운 코드를 작성할 수 있습니다. 예를 들어, `.box` 클래스 내에서 `&:hover`를 사용하면 `.box:hover`와 동일하게 동작합니다.
+
+- 미디어 쿼리: 반응형 디자인을 위해 `@media` 쿼리를 사용하여 화면 크기에 따라 레이아웃을 변경합니다.
+
+- 확장(@extend): `@extend`는 한 클래스의 스타일을 다른 클래스에서 상속받아 재사용할 수 있도록 합니다. 이 방식은 여러 클래스 간에 공통된 스타일을 공유할 때 유용합니다. 예를 들어, `.btn-primary` 클래스가 `.btn` 클래스의 스타일을 상속받아 공통된 버튼 스타일을 유지하면서 추가적인 스타일을 적용할 수 있습니다. 
+
+
+- 문자열 보간(`#{}`): 변수를 문자열 내에 삽입할 수 있습니다. 이를 통해 변수의 값을 동적으로 설정하거나, 미디어 쿼리와 같은 상황에서 변수 값을 유연하게 사용할 수 있습니다.
+
+<br>
+
+### 4) Sass 변수 및 믹스인 파일 코드
+
+```scss
+// _variables.scss
+$color-first: red;
+$color-second: orange;
+$color-third: yellow;
+$animation-duration: 0.4s;
+$breakpoint-sm: 360px;
+
+// scss파일명 앞에 _ 의미
+// - 이 파일은 css 파일로 변환될 필요가 없음을 알림.
+```
+
+```scss
+// _utils.scss
+@mixin box($size) {
+    width: $size;
+    height: $size;
+}
+
+// mixin: 반복되는 스타일 블록을 함수처럼 재사용할 수 있음
+```
+
+- 변수 파일: `_variables.scss`는 반복되는 색상, 크기, 시간을 변수로 관리합니다.
+- 믹스인 파일: `_utils.scss`는 자주 사용하는 스타일을 믹스인으로 정의하여 재사용성을 높입니다.
+
+<br>
+
+### 5) Sass의 장단점
+
+- 장점: 코드 재사용성과 가독성이 높아집니다. 변수와 믹스인을 사용해 코드가 더 효율적이고 간결해집니다.
+- 단점: 컴파일 과정이 필요하고, 설정이 다소 복잡할 수 있습니다.
+
+<br>
+<br>
+
+## 3. Styled Components
+
+### 1) Styled Components란?
+
+Styled Components는 JavaScript 파일 내에서 CSS를 작성할 수 있는 라이브러리입니다. 스타일을 컴포넌트 단위로 관리할 수 있으며, props를 이용해 동적으로 스타일을 변경할 수 있습니다.
+
+### 2) Styled Components 설치 및 설정
+
+#### (1) 프로젝트에 Styled Components 설치
+
+```bash
+npm install styled-components
+```
+
+<br>
+
+#### (2) Styled Components 코드 
+
+```js
+import React from 'react'
+import styled from 'styled-components' // Styled Components를 import
+
+// CSS in JS: JavaScript 안에 CSS를 작성
+
+// Styled Components는 자동으로 고유한 클래스 이름을 생성
+// props를 사용하여 동적으로 스타일을 변경할 수 있음
+const StyledContainer = styled.div`
+    display: flex;
+`;
+
+const StyledBox = styled.div`
+    width: 100px;
+    height: 100px;
+    background-color: ${(props) => props.bgColor || 'blue'}; // props로 배경색을 설정하거나 기본값을 blue로 설정
+    &:hover {
+        transform: translateY(-20px); // 호버 시 박스를 위로 20px 이동
+    }
+`;
+
+export default function StyledComponent() {
+  return (
+    <StyledContainer>
+        {/* bgColor props로 빨간색 배경 지정 */}
+        <StyledBox bgColor="red">1</StyledBox> 
+
+        {/* bgColor props로 주황색 배경 지정 */}
+        <StyledBox bgColor="orange">2</StyledBox> 
+        
+        {/* bgColor props로 노란색 배경 지정 */}
+        <StyledBox bgColor="yellow">3</StyledBox> 
+
+        {/* 기본 배경색 blue로 설정 */}
+        <StyledBox>4</StyledBox> 
+    </StyledContainer>
+    );
+}
+```
+
+- `props`를 통해 동적으로 스타일을 변경할 수 있습니다. 
+- `StyledBox`에 `bgColor` props를 전달하여 배경색을 설정할 수 있습니다.
+- 만약 `bgColor`가 전달되지 않으면 기본값으로 `blue`가 설정됩니다.
+
+- Styled Components는 각 컴포넌트에 고유한 클래스 이름을 자동으로 생성하여 스타일 충돌을 방지합니다. 
+- 예를 들어, `StyledBox` 컴포넌트에 의해 생성된 클래스 이름은 브라우저의 개발자 도구에서 `sc-abcdef`와 같은 고유한 이름으로 나타납니다. 
+- 이러한 고유 클래스 이름 덕분에 동일한 이름의 스타일이 여러 컴포넌트에서 충돌하지 않습니다.
+
+  ```js
+  // 예시: StyledBox 컴포넌트의 클래스 이름이 자동으로 생성
+  console.log(StyledBox);
+  // 출력: "sc-abcdef-0 StyledBox"와 같은 고유한 클래스 이름이 생성됨
+  ```
+
+<br>
+
+### 3) Styled Components의 장단점
+
+- 장점: 동적 스타일링이 쉽고, 스타일과 컴포넌트를 한 곳에서 관리할 수 있어 코드의 응집도가 높습니다.
+- 단점: CSS 파일과 로직이 함께 작성되므로, CSS만 따로 관리하고 싶은 경우 불편할 수 있습니다.
+
+<br>
+<br>
+
+## 4. CSS Module, Sass, Styled Components 비교
+
+### 1) CSS Module
+
+- 장점: 클래스 이름 충돌을 방지할 수 있으며, 각 컴포넌트의 스타일을 독립적으로 관리할 수 있습니다.
+- 단점: 전역 스타일 관리가 어렵고, 컴포넌트별로 파일이 많아질 수 있습니다.
+
+### 2) Sass
+
+- 장점: 변수, 믹스인, 중첩 등을 통해 코드의 재사용성과 가독성을 크게 높일 수 있습니다.
+- 단점: 컴파일(`.scss` 파일을 CSS로 컴파일)이 필요하고 설정이 다소 복잡할 수 있습니다.
+
+### 3) Styled Components
+
+- 장점: JavaScript 내에서 스타일을 관리할 수 있으며, props를 통해 동적 스타일링이 가능합니다.
+- 단점: CSS와 로직이 함께 작성되므로, 스타일을 따로 관리하기 어려울 수 있습니다.
