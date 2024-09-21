@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] Custom Hook"
 date: 2024-08-22 
-categories: React.js  
+categories: React  
 ---
 
 # React에서 Custom Hook 만들기

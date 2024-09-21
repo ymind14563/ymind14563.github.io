@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] useReducer"  
 date: 2024-08-20
-categories: React.js  
+categories: React  
 ---
 
 # useReducer를 이용한 상태 관리

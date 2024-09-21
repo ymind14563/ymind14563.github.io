@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] React Hook Form" 
 date: 2024-08-25
-categories: React.js
+categories: React
 ---
 
 # React Hook Form을 활용한 폼 관리

@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] Link와 Routes"
 date: 2024-09-19
-categories: React.js
+categories: React
 ---
 
 # React Router에서 사용되는 `Link`와 `Routes`

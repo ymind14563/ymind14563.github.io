@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] State(Class vs Function 컴포넌트)"
 date: 2024-08-10  
-categories: React.js  
+categories: React  
 ---
 
 # React 에서의 State(클래스형 vs 함수형 컴포넌트)

@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] React 스타일링(CSS Module, Sass, Styled Components)"
 date: 2024-08-31
-categories: React.js
+categories: React
 ---
 
 

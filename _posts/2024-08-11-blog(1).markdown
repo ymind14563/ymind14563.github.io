@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] Event Handling"  
 date: 2024-08-11
-categories: React.js  
+categories: React  
 ---
 
 # Event Handling

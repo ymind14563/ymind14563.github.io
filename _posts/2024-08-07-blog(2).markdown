@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] PropTypes와 DefaultProps"  
 date: 2024-08-07  
-categories: React.js  
+categories: React  
 ---
 
 # 클래스형 컴포넌트와 함수형 컴포넌트의 PropTypes와 DefaultProps

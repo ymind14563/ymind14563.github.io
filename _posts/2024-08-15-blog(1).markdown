@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] 컴포넌트 생명 주기 (Class vs Function 컴포넌트)"  
 date: 2024-08-15  
-categories: React.js  
+categories: React  
 ---
 
 # React에서의 Ref와 컴포넌트 생명 주기

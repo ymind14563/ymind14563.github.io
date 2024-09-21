@@ -2,7 +2,7 @@
 layout: post
 title: "[SeSACx코딩온] useParams, useSearchParams, useNavigate"
 date: 2024-09-19
-categories: React.js
+categories: React
 ---
 
 # `useParams`, `useSearchParams`, `useNavigate`
