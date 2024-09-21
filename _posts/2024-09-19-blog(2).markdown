@@ -1,0 +1,140 @@
+---
+layout: post
+title: "[SeSACx코딩온] Link와 Routes"
+date: 2024-09-19
+categories: React.js
+---
+
+# React Router에서 사용되는 `Link`와 `Routes`
+
+<hr>
+<br>
+
+## 1. React Router란?
+
+React Router는 SPA(Single Page Application)에서 페이지 이동을 처리하고, URL을 관리할 수 있습니다.
+
+<br>
+
+## 2. React Router 컴포넌트
+
+### 1) `Link` 컴포넌트로 페이지 간 이동
+
+`Link`는 HTML의 `<a>` 태그와 유사하지만, 페이지 전체를 새로고침하지 않고도 클라이언트 측에서 페이지 이동을 처리할 수 있습니다. React Router는 이러한 링크를 클릭했을 때 기존 페이지를 유지한 채로 URL을 변경하고, 새로운 컴포넌트를 렌더링합니다.
+
+#### `components/Header.js`
+
+```js
+import React from "react";
+import { Link } from "react-router-dom";
+
+export default function Header() {
+  return (
+    <header>
+      <h1>React Router Example</h1>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/products">Products</Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+}
+```
+
+- `Link` 컴포넌트: `to` 속성을 통해 이동할 경로를 지정합니다. 이 컴포넌트는 `<a>` 태그와 유사하지만 페이지 리로드 없이 라우트만 변경해줍니다.
+- `to` 속성: URL 경로를 지정하는 데 사용되며, 상대 경로나 절대 경로를 설정할 수 있습니다.
+
+<br>
+
+### 2) `Routes`로 경로와 컴포넌트 매핑하기
+
+`Routes`는 다양한 경로에 따라 특정 컴포넌트를 렌더링하는 역할을 합니다. 각 `Route` 컴포넌트는 경로(path)와 렌더링할 컴포넌트(element)를 설정할 수 있습니다.
+
+#### `App.js`
+
+```js
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import Home from "./pages/Home";
+import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
+import NotFound from "./pages/NotFound";
+
+function App() {
+  return (
+    <div>
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} /> {/* 홈 페이지 */}
+          <Route path="/products" element={<Products />} /> {/* 상품 목록 페이지 */}
+          <Route path="/products/:id" element={<ProductDetail />} />{" "}
+          {/* 상품 상세 페이지 */}
+          <Route path="*" element={<NotFound />} /> {/* 404 페이지 */}
+        </Routes>
+      </BrowserRouter>
+    </div>
+  );
+}
+
+export default App;
+```
+
+#### 동작 방식:
+
+- `Route`: 각 `Route` 컴포넌트는 `path`와 `element` 속성을 가집니다.
+  - `path`: 경로를 설정합니다.
+  - `element`: 해당 경로에 매핑할 컴포넌트를 설정합니다.
+- `Routes`: 경로에 따라 어떤 컴포넌트를 렌더링할지 결정하는 컨테이너입니다. 여러 개의 `Route`를 감싸서 경로에 맞는 컴포넌트를 렌더링하게 합니다.
+- 와일드카드 경로 (`*`): 위 예시에서 `/products` 외의 모든 경로는 `NotFound` 페이지로 연결됩니다. 이는 404 페이지를 구현할 때 유용합니다.
+
+#### `path`와 `element`:
+
+- `path="/"`: 루트 경로에 매핑된 홈 페이지를 렌더링합니다.
+- `path="/products"`: 상품 목록 페이지를 렌더링합니다.
+- `path="/products/:id"`: 동적 경로를 사용하여 특정 상품의 상세 정보를 보여주는 페이지를 렌더링합니다.
+- `path="*"`: 와일드카드 경로로, 지정되지 않은 모든 경로를 404 페이지로 연결합니다.
+
+<br>
+
+### 3) 동적 경로 처리하기
+
+React Router는 동적 경로를 처리할 수 있습니다. 예를 들어, `:id`와 같은 경로 매개변수를 사용하여 특정 상품의 상세 정보를 렌더링할 수 있습니다. 이때는 `useParams` 훅을 사용하여 동적 경로의 파라미터를 추출할 수 있습니다.
+
+#### `pages/ProductDetail.js`
+
+```js
+import React from "react";
+import { useParams } from "react-router-dom";
+import { productInfos } from "../components/ProductList";
+
+export default function ProductDetail() {
+  const { id } = useParams(); // URL 경로에서 'id'를 추출
+  const product = productInfos.find((item) => item.id === Number(id)); // 해당 상품 정보를 가져옴
+
+  return (
+    <div>
+      <h1>상품 상세 정보</h1>
+      {product ? (
+        <ul>
+          <li>상품명: {product.title}</li>
+          <li>설명: {product.body}</li>
+        </ul>
+      ) : (
+        <p>상품을 찾을 수 없습니다.</p>
+      )}
+    </div>
+  );
+}
+```
+
+- 동적 경로: `/products/:id`와 같은 경로에서 `:id`는 동적 경로 매개변수로, 이를 통해 특정 리소스를 조회할 수 있습니다.
+- `useParams` 훅: URL 경로의 파라미터 값을 추출하는 훅입니다. 여기서는 `id` 값을 추출하여 해당 상품의 정보를 조회하고 렌더링합니다.
+
+<br>
