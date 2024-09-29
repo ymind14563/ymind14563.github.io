@@ -451,4 +451,5 @@ Redux Store
 - **Reducers**: 액션에 따라 상태를 어떻게 변경할지 결정하는 순수 함수.
 - **Store**: 초기 상태를 가지고 있으며, `Reducers`를 통해 상태를 업데이트.
 - **컴포넌트**: `useSelector`로 상태를 읽고, `useDispatch`로 상태 변경을 요청.
+
 ---
