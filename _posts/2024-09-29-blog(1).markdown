@@ -1,0 +1,345 @@
+---
+layout: post
+title: "[SeSACx코딩온] Props와 Redux를 통한 상태 관리 비교"
+date: 2024-09-29
+categories: React
+---
+
+# React에서 상태 관리 방법 비교: Props vs 전통 Redux
+
+React 애플리케이션에서 상태 관리가 중요한 이유는 여러 컴포넌트에서 동일한 상태를 사용하거나, 상태를 쉽게 업데이트하기 위해서입니다. `Props`를 통해 상태를 관리하는 방식과 `Redux`를 사용해 상태를 관리하는 방식을 비교해보겠습니다.
+
+<hr>
+<br>
+
+## 1. Props를 사용한 상태 관리 방식
+
+React에서 가장 기본적인 상태 전달 방식은 부모 컴포넌트에서 자식 컴포넌트로 `Props`를 사용하는 것입니다. 부모가 가지고 있는 상태를 자식에게 전달하고, 자식은 그 상태를 이용해 화면에 데이터를 보여주거나 변경할 수 있습니다. 하지만 이 방식은 컴포넌트 계층이 깊어질수록 코드가 복잡해질 수 있습니다.
+
+### 1) Box1의 상태를 Box4에서 사용하기
+
+예를 들어, `App` 컴포넌트에서 관리하는 `number` 상태와 이를 업데이트하는 함수(`plus`, `minus`)를 `Box4`에서 사용하려고 합니다. 하지만 `Box4`는 `App`에서 직접 상태를 전달받지 못하므로, `Props`를 통해 중간 컴포넌트인 `Box1`, `Box2`, `Box3`을 거쳐 전달해야 합니다.
+
+이 방식은 **"Prop Drilling"**이라고 불리며, 중간 단계의 컴포넌트들이 실제로 상태를 사용하지 않더라도 상태와 함수를 계속해서 전달해야 한다는 단점이 있습니다.
+
+### (1) 상태를 Props로 전달하는 기본 구조
+
+```js
+import { useState } from "react";
+import "./styles/Box.css";
+
+function App() {
+  const [number, setNumber] = useState(100); // 상태 관리
+
+  const plus = () => setNumber(number + 1); // 상태 증가 함수
+  const minus = () => setNumber(number - 1); // 상태 감소 함수
+
+  return (
+    <div className="App">
+      <h1>Props 방식의 상태 관리</h1>
+      <Box1 number={number} plus={plus} minus={minus} />
+    </div>
+  );
+}
+```
+
+`App` 컴포넌트는 상태 `number`를 관리하며, 이 상태와 상태를 변경할 수 있는 함수(`plus`, `minus`)를 자식 컴포넌트 `Box1`에 전달합니다. 이렇게 전달된 상태와 함수는 `Box4`에서 사용하려고 하지만, `Box1`, `Box2`, `Box3`을 거쳐야만 `Box4`에서 상태를 사용할 수 있습니다.
+
+### (2) 중간 컴포넌트에서 Props를 전달하는 방식
+
+```js
+const Box1 = ({ number, plus, minus }) => {
+  return (
+    <div className="Box">
+      <h2>Box1: {number}</h2>
+      <Box2 number={number} plus={plus} minus={minus} />
+    </div>
+  );
+};
+
+const Box2 = ({ number, plus, minus }) => {
+  return (
+    <div className="Box2">
+      <h2>Box2: {number}</h2>
+      <Box3 number={number} plus={plus} minus={minus} />
+    </div>
+  );
+};
+
+const Box3 = ({ number, plus, minus }) => {
+  return (
+    <div className="Box3">
+      <h2>Box3: {number}</h2>
+      <Box4 number={number} plus={plus} minus={minus} />
+    </div>
+  );
+};
+```
+
+`Box1`에서 받은 `number`와 `plus`, `minus`는 `Box2`와 `Box3`을 통해 계속해서 전달됩니다. 하지만 실제로 상태를 사용하는 컴포넌트는 `Box4`입니다. 이처럼 중간 컴포넌트들이 상태를 직접 사용하지 않더라도 계속해서 상태를 전달하는 것이 **Prop Drilling**의 문제점입니다.
+
+### (3) 최종적으로 상태를 사용하는 Box4
+
+```js
+const Box4 = ({ number, plus, minus }) => {
+  return (
+    <div className="Box4">
+      <h2>Box4: {number}</h2>
+      <button onClick={plus}>PLUS</button>
+      <button onClick={minus}>MINUS</button>
+    </div>
+  );
+};
+```
+
+`Box4`에서 `number` 상태를 화면에 표시하고, `plus`와 `minus` 함수로 상태를 변경할 수 있습니다. 하지만 이 과정은 `Box1`에서 `Box4`까지 `Props`를 통해 상태를 전달해야만 가능하게 됩니다.
+
+### 2) Props로 상태 전달하기의 문제점
+
+위 코드에서는 `App`에서 정의한 `number`, `plus`, `minus`를 계속해서 `Box1`, `Box2`, `Box3`, `Box4`로 전달하고 있습니다. 만약 중간의 `Box2`나 `Box3`가 `Props`를 전달하지 않으면 `Box4`는 `number` 상태를 받을 수 없게 됩니다.
+
+즉, 중간 단계 컴포넌트 중 하나라도 `Props` 전달을 놓치면, 최종적으로 상태를 사용하는 컴포넌트에서 상태를 사용할 수 없습니다. 이러한 문제는 컴포넌트 계층이 깊어질수록 유지보수가 어려워지며, 코드가 복잡해질 수 있습니다.
+
+### 3) Props 방식의 장점과 단점
+
+- **장점**: 간단한 구조에서는 매우 직관적이고 이해하기 쉽습니다. 상태가 비교적 적고 컴포넌트 계층이 얕다면 `Props`를 사용하는 것이 충분히 효과적입니다.
+- **단점**: 컴포넌트 계층이 깊어지면, 상태를 불필요하게 여러 컴포넌트를 거쳐 전달해야 합니다. `Box2`나 `Box3`에서 `Props` 전달을 놓치면, `Box4`에서 상태를 사용할 수 없습니다. 이러한 상황은 유지보수를 어렵게 하고, 코드의 복잡도를 높입니다.
+
+<hr><br>
+
+## 2. Redux를 사용한 상태 관리 방식
+
+다음으로는 Redux를 사용하여 상태를 관리하는 방식에 대해 살펴보겠습니다.
+
+Redux는 애플리케이션의 모든 상태를 중앙에서 관리하는 도구입니다. Redux의 핵심 개념은 **액션(Action)**, **리듀서(Reducer)**, **스토어(Store)** 세 가지로 구성되며, 상태를 효율적으로 관리할 수 있습니다.
+
+<hr><br>
+
+## 1) Redux 설치
+
+먼저, Redux를 사용하려면 관련 패키지를 설치해야 합니다. 아래 명령어를 통해 Redux와 React-Redux 패키지를 설치할 수 있습니다.
+
+```bash
+npm install redux react-redux
+```
+
+## 2) Redux 설정 및 상태 관리
+
+### (1) 액션 타입 상수 정의 (`store/counterActions.js`)
+
+액션은 Redux에서 상태 변경을 설명하는 객체입니다. 상태가 어떻게 변경될지를 설명하는 **액션 타입**을 정의합니다.
+
+```js
+// store/counterActions.js
+
+const PLUS = "counter/PLUS";
+const MINUS = "counter/MINUS";
+```
+
+**액션 타입**은 상태가 어떻게 변경될지를 설명하는 문자열입니다. 여기서 `PLUS`와 `MINUS`는 각각 상태를 증가시키고 감소시키는 액션입니다. 여기서 `counter/PLUS`는 정해진 것이 아니며, 네임스페이스는 개발자가 상황에 맞게 자유롭게 이름을 짓는 것입니다.
+
+### (2) 액션 생성자 정의 (`store/counterActions.js`)
+
+**액션 생성자**는 액션 객체를 반환하는 함수입니다. 이를 통해 컴포넌트에서 액션을 쉽게 디스패치(dispatch)할 수 있습니다. 디스패치란, 상태를 변경하기 위해 **액션을 스토어로 보내는 과정**을 말합니다.
+
+```js
+// store/counterActions.js
+
+export const plus = () => ({ type: PLUS });
+export const minus = () => ({ type: MINUS });
+```
+
+`plus`와 `minus` 액션 생성자는 각각 `PLUS`와 `MINUS` 액션을 반환하는 함수입니다. 나중에 컴포넌트에서 이 액션을 호출해 상태 변경을 요청할 수 있습니다. 액션 객체는 **type** 속성을 필수로 가지고, 필요에 따라 **페이로드(payload)**라는 추가 데이터를 전달할 수 있습니다. 페이로드는 상태 변경에 필요한 추가 정보를 담고 있습니다.
+
+### (3) 초기 상태 정의 (`store/counterReducer.js`)
+
+Redux에서 상태는 처음 설정될 때 **초기값**을 정의해야 합니다. 이 값이 상태 관리의 기본값이 됩니다.
+
+```js
+// store/counterReducer.js
+
+const initialState = {
+  number: 100,
+};
+```
+
+`initialState`는 Redux 스토어에서 관리할 상태의 초기값입니다. 이 상태는 애플리케이션이 처음 실행될 때 스토어에 저장됩니다.
+
+### (4) 리듀서 정의 (`store/counterReducer.js`)
+
+**리듀서(Reducer)**는 액션을 받아 상태를 변경하는 함수입니다. 리듀서는 **순수 함수**여야 합니다. 순수 함수란, 동일한 입력에 대해 항상 동일한 출력을 반환하고, 외부 상태를 변경하지 않는 함수입니다.
+
+```js
+// store/counterReducer.js
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "counter/PLUS":
+      return { number: state.number + 1 };
+    case "counter/MINUS":
+      return { number: state.number - 1 };
+    default:
+      return state;
+  }
+};
+
+export default counterReducer;
+```
+
+여기서 `counterReducer`는 액션이 들어오면 `number` 값을 증가 또는 감소시킵니다. 상태는 직접 변경하지 않고, 항상 새로운 상태 객체를 반환하는 것이 중요합니다. 이때, 액션에 **페이로드**가 있는 경우 상태를 업데이트할 때 사용할 수 있습니다.
+
+**참고사항**
+**페이로드(Payload)**는 액션과 함께 전달되는 추가 데이터로, 상태를 변경하는 데 필요한 구체적인 정보를 제공합니다.
+
+```
+// 액션 생성자
+export const addTodo = (text) => ({
+  type: 'ADD_TODO',
+  payload: text
+});
+
+// 리듀서
+const todoReducer = (state = [], action) => {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return [...state, { text: action.payload }];
+    default:
+      return state;
+  }
+};
+```
+
+- 액션 생성자에서 payload로 전달된 text가 상태 변경에 필요한 추가 데이터입니다.
+- 리듀서는 action.payload를 사용해 새로운 todo 항목을 상태 배열에 추가합니다.
+
+## 3) Redux 스토어 생성 및 연결
+
+### (1) Redux 스토어 생성 (`store/index.js`)
+
+리듀서를 정의한 후, **스토어(store)**를 생성해야 합니다. 스토어는 애플리케이션의 모든 상태를 중앙에서 관리하는 저장소 역할을 합니다.
+
+```js
+// store/index.js
+
+import { createStore } from "redux";
+import counterReducer from "./counterReducer";
+
+// Redux 스토어 생성
+const store = createStore(counterReducer);
+
+export default store;
+```
+
+`createStore` 함수는 Redux 스토어를 생성합니다. 이 스토어는 상태를 저장하고, 상태 변경이 일어날 때 리듀서를 호출하여 새로운 상태를 반환합니다.
+
+### (2) Redux Provider로 스토어 연결 (`index.js`)
+
+이제 생성한 Redux 스토어를 React 애플리케이션에 연결해야 합니다. 이를 위해 **Provider** 컴포넌트를 사용합니다. Provider는 스토어를 애플리케이션 전체에 주입하여, 모든 컴포넌트가 스토어에 접근할 수 있게 합니다.
+
+```js
+// index.js
+
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import App from "./App";
+import store from "./store";
+
+// Redux Provider로 스토어를 애플리케이션에 주입
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
+```
+
+`Provider`는 애플리케이션 전체에 Redux 스토어를 주입합니다. 이제 모든 컴포넌트에서 Redux 상태를 사용하고 변경할 수 있습니다.
+
+## 4) 컴포넌트에서 Redux 상태 사용
+
+### (1) Redux 상태 읽기 (useSelector) (`App.js`)
+
+컴포넌트에서 Redux 스토어에 저장된 상태를 읽기 위해서는 **useSelector** 훅을 사용합니다. 이 훅을 통해 스토어에서 필요한 상태를 가져올 수 있습니다.
+
+```js
+// App.js
+
+import React from "react";
+import { useSelector } from "react-redux";
+
+function App() {
+  // Redux 스토어에서 상태 가져오기
+  const number = useSelector((state) => state.number);
+
+  return (
+    <div className="App">
+      <h1>Redux 방식의 상태 관리</h1>
+      <h2>number: {number}</h2>
+    </div>
+  );
+}
+
+export default App;
+```
+
+여기서는 `useSelector`를 사용하여 Redux 스토어에서 `number` 상태를 가져와 화면에 출력하고 있습니다. 컴포넌트에서 상태를 직접 가져오므로, 중간 컴포넌트가 상태를 전달할 필요가 없습니다.
+
+### (2) Redux 상태 변경 (useDispatch) (`App.js`)
+
+컴포넌트에서 상태를 변경하려면 **useDispatch** 훅을 사용해 액션을 스토어로 **디스패치(dispatch)** 해야 합니다. 디스패치는 액션을 스토어에 전달하여 리듀서가 상태를 변경하는 과정을 의미합니다. 디스패치된 액션이 스토어로 가면, 리듀서가 이 액션을 보고 상태를 어떻게 변경할지 결정합니다.
+
+```js
+// App.js
+
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { plus, minus } from './store/counterActions';
+
+function App() {
+  // Redux 스토어에서 상태 가져오기
+  const number = useSelector((state) => state.number);
+  const dispatch = useDispatch();  // 액션을 디스패치하는 함수 가져오기
+
+  return (
+    <div className="App">
+      <h1>Redux 방식의 상태 관리</h2>
+      <h2>number: {number}</h2>
+      <button onClick={() => dispatch(plus())}>PLUS</button>
+      <button onClick={() => dispatch(minus())}>MINUS</button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+`useDispatch` 훅을 사용해 `plus`와 `minus` 액션을 디스패치하면, 스토어에 액션이 전달되고 리듀서가 해당 액션에 맞게 상태를 변경합니다. **디스패치**란 상태를 변경하기 위해 액션을 스토어에 전달하는 과정이며, 리듀서는 이 액션을 받아 새로운 상태를 반환합니다.
+
+---
+
+#### Redux 설정 단계별 정리
+
+1단계: 액션 타입 상수 정의  
+2단계: 액션 생성자 정의  
+3단계: 초기 상태 정의  
+4단계: 리듀서 정의  
+5단계: Redux 스토어 생성  
+6단계: Redux Provider로 스토어 연결  
+7단계: Redux 상태 읽기 (useSelector)  
+8단계: Redux 상태 변경 (useDispatch)
+
+
+## 3. Props 방식과 Redux 방식의 비교
+
+### 1) 상태 전달 방식
+- Props: 부모에서 자식으로 상태를 전달하며, 컴포넌트 계층을 따라 전달해야 함.
+- Redux: 모든 컴포넌트가 중앙 스토어에서 상태를 직접 가져올 수 있음.
+
+### 2)상태 관리의 복잡성
+- Props: 컴포넌트 계층이 깊어질수록 상태 전달이 복잡해짐.
+- Redux: 중앙에서 상태를 관리하므로, 복잡도가 낮음.
+
+### 3)유지보수
+- Props: 중간 컴포넌트가 상태 전달을 놓치면 유지보수가 어려워질 수 있음.
+- Redux: 액션과 리듀서를 통해 상태가 명확하게 변경되므로 유지보수가 쉬움.
