@@ -1,0 +1,203 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Container와 Presentational Component를 통한 상태 관리 개선"  
+date: 2024-10-02
+categories: React
+---
+
+# Container와 Presentational Component를 통한 상태 관리 개선
+
+**컨테이너(Container)** 와 **프레젠테이셔널(Presentational)** 컴포넌트 패턴을 통해 상태 관리와 UI 렌더링을 어떻게 분리할 수 있는지 설명합니다.
+
+<hr>
+<br>
+
+## 1. 기존 방식의 한계
+
+### 1) 기존 방식 (App2.js)
+
+```js
+// App2.js
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { plus, minus } from "./store/counterActions";
+
+export default function App2() {
+  // Redux 상태를 읽어오는 로직 (상태 관리)
+  const number = useSelector((state) => state.counter.number); 
+
+  // Redux 액션을 디스패치하는 로직 (상태 관리)
+  const dispatch = useDispatch();
+
+  return (
+    <div className="App">
+      {/* UI 렌더링 로직 */}
+      <h1>Redux 상태 관리</h1>
+      <h2>number: {number}</h2>
+
+      {/* 버튼 클릭 시 상태를 업데이트하는 로직 (상태 관리) */}
+      <button onClick={() => dispatch(plus())}>PLUS</button>
+      <button onClick={() => dispatch(minus())}>MINUS</button>
+    </div>
+  );
+}
+```
+
+- **상태 관리 로직**: `useSelector`와 `useDispatch` 훅을 통해 리덕스 상태를 관리하고 액션을 디스패치하는 부분입니다.
+- **UI 렌더링 로직**: 상태 값(`number`)을 화면에 출력하고, 버튼을 렌더링하는 부분입니다.
+
+<br>
+
+### 2) 문제점
+
+기존 방식에서는 상태 관리와 UI 렌더링 로직이 하나의 컴포넌트에 혼재되어 있습니다. 이는 작은 프로젝트에서는 문제가 없을 수 있지만, 애플리케이션이 커지면서 코드가 복잡해지고 유지보수가 어려워질 수 있습니다.
+
+<br>
+
+### 3) 기존 파일 트리
+
+```
+src/
+│
+├── store/                   # Redux 관련 폴더
+│   ├── counterActions.js    # counter 액션 타입 및 액션 생성자 정의
+│   ├── counterReducer.js    # counter 상태를 관리하는 리듀서
+│
+├── styles/                  # CSS 파일 폴더
+│   └── Box.css              # Box 컴포넌트 스타일링
+│
+├── index.js                 # ReactDOM 및 Redux Provider 설정
+└── App2.js                  # 메인 컴포넌트 (Box 컴포넌트와 Redux 상태 관리)
+```
+
+---
+
+## 2. 컨테이너와 프레젠테이셔널 컴포넌트 패턴
+
+상태 관리와 UI 렌더링을 분리하는 **컨테이너/프레젠테이셔널 패턴**을 사용해 보겠습니다.
+
+- **컨테이너 컴포넌트**: 리덕스와 직접적으로 연결되어 상태를 관리하고 비즈니스 로직을 처리합니다. 그리고 프레젠테이셔널 컴포넌트에 필요한 데이터를 전달합니다.
+- **프레젠테이셔널 컴포넌트**: UI 렌더링만을 담당하며, 상태나 비즈니스 로직에 대해서는 신경 쓰지 않습니다.
+
+<br>
+
+### 1) 변경된 Redux 파일 트리 구조
+
+컨테이너 컴포넌트와 프레젠테이셔널 컴포넌트로 분리한 후의 파일 트리 구조는 다음과 같습니다.
+
+```
+src/
+│
+├── store/                   # Redux 관련 폴더
+│   ├── counterActions.js    # counter 액션 타입 및 액션 생성자 정의
+│   ├── counterReducer.js    # counter 상태를 관리하는 리듀서
+│
+├── containers/              # 컨테이너 컴포넌트 폴더
+│   ├── BoxesContainer.js    # Box1~Box4의 상태 관리 및 액션 디스패치
+│
+├── styles/                  # CSS 파일 폴더
+│   └── Box.css              # Box 컴포넌트 스타일링
+│
+├── index.js                 # ReactDOM 및 Redux Provider 설정
+└── App4.js                  # 프레젠테이셔널 컴포넌트와 컨테이너 컴포넌트의 분리된 상태 관리
+```
+
+<br>
+
+### 2) 컨테이너 컴포넌트의 역할
+
+```js
+// containers/BoxesContainer.js
+import { useDispatch, useSelector } from "react-redux";
+import { Box1, Box2, Box3, Box4 } from "../App4";
+import { minus, plus } from "../store/counterReducer";
+
+export const Box1Container = () => {
+  return <Box1 />;
+};
+
+export const Box2Container = () => {
+  return <Box2 />;
+};
+
+export const Box3Container = () => {
+  return <Box3 />;
+};
+
+export const Box4Container = () => {
+  const number = useSelector((state) => state.counter.number);
+  const dispatch = useDispatch();
+  return (
+    <Box4
+      number={number}
+      onPlus={() => dispatch(plus())}
+      onMinus={() => dispatch(minus())}
+    />
+  );
+};
+```
+
+- 컨테이너 컴포넌트는 **데이터 로직과 상태 관리**를 담당하며, **프레젠테이셔널 컴포넌트**에 데이터를 전달합니다. 이 컴포넌트에서는 상태를 가져오고(`useSelector`), 상태를 변경하기 위해 액션을 디스패치(`useDispatch`)합니다.
+
+<br>
+
+### 3) 프레젠테이셔널 컴포넌트의 역할
+
+```js
+// App4.js
+export const Box1 = () => {
+  return (
+    <div className="Box">
+      <h2>Box1</h2>
+      <Box2Container />
+    </div>
+  );
+};
+
+export const Box2 = () => {
+  return (
+    <div className="Box2">
+      <h2>Box2</h2>
+      <Box3Container />
+    </div>
+  );
+};
+
+export const Box3 = () => {
+  return (
+    <div className="Box3">
+      <h2>Box3</h2>
+      <Box4Container />
+    </div>
+  );
+};
+
+export const Box4 = ({ number, onPlus, onMinus }) => {
+  return (
+    <div className="Box4">
+      <h2>Box4: {number}</h2>
+      <button onClick={onPlus}>PLUS</button>
+      <button onClick={onMinus}>MINUS</button>
+    </div>
+  );
+};
+```
+
+- 프레젠테이셔널 컴포넌트는 **UI 렌더링만**을 담당합니다. 상태 관리에 대해서는 전혀 신경 쓰지 않으며, 컨테이너 컴포넌트로부터 전달받은 `props`를 통해 UI를 업데이트합니다.
+
+<br>
+
+## 3. 컨테이너/프레젠테이셔널 패턴의 장점
+
+### 1) 단일 책임 원칙 충족
+
+- **컨테이너 컴포넌트**는 **상태 관리**와 **비즈니스 로직**을 담당하고, 
+- **프레젠테이셔널 컴포넌트**는 **UI**만을 담당하게 되어 
+- **단일 책임 원칙**을 충족할 수 있습니다. 
+- 이를 통해 각 컴포넌트의 역할이 명확해지며, 코드의 유지보수성과 확장성이 크게 향상됩니다.
+
+### 2) 코드의 가독성과 재사용성 향상
+
+- 프레젠테이셔널 컴포넌트는 상태와 독립적이기 때문에 **재사용 가능**하며, 
+- UI만 변경하고 싶은 경우 쉽게 수정할 수 있습니다. 
+- 또한, 비즈니스 로직과 UI 로직이 분리되어 코드의 **가독성**이 높아집니다.
