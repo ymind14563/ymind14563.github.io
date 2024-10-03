@@ -1,0 +1,273 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Redux Toolkit을 통한 상태 관리 개선"  
+date: 2024-10-03
+categories: React  
+---
+
+# Redux Toolkit을 통한 상태 관리 개선
+
+Redux Toolkit은 Redux 상태 관리에서 필요한 반복적인 코드를 줄여주고, 효율적으로 상태를 관리할 수 있는 도구입니다.
+
+<hr><br>
+
+## 1. 기존 Redux 방식의 문제점
+
+### 1) 불필요한 설정 및 코드 반복
+
+- 기존 Redux 방식에서는 액션 타입 상수, 액션 생성자, 리듀서 함수, 스토어 설정을 따로 정의해야 했습니다. 이 과정에서 반복적인 코드가 많이 발생하게 됩니다.
+
+```js
+// counterActions.js
+const PLUS = "counter/PLUS";
+const MINUS = "counter/MINUS";
+
+export const plus = () => ({ type: PLUS });
+export const minus = () => ({ type: MINUS });
+```
+
+- 이렇게 액션 타입과 액션 생성자를 별도로 정의하고, 리듀서 함수에서도 해당 액션 타입에 따라 상태를 업데이트해야 합니다.
+
+```js
+// counterReducer.js
+const initialState = { number: 100 };
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case PLUS:
+      return { number: state.number + 1 };
+    case MINUS:
+      return { number: state.number - 1 };
+    default:
+      return state;
+  }
+};
+
+export default counterReducer;
+```
+
+- 이 과정에서 **불필요한 반복 코드**가 많이 발생합니다. 상태의 복잡도가 증가할수록 유지보수가 어려워지고, 가독성이 떨어집니다.
+
+<br>
+<br>
+
+## 2. Redux Toolkit을 통한 개선
+
+Redux Toolkit은 위와 같은 불필요한 설정을 줄이고 더 간편하게 Redux 상태 관리를 할 수 있도록 도와줍니다. 
+
+### 1) Redux Toolkit의 주요 특징
+
+- **코드 간소화**: `createSlice`를 사용하면 리듀서와 액션 생성자를 한 번에 정의할 수 있습니다.
+- **자동 불변성 관리**: Redux Toolkit은 내부적으로 **immer 라이브러리**를 사용해 불변성을 신경 쓰지 않아도 상태를 직접 변경하는 것처럼 코드를 작성할 수 있게 해줍니다.
+- **자동 액션 타입 생성**: 액션 타입을 따로 정의하지 않아도 `createSlice`에서 자동으로 액션 타입이 생성됩니다.
+
+<br>
+
+### 2) Redux Toolkit 설치
+
+먼저 Redux Toolkit을 사용하려면 관련 패키지를 설치해야 합니다. 아래 명령어를 통해 Redux Toolkit을 설치합니다.
+
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
+- `@reduxjs/toolkit`: Redux의 최신 기능들을 포함한 패키지로, 기존 Redux보다 더 간편하게 상태 관리를 할 수 있게 해줍니다.
+- `react-redux`: React 컴포넌트와 Redux 스토어를 연결하는 라이브러리입니다.
+
+<br>
+
+## 3. Redux Toolkit으로 상태 관리
+
+### 1) Redux 파일 트리 구조
+
+```
+src/
+│
+├── store/                   # Redux 관련 폴더
+│   ├── counterSlice.js      # counter 상태를 관리하는 슬라이스
+│   ├── isVisibleSlice.js    # isVisible 상태를 관리하는 슬라이스
+│   └── index.js             # 여러 슬라이스를 결합한 스토어 생성
+│
+├── styles/                  # CSS 파일 폴더
+│   └── Box.css              # Box 컴포넌트 스타일링
+│
+├── index.js                 # ReactDOM 및 Redux Provider 설정
+└── App.js                   # 메인 컴포넌트 (Box 1 ~ 4, 상태 변경)
+```
+
+<br>
+
+### 2) Redux Toolkit 코드
+
+### (1) Redux Toolkit Slice 생성 (`counterSlice.js`)
+
+```js
+// counterSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+
+// #1. 슬라이스 객체 정의
+const counterSlice = createSlice({
+    name: 'counter', // 슬라이스 이름 정의, 자동으로 액션 타입 네임스페이스로 사용
+    initialState: { number: 100 }, // 초기 상태
+    reducers: {
+        plus: (state) => {
+            state.number += 1;  // 상태를 직접 변경하는 것처럼 보이지만 내부적으로 immer 라이브러리가 불변성을 유지함
+        },
+        minus: (state) => {
+            state.number -= 1;
+        }
+    }
+});
+
+export const { plus, minus } = counterSlice.actions; // 액션 생성자 내보내기
+export default counterSlice.reducer; // 리듀서 함수 내보내기
+```
+
+- createSlice는 Redux 상태 관리의 핵심적인 부분인 액션 타입, 액션 생성자, 리듀서를 한 번에 정의할 수 있게 해줍니다.
+
+- immer 라이브러리를 통해 불변성을 유지하면서 상태를 직접 변경할 수 있습니다. (불변성에 관련한 내용은 하단 **[장점 > 불변성 유지 및 필요성]** 참고)
+
+<br>
+
+### (2) Redux Toolkit 스토어 설정 (`store/index.js`)
+
+
+```js
+// store/index.js
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counterSlice";
+import isVisibleReducer from "./isVisibleSlice";
+
+// #2. 스토어 생성 및 리듀서 결합
+const store = configureStore({
+    reducer: {
+        counter: counterReducer,   // counter 상태를 관리하는 리듀서
+        isVisible: isVisibleReducer // isVisible 상태를 관리하는 리듀서
+    }
+});
+
+export default store;
+```
+
+- configureStore는 Redux Toolkit에서 제공하는 함수로, 기존 Redux의 createStore보다 간편하게 스토어를 설정할 수 있습니다.
+
+- 여러 리듀서를 결합하여 상태를 관리할 수 있으며, 이 과정에서 미들웨어와 같은 추가 기능들도 자동으로 설정됩니다.
+
+
+<br>
+
+### (3) 컴포넌트에서 Redux Toolkit 상태 관리 (`App.js`)
+
+```js
+// App.js
+import { useSelector, useDispatch } from 'react-redux';
+import './styles/Box.css';
+import { minus, plus } from './store/counterSlice';
+import { changeVisibility } from './store/isVisibleSlice';
+
+function App() {
+   const number = useSelector((state) => state.counter.number); // counter 상태 가져오기
+   const isVisible = useSelector((state) => state.isVisible);   // isVisible 상태 가져오기
+   const dispatch = useDispatch();  // 액션을 디스패치할 함수
+
+   return (
+    <div className="App">
+      <h1>Redux Toolkit 사용</h1>
+      <h2>number: {number}</h2>
+      <h2>isVisible 값은 {isVisible ? '참' : '거짓'} 입니다.</h2>
+      <button onClick={() => dispatch(plus())}>PLUS</button>
+      <button onClick={() => dispatch(minus())}>MINUS</button>
+      <button onClick={() => dispatch(changeVisibility())}>CHANGE</button>
+    </div>
+   );
+}
+
+export default App;
+```
+
+- useSelector 훅을 사용해 Redux 스토어의 상태를 읽어옵니다.
+- useDispatch 훅을 사용해 액션을 스토어에 전달하여 상태를 변경합니다.
+
+<br>
+
+### (4) 스토어 통합 및 Redux Provider 설정 (`index.js`)
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { Provider } from 'react-redux';
+import store from './store'
+const root = ReactDOM.createRoot(document.getElementById('root'));
+// #3. Store 연결
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
+```
+
+<br>
+
+## 4. Redux Toolkit의 장점
+
+### 1) 불변성 유지 및 필요성
+
+- Redux에서는 상태를 변경할 때 원본 상태를 직접 수정하지 않고, **불변성을 유지**해야 합니다. 불변성은 상태가 변경될 때 **새로운 객체**를 만들어 이전 상태와 구분되도록 하는 것을 의미합니다.
+
+- **왜 불변성을 유지해야 하는가?**
+  - Redux는 상태가 변경되었는지 확인하기 위해 **얕은 비교**를 사용합니다. 즉, 객체의 참조값을 비교하여 상태가 변경되었는지 판단합니다. 
+  - 만약 상태를 직접 수정하면 참조값이 변하지 않기 때문에 Redux가 상태 변경을 감지하지 못합니다.
+
+- **immer의 역할**
+  - `immer`는 기존 상태를 수정하는 것처럼 코드를 작성할 수 있게 도와줍니다. 
+  - 하지만 실제로는 새로운 상태를 **복사**하여 변경하고, **불변성**을 자동으로 유지해줍니다. 이를 통해 상태 관리가 더 직관적으로 이루어집니다.
+
+### 2) 코드 간소화
+
+- 액션 타입 상수 정의, 액션 생성자 함수 정의, 리듀서 함수 정의 등의 코드가 `createSlice` 하나로 모두 통합되어 **코드가 훨씬 간결**해집니다. 
+- 또한, **액션 타입을 자동 생성**해 주기 때문에 실수를 줄일 수 있습니다. 예를 들어, `counter/plus`와 같은 액션 타입이 자동으로 생성되며, 이를 명시적으로 정의할 필요가 없습니다.
+
+<br>
+
+---
+
+
+### [ Redux Toolkit 루트 리듀서 구조 시각화 ]
+
+```
+Redux Toolkit Store
+│
+├── Actions (액션)
+│   ├── plus()              --> { type: 'counter/plus' }
+│   └── changeVisibility()  --> { type: 'isVisible/changeVisibility' }
+│
+├── Reducers (리듀서)
+│   ├── counterSlice()      --> counter 상태 변경 함수
+│        ├── 'counter/plus' --> state.number + 1
+│        └── 'counter/minus'--> state.number - 1
+│   └── isVisibleSlice()    --> isVisible 상태 변경 함수
+│        └── 'isVisible/changeVisibility' --> state.toggle
+│
+└── Store (스토어)
+     ├── 초기 상태 (initialState)
+     │   ├── counter: { number: 100 }
+     │   └── isVisible: true
+     ├── 루트 리듀서 (rootReducer)
+     ├── 여러 슬라이스 결합하여 중앙에서 관리
+     └── 컴포넌트가 useSelector, useDispatch로 상태 읽기/변경
+```
+
+<br>
+<br>
+
+### [ Redux Toolkit 설정 단계별 정리 ]
+
+### 1단계: **createSlice**를 사용해 리듀서와 액션 생성자 정의  
+### 2단계: **configureStore**를 사용해 스토어 생성 및 리듀서 결합  
+### 3단계: **useSelector**와 **useDispatch**로 상태 읽기 및 액션 디스패치  
+### 4단계: **immer가 상태 변경 시 자동으로 불변성을 보장 (immer 내부적으로 처리)** 
+
+---
