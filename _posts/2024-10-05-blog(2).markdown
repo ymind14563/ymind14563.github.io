@@ -1,0 +1,117 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 입력과 출력 (Input/Output)"  
+date: 2024-10-05
+categories: Java  
+---
+
+# Java의 입력과 출력 (Input/Output)
+
+<hr>
+<br>
+
+## 1. 출력 (Output)
+
+Java에서 데이터를 출력할 때는 **System.out.print**, **System.out.println**, **System.out.printf**와 같은 메서드를 사용합니다.
+
+### 1) print와 println
+- `System.out.print`: 줄 바꿈 없이 출력을 수행합니다.
+- `System.out.println`: 출력 후 줄 바꿈을 자동으로 수행합니다.
+
+```java
+System.out.print("안녕하세요");
+System.out.println("저는 김새싹입니다!");
+System.out.print("잘 부탁드립니다.");
+System.out.println(); // 줄 바꿈만 수행
+```
+
+출력 결과:
+```
+안녕하세요저는 김새싹입니다!
+잘 부탁드립니다.
+```
+
+<br>
+
+### 2) printf
+`System.out.printf`는 **서식 문자열**을 사용해 데이터를 형식화하여 출력할 수 있습니다.
+
+- **서식 문자**: 
+  - `%s`: 문자열
+  - `%d`: 정수형
+  - `%f`: 실수형
+  - `%c`: 문자형
+  - `%b`: 불리언형
+  - `%n`: 줄 바꿈
+
+```java
+String product = "코카콜라 제로";
+int amount = 3;
+System.out.printf("편의점에서 %s 제품을 %d 개 구매했습니다. (10%% 할인 진행 중)%n", product, amount);
+```
+
+출력 결과:
+```
+편의점에서 코카콜라 제로 제품을 3 개 구매했습니다. (10% 할인 진행 중)
+```
+
+<br>
+
+## 2. 입력 (Input)
+
+Java에서 **Scanner 클래스**를 사용하여 입력을 받을 수 있습니다. Scanner 객체를 통해 다양한 타입의 데이터를 읽어들일 수 있으며, 만약 여러 정보를 한 줄에 입력 시에는 공백을 기준으로 데이터를 구분하여 처리합니다.
+
+### 1) 입력 예시
+
+```java
+import java.util.Scanner;
+
+Scanner scanner = new Scanner(System.in);  // Scanner 객체 생성
+
+System.out.println("이름을 입력해주세요 >> ");
+String name = scanner.next(); // 문자열을 읽음
+
+System.out.println("나이를 입력해주세요 >> ");
+int age = scanner.nextInt();  // 정수를 읽음
+
+System.out.printf("안녕하세요 %s님 (%d세)", name, age);
+```
+
+출력 결과:
+```
+이름을 입력해주세요 >> 
+홍길동
+나이를 입력해주세요 >> 
+25
+안녕하세요 홍길동님 (25세)
+```
+
+### 2) Scanner 메서드
+- `next()`: 문자열을 입력받습니다.
+- `nextInt()`: 정수를 입력받습니다.
+- `nextDouble()`: 실수를 입력받습니다.
+- `nextBoolean()`: `true` 또는 `false`를 입력받습니다.
+
+입력된 데이터를 처리한 후에는 자원을 해제하기 위해 **Scanner 객체를 닫아주는 것**이 중요합니다.
+
+```java
+scanner.close();  // Scanner 닫기
+```
+
+<br>
+
+## 3. (참고) 반올림, 올림, 버림
+
+- 실수를 다룰 때 **소수점 처리**를 위해 `Math` 클래스를 사용할 수 있습니다.
+  - **반올림**: `Math.round()` 메서드를 통해 소수점을 반올림합니다.
+  - **올림**: `Math.ceil()` 메서드를 통해 소수점을 올림합니다.
+  - **버림**: `Math.floor()` 메서드를 통해 소수점을 버림합니다.
+
+```java
+double num = 2.71828;
+System.out.println(Math.round(num)); // 3 // 반올림
+System.out.println(Math.round(num * 100.0) / 100.0); // 2.72 // 소수점 둘째 자리에서 반올림
+System.out.println(Math.ceil(num)); // 3.0 // 올림
+System.out.println(Math.floor(num)); // 2.0 // 버림
+
+```
