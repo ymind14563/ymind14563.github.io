@@ -1,0 +1,152 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 연산자 (Operator)"  
+date: 2024-10-05
+categories: Java  
+---
+
+# Java의 연산자 (Operator)
+
+<hr>
+<br>
+
+## 1. 산술 연산자 (Arithmetic Operators)
+
+Java에서는 기본적인 산술 연산을 수행할 수 있는 연산자들을 제공합니다. 이들 연산자는 숫자형 데이터에 대해서 **덧셈**, **뺄셈**, **곱셈**, **나눗셈**, **나머지 연산** 등을 수행할 수 있습니다.
+
+```java
+int x = 10;
+int y = 20;
+System.out.println("x + y = " + (x + y));  // 덧셈
+System.out.println("x - y = " + (x - y));  // 뺄셈
+System.out.println("x * y = " + (x * y));  // 곱셈
+System.out.println("x / y = " + (x / y));  // 나눗셈
+System.out.println("x % y = " + (x % y));  // 나머지 연산
+```
+
+### 결과:
+```
+x + y = 30
+x - y = -10
+x * y = 200
+x / y = 0
+x % y = 10
+```
+
+- 나눗셈에서 결과가 **정수형**일 경우 소수점 이하는 무시됩니다. 예를 들어 `10 / 20`의 결과는 0입니다.
+- **나머지 연산자**는 나눗셈 후 나머지 값을 반환합니다.
+
+<br>
+
+## 2. 증가/감소 연산자 (Increment/Decrement Operators)
+
+증가 및 감소 연산자는 변수를 **1씩 증가** 또는 **감소**시키는 역할을 합니다. 전위(`++x`, `--x`)와 후위(`x++`, `x--`)에 따라 값이 증가/감소하는 시점이 달라집니다.
+
+```java
+int x = 10;
+System.out.println("x++ = " + x++ + " " + x);  // 후위 증가
+System.out.println("++x = " + ++x);  // 전위 증가
+System.out.println("x-- = " + x-- + " " + x);  // 후위 감소
+System.out.println("--x = " + --x);  // 전위 감소
+```
+
+### 결과:
+```
+x++ = 10 11
+++x = 12
+x-- = 12 11
+--x = 10
+```
+
+- **후위 연산자**는 현재 값을 반환한 후 나중에 증가/감소하고, **전위 연산자**는 먼저 값을 증가/감소한 후 그 값을 반환합니다.
+
+<br>
+
+## 3. 산술적 대입 연산자 (Compound Assignment Operators)
+
+산술 연산자와 대입 연산자가 결합된 형태로, 특정 연산을 수행한 결과를 다시 변수에 저장하는 방식입니다.
+
+```java
+int x = 10;
+System.out.println("x += 5 >> " + (x += 5));  // x = x + 5
+System.out.println("x -= 5 >> " + (x -= 5));  // x = x - 5
+System.out.println("x *= 5 >> " + (x *= 5));  // x = x * 5
+System.out.println("x /= 5 >> " + (x /= 5));  // x = x / 5
+System.out.println("x %= 5 >> " + (x %= 5));  // x = x % 5
+```
+
+### 결과:
+```
+x += 5 >> 15
+x -= 5 >> 10
+x *= 5 >> 50
+x /= 5 >> 10
+x %= 5 >> 0
+```
+
+<br>
+
+## 4. 비교 연산자 (Comparison Operators)
+
+비교 연산자는 두 값을 비교하여 **true** 또는 **false**의 결과를 반환합니다. 자주 사용되는 비교 연산자에는 **>, <, >=, <=, ==, !=** 등이 있습니다.
+
+```java
+float a = 5.0f;
+float b = 10.0f;
+System.out.println("a > b >> " + (a > b));   // a가 b보다 큰지 비교
+System.out.println("a == b >> " + (a == b));  // a와 b가 같은지 비교
+System.out.println("a != b >> " + (a != b));  // a와 b가 다른지 비교
+```
+
+### 결과:
+```
+a > b >> false
+a == b >> false
+a != b >> true
+```
+
+<br>
+
+## 5. 논리 연산자 (Logical Operators)
+
+논리 연산자는 주로 **불리언 (boolean)** 값에 대해 사용되며, 조건을 논리적으로 결합할 때 사용됩니다.
+
+```java
+boolean j = true;
+boolean k = false;
+boolean l = true;
+System.out.println("j && k >> " + (j && k));  // AND 연산자
+System.out.println("j || l >> " + (j || l));  // OR 연산자
+System.out.println("!j >> " + (!j));          // NOT 연산자
+```
+
+### 결과:
+```
+j && k >> false
+j || l >> true
+!j >> false
+```
+
+- **AND(`&&`)**: 두 값이 모두 참일 때만 참.
+- **OR(`||`)**: 둘 중 하나라도 참이면 참.
+- **NOT(`!`)**: 현재 값의 반대값을 반환.
+
+<br>
+
+## 6. 삼항 연산자 (Ternary Operator)
+
+삼항 연산자는 간단한 조건문을 작성할 때 유용하며, 조건이 참이면 첫 번째 값을, 거짓이면 두 번째 값을 반환합니다.
+
+```java
+int x, y;
+x = 10;
+y = 20;
+System.out.println(x > y ? "x는 y보다 큼" : "x는 y보다 크지 않음");
+```
+
+### 결과:
+```
+x는 y보다 크지 않음
+```
+
+- 조건이 **참**일 경우 `x는 y보다 큼`이 출력되고, **거짓**일 경우 `x는 y보다 크지 않음`이 출력됩니다.
