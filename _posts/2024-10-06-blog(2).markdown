@@ -1,0 +1,239 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 조건문과 반복문"
+date: 2024-10-06  
+categories: Java  
+---
+
+# Java의 조건문과 반복문
+
+<hr>  
+<br>
+
+조건문을 사용하여 **조건에 따라 코드를 실행**할 수 있고, 반복문을 통해 **동일한 작업을 여러 번 반복**할 수 있습니다.
+
+
+
+## 1. 조건문 (Conditional Statements)
+
+### 1) if-else 문
+
+**if-else 문**은 조건에 따라 두 가지 실행 경로 중 하나를 선택합니다. 조건이 **참**일 경우 `if` 블록이 실행되고, **거짓**일 경우 `else` 블록이 실행됩니다.
+
+```java
+int number = 10;
+if (number % 2 == 0) {
+    System.out.println("짝수");
+} else {
+    System.out.println("홀수");
+}
+```
+
+<br>
+
+### 2) 문자열 비교 시 주의 사항
+
+- 문자열을 비교할 때는 **`==` 연산자** 대신 **`.equals()` 메서드**를 사용하는 것이 바람직합니다. 
+- 그 이유는 **`==` 연산자**는 **참조 값**(메모리 주소)을 비교하고, **`.equals()` 메서드**는 **문자열의 내용**을 비교하기 때문입니다.
+
+#### (1) `==` 연산자와 `.equals()` 메서드 비교
+
+```java
+String name1 = "김새싹";  // 문자열 리터럴
+String name2 = new String("김새싹");  // new 키워드로 생성된 문자열 객체
+String name3 = "김새싹";  // 동일한 리터럴
+String name4 = new String("김새싹");  // 새로운 String 객체
+
+// 참조 값 비교
+if (name1 == name2) {
+    System.out.println("name1과 name2는 참조가 같습니다.");
+} else {
+    System.out.println("name1과 name2는 참조가 다릅니다.");  // 출력
+}
+
+if (name1 == name3) {
+    System.out.println("name1과 name3은 참조가 같습니다.");  // 출력
+} else {
+    System.out.println("name1과 name3은 참조가 다릅니다.");
+}
+
+if (name2 == name4) {
+    System.out.println("name2와 name4는 참조가 같습니다.");
+} else {
+    System.out.println("name2와 name4는 참조가 다릅니다.");  // 출력
+}
+
+
+// 내용 비교
+if (name1.equals(name2)) {
+    System.out.println("name1과 name2의 내용이 같습니다.");  // 출력
+} else {
+    System.out.println("name1과 name2의 내용이 다릅니다.");
+}
+
+if (name1.equals(name3)) {
+    System.out.println("name1과 name3의 내용이 같습니다.");  // 출력
+} else {
+    System.out.println("name1과 name3의 내용이 다릅니다.");
+}
+
+if (name2.equals(name4)) {
+    System.out.println("name2와 name4의 내용이 같습니다.");  // 출력
+} else {
+    System.out.println("name2와 name4의 내용이 다릅니다.");
+```
+
+#### (2) 결과
+```
+name1과 name2는 참조가 다릅니다.
+name1과 name3은 참조가 같습니다.
+name2와 name4는 참조가 다릅니다.
+name1과 name2의 내용이 같습니다.
+name1과 name3의 내용이 같습니다.
+name2와 name4의 내용이 같습니다.
+```
+
+#### (3) 설명
+
+- **`==` 연산자**는 **참조 값**을 비교합니다. 즉, 두 객체가 동일한 메모리 위치를 가리키고 있는지 확인합니다. 
+  - `name1`과 `name2`는 서로 다른 참조 값을 가리키므로 **참조가 다릅니다**.
+  - 하지만, `name1`과 `name3`은 동일한 리터럴을 사용하므로 **같은 참조 값을 가리킵니다**.
+  - `name2`와 `name4`는 각각 **`new String()`**으로 새로운 객체를 생성했으므로, **참조 값이 다릅니다**.
+  
+- 반면에, **`.equals()` 메서드**는 **문자열의 실제 내용**을 비교합니다. `name1`, `name2`, `name3`, `name4`의 문자열 내용이 모두 **"김새싹"**로 동일하므로, **내용이 같습니다**.
+
+<br>
+
+### 3) if-else if 문
+
+`if-else if` 문은 여러 조건을 검사하여 **가장 먼저 참이 되는 조건**의 블록을 실행합니다. 조건이 참인 블록이 하나라도 실행되면 나머지 블록은 실행되지 않습니다.
+
+```java
+int number = 10;
+if (number % 3 == 0) {
+    System.out.println("3의 배수");
+} else if (number % 5 == 0) {
+    System.out.println("5의 배수");
+} else if (number % 2 == 0) {
+    System.out.println("2의 배수");  // 출력
+} else {
+    System.out.println("어떤 배수도 아님");
+}
+```
+
+<br>
+
+### 4) switch 문
+
+**switch 문**은 하나의 변수 값을 여러 값과 비교하여 **해당하는 case 블록**을 실행합니다. 각 case는 **break 문**으로 끝낼 수 있습니다.
+
+```java
+String dayOfWeek;
+int day = 14;
+switch (day) {
+    case 1:
+        dayOfWeek = "일요일";
+        break;
+    case 2: case 3: case 4: case 5: case 6:
+        dayOfWeek = "평일";
+        break;
+    case 7:
+        dayOfWeek = "토요일";
+        break;
+    default:
+        dayOfWeek = "잘못된 입력입니다.";
+        break;
+}
+System.out.println(dayOfWeek);  // 출력: 잘못된 입력입니다.
+```
+
+<br>
+<br>
+
+## 2. 반복문 (Loop Control Statements)
+
+### 1) for 문
+
+**for 문**은 주어진 조건이 참인 동안 **지정된 횟수만큼** 반복 실행합니다.
+
+```java
+for (int i = 1; i <= 10; i++) {
+    System.out.print(i + " ");
+}
+// 출력: 1 2 3 4 5 6 7 8 9 10
+```
+
+<br>
+
+### 2) while 문
+
+**while 문**은 조건이 **참인 동안** 블록을 반복 실행합니다. 조건이 처음부터 거짓이면 한 번도 실행되지 않습니다.
+
+```java
+int i = 1;
+while (i <= 10) {
+    System.out.print(i + " ");
+    i++;
+}
+// 출력: 1 2 3 4 5 6 7 8 9 10
+```
+
+<br>
+
+### 3) do-while 문
+
+**do-while 문**은 조건을 나중에 평가하므로 **적어도 한 번은 실행**됩니다.
+
+```java
+int j = 1;
+do {
+    System.out.print(j + " ");
+    j++;
+} while (j <= 10);
+// 출력: 1 2 3 4 5 6 7 8 9 10
+```
+
+<br>
+
+### 4) for-each 문 (향상된 for 문)
+
+- **향상된 for 문(for-each)**는 배열이나 리스트 같은 **컬렉션의 요소들을 순차적으로 접근**할 때 사용됩니다. 
+- 인덱스 없이 배열이나 리스트의 **모든 요소에 동일한 작업**을 수행할 때 **간결하고 오류 가능성이 적은 코드**를 작성할 수 있습니다.
+
+#### (1) 배열에 대한 for-each 문
+
+```java
+String[] array = { "a", "b", "c" };
+for (String element : array) {
+    System.out.println("원소: " + element);
+}
+// a b c 출력
+```
+
+<br>
+
+#### (2) 리스트에 대한 for-each 문
+
+```java
+List<String> list = new ArrayList<>();
+list.add("A");
+list.add("B");
+list.add("C");
+
+for (String element : list) {
+    System.out.println("원소: " + element);
+}
+// A B C 출력
+```
+
+- **for-each 문**은 배열과 리스트의 **모든 요소**에 동일한 작업을 할 때 유리합니다. 
+- 그러나 **인덱스**가 필요하거나, **인덱스 기반으로 특정 조건에서 순회를 중단**해야 할 경우, **일반 for문**이나 **while문**이 더 적합합니다.
+
+```java
+for (int i = 0; i < array.length; i++) {
+    if (array[i].equals("b")) {
+        break;  // 특정 조건에서 순회를 중단
+    }
+    System.out.println("원소: " + array[i]);
+}
+```

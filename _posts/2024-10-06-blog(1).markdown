@@ -1,0 +1,107 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 형변환 (Casting)"  
+date: 2024-10-06
+categories: Java  
+---
+
+# Java의 형변환 (Casting)
+
+Java에서 **형변환(Casting)**은 **데이터 타입을 변환하는 과정**을 의미합니다. 형변환은 크게 **묵시적 형변환(Wider Conversion)**과 **명시적 형변환(Narrow Conversion)**으로 나뉩니다.
+
+<hr><br>
+
+## 1. 묵시적 형변환 (Wider Conversion)
+
+묵시적 형변환은 작은 데이터 타입에서 더 큰 데이터 타입으로 자동으로 변환되는 것을 의미합니다. 데이터 손실이 없기 때문에 **자동 형변환**이 이루어집니다.
+
+```java
+int smallNumber = 10;
+System.out.println("smallNumber = " + smallNumber);
+double bigNumber = smallNumber;  // int를 double로 자동 형변환
+System.out.println("bigNumber = " + bigNumber);
+```
+
+### 결과
+```
+smallNumber = 10
+bigNumber = 10.0
+```
+
+- `smallNumber`가 `int`형에서 **`double`형**으로 자동으로 변환됩니다. 이는 작은 범위의 데이터 타입을 큰 범위의 데이터 타입으로 변환할 때 발생하는 묵시적 형변환입니다.
+
+<br>
+
+## 2. 명시적 형변환 (Narrow Conversion)
+
+명시적 형변환은 더 큰 데이터 타입을 더 작은 데이터 타입으로 변환할 때 사용되며, **명시적으로 변환을 지정**해야 합니다. 이때 데이터 손실이 발생할 수 있습니다.
+
+```java
+double anotherBigNumber = 20.5;
+System.out.println("anotherBigNumber = " + anotherBigNumber);
+int anotherSmallNumber = (int) anotherBigNumber;  // double을 int로 명시적 형변환
+System.out.println("anotherSmallNumber = " + anotherSmallNumber);
+```
+
+### 결과
+```
+anotherBigNumber = 20.5
+anotherSmallNumber = 20
+```
+
+- 소수점 아래 값이 잘리게 되어 `20`만 저장됩니다. 이러한 데이터 손실은 더 큰 타입에서 더 작은 타입으로 변환할 때 발생합니다.
+
+<br>
+
+## 3. 데이터 손실 발생 예시
+
+명시적 형변환을 할 때, 큰 범위의 `int` 값을 작은 범위의 `byte`로 변환할 경우 **예상치 못한 값**이 발생할 수 있습니다.
+
+```java
+int largeNumber = 1000;
+System.out.println("largeNumber = " + largeNumber);
+byte smallByte = (byte) largeNumber;  // int를 byte로 명시적 형변환
+System.out.println("smallByte = " + smallByte);  // 예상치 못한 결과 발생
+```
+
+### 결과
+```java
+largeNumber = 1000
+smallByte = -24  // 예상치 못한 결과 발생
+```
+
+- `1000`을 `byte`로 변환한 결과가 **-24**로 출력됩니다. 이는 데이터 손실과 2의 보수법으로 인해 발생한 결과입니다.
+
+<br>
+
+## 4. 참고 사항 (데이터 손실과 보수에 관련하여)
+
+- **2의 보수란?**
+  - 컴퓨터는 **양수와 음수를 동일한 방식으로 처리**하기 위해 **2의 보수(2's complement)**를 사용합니다. 
+  - **2의 보수**는 이진수에서 **1의 보수(각 비트를 반전)**한 후 **1을 더해** 음수를 표현하는 방식입니다.
+
+- **2의 보수법을 사용하는 이유**:
+  - **덧셈과 뺄셈을 동일한 연산 방식**으로 처리하기 위해서입니다.
+  - 컴퓨터에서 **덧셈 회로**는 매우 간단한 구조로 설계될 수 있지만, **뺄셈**은 복잡한 회로 설계를 요구합니다. 
+  - **2의 보수법**을 사용하면, **뺄셈을 덧셈으로 변환**할 수 있습니다. 예를 들어, A에서 B를 빼는 대신, A에 **B의 2의 보수를 더하는 방식**으로 계산합니다. 이렇게 하면 덧셈만으로도 양수와 음수 연산을 처리할 수 있습니다.
+  - 이 방식은 컴퓨터에서 **연산을 단순화**하고, **하드웨어의 복잡도를 줄여** 효율적인 처리가 가능하게 만듭니다.
+
+- **왜 `1000`이 `-24`가 되는가?**
+  1. **1000**을 이진수로 변환하면 **1111101000**이 됩니다. 이는 10비트로 표현되지만, `byte`는 8비트만 저장할 수 있기 때문에 **하위 8비트**인 **11101000**만 남습니다.
+  2. 남은 **11101000**은 **부호 비트**가 1이므로 음수로 해석됩니다. 이를 **2의 보수** 방식으로 해석하면
+     - **1의 보수**를 구하면 **00010111**이 됩니다.
+     - 여기에 **1을 더하면** **00011000**이 됩니다.
+     - 이 값은 10진수로 **24**입니다.
+  3. 따라서 **11101000**은 **-24**를 나타냅니다.
+
+### 요약:
+- **11101000**은 2의 보수법으로 음수로 해석되며, 이를 10진수로 변환하면 **-24**가 됩니다.
+- 최종적으로 `1000`을 `byte`로 변환했을 때 **-24**가 출력되는 이유는 **2의 보수법**을 사용하여 컴퓨터가 음수를 덧셈 연산으로 처리하기 때문입니다.
+
+```java
+int largeNumber = 1000;
+byte smallByte = (byte) largeNumber;  // int를 byte로 명시적 형변환
+System.out.println(smallByte);  // -24 출력
+```
+
+이처럼 **명시적 형변환** 시에는 데이터 손실과 **음수 변환**에 주의해야 합니다.
