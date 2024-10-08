@@ -1,0 +1,156 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 메서드 개념"  
+date: 2024-10-08
+categories: Java  
+---
+
+# Java의 메서드 개념
+
+<hr>  
+<br>
+
+## 1. 메서드란?
+
+- **메서드**는 객체가 수행하는 **기능**을 정의한 코드 블록입니다. 
+- 메서드는 코드의 **재사용성**을 높이고, 프로그램의 **구조화**와 **유지보수성**을 향상시키는 중요한 역할을 합니다.
+
+<br>
+
+## 2. 메서드의 종류
+
+1. **static 메서드**: 클래스에 속하는 메서드로, **객체를 생성하지 않고도 호출**할 수 있습니다.
+2. **non-static 메서드**: 객체에 속하는 메서드로, **객체를 생성한 후에만 호출**할 수 있습니다.
+
+```java
+public class MethodExample {
+    public static void main(String[] args) {
+        hello();  // static 메서드 호출
+        MethodExample example = new MethodExample();
+        example.nonStaticMethod();  // non-static 메서드 호출
+    }
+
+    // static 메서드
+    public static void hello() {
+        System.out.println("안녕하세요, Java!");
+    }
+
+    // non-static 메서드
+    public void nonStaticMethod() {
+        System.out.println("이것은 non-static 메서드입니다.");
+    }
+}
+```
+
+<br>
+
+## 3. 반환 값이 없는 메서드
+
+**void** 키워드를 사용한 메서드는 **반환할 값이 없는** 메서드입니다. 아래 예시는 반환 값이 없는 메서드의 예시입니다.
+
+```java
+public static void hello() {
+    System.out.println("안녕, 자바야!");
+}
+```
+
+### 호출
+```java
+hello();  // "안녕, 자바야!" 출력
+```
+
+<br>
+
+## 4. 반환 값이 있는 메서드
+
+메서드는 **데이터를 반환**할 수 있습니다. 반환할 데이터 타입을 지정하고, **`return`** 키워드를 사용하여 값을 반환합니다.
+
+```java
+public static int sum(int x, int y) {
+    return x + y;
+}
+```
+
+### 호출
+```java
+System.out.println(sum(10, 20));  // 30 출력
+```
+
+<br>
+
+## 5. Call by Value vs Call by Reference
+
+### 1) Call by Value (값 전달)
+
+기본 데이터 타입을 메서드에 전달할 때는 **값을 복사**하여 전달합니다. 이때 **원래 변수의 값은 변경되지 않습니다**.
+
+```java
+public static int multiply(int x, int y) {
+    return x * y;
+}
+```
+
+### 2) Call by Reference (참조 전달)
+
+배열이나 객체를 메서드에 전달할 때는 **참조 값**이 전달되므로, **원래 데이터에 영향을 줄 수 있습니다**.
+
+```java
+public static int multiplyArray(int[] numbers) {
+    int result = 1;
+    for (int n : numbers) {
+        result *= n;
+    }
+    return result;
+}
+```
+
+### 호출
+```java
+int[] numbers = {10, 20};
+System.out.println(multiplyArray(numbers));  // 200 출력
+```
+
+<br>
+
+## 6. 가변 인자(Varargs)
+
+Java에서는 **가변 인자**(Varargs)를 사용하여 메서드를 호출할 때 **인자의 개수를 동적으로 지정**할 수 있습니다.
+
+```java
+public static int sumVarargs(int... numbers) {
+    int total = 0;
+    for (int num : numbers) {
+        total += num;
+    }
+    return total;
+}
+```
+
+### 호출
+```java
+System.out.println(sumVarargs(1, 2, 3));  // 6 출력
+System.out.println(sumVarargs(1, 2, 3, 4, 5));  // 15 출력
+```
+
+**가변 인자 문법**은 `타입... 변수명`으로 사용되며, **메서드의 마지막 파라미터로만** 사용할 수 있습니다.
+
+<br>
+
+## 7. 재귀 메서드 (Recursive Method)
+
+- **재귀 메서드**는 **자기 자신을 호출**하는 메서드입니다. 재귀 메서드는 **반복적인 작업**을 처리할 때 유용하지만, 
+- 반드시 **종료 조건**을 설정해야 합니다.
+
+```java
+public static int factorial(int n) {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}
+```
+
+### 호출
+```java
+System.out.println(factorial(5));  // 120 출력 (5! = 5 * 4 * 3 * 2 * 1)
+```
+
+**재귀 메서드**는 종료 조건이 없을 경우 **무한 루프**에 빠질 수 있으므로 항상 주의해야 합니다.
