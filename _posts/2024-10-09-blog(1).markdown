@@ -1,0 +1,215 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 메서드 오버로딩 (With 오버라이딩)"  
+date: 2024-10-09
+categories: Java  
+---
+
+# Java의 메서드 오버로딩 (With 오버라이딩)
+
+<hr>  
+<br>
+
+**메서드 오버로딩**은 하나의 클래스에서 **같은 이름의 메서드를 여러 개 정의**할 수 있는 기능입니다. **매개변수의 타입, 개수, 순서**에 따라 다른 메서드를 호출할 수 있습니다. 이를 통해 **동작이 유사한 메서드**를 같은 이름으로 정의하여 코드의 **가독성**과 **유지보수성**을 높일 수 있습니다.
+
+## 1. 메서드 오버로딩이란?
+
+- **메서드 오버로딩**은 **같은 이름**을 가진 메서드를 **매개변수의 타입, 개수, 순서**를 다르게 하여 여러 개 정의하는 것을 말합니다.
+- 메서드 이름은 같지만, 매개변수의 차이에 따라 컴파일러가 어떤 메서드를 호출할지 결정합니다.
+
+```java
+public class MethodOverloading {
+    public static void main(String[] args) {
+        MethodOverloading ol = new MethodOverloading();  // 객체 생성
+        System.out.println(ol.add(1, 2));            // int형 add 호출
+        System.out.println(ol.add(2.2, 3.3));        // double형 add 호출
+        System.out.println(ol.add(1.1, 2.2, 2.7));   // double형 3개 매개변수 add 호출
+        System.out.println(ol.add(2, 3, 4));         // int형 3개 매개변수 add 호출
+    }
+
+    // 두 정수를 더하는 메서드
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    // 두 실수를 더하는 메서드
+    public double add(double a, double b) {
+        return a + b;
+    }
+
+    // 세 정수를 더하는 메서드
+    public int add(int a, int b, int c) {
+        return a + b + c;
+    }
+
+    // 세 실수를 더하는 메서드
+    public double add(double a, double b, double c) {
+        return a + b + c;
+    }
+}
+```
+
+<br>
+
+## 2. 메서드 오버로딩의 장점
+
+### 1) 코드의 가독성 향상
+동일한 동작을 수행하는 메서드를 **같은 이름**으로 정의할 수 있으므로, 메서드의 기능을 쉽게 이해할 수 있고, 코드의 **가독성**이 높아집니다.
+
+### 2) 유지보수성 향상
+메서드 오버로딩을 통해 동작이 유사한 메서드를 한 이름으로 관리할 수 있으므로, **일관성 있는 코드 작성**과 **유지보수성** 향상에 기여합니다.
+
+<br>
+
+## 3. 오버로딩의 규칙
+
+### 1) 매개변수의 **타입**이 다르면 오버로딩 가능
+
+```java
+public int add(int a, int b) {
+    return a + b;
+}
+
+public double add(double a, double b) {
+    return a + b;
+}
+```
+
+### 2) 매개변수의 **개수**가 다르면 오버로딩 가능
+
+```java
+public int add(int a, int b) {
+    return a + b;
+}
+
+public int add(int a, int b, int c) {
+    return a + b + c;
+}
+```
+
+### 3) 매개변수의 **순서**가 다르면 오버로딩 가능
+
+```java
+public void print(String a, int b) {
+    System.out.println(a + " " + b);
+}
+
+public void print(int a, String b) {
+    System.out.println(a + " " + b);
+}
+```
+
+<br>
+
+## 4. 오버로딩 주의 사항
+
+### 1) **반환 타입**만 다르면 오버로딩이 불가능
+
+- **오버로딩**은 **매개변수**의 차이로 메서드를 구분합니다. 
+- **반환 타입**만 다른 경우, 매개변수 구성이 동일하기 때문에 컴파일러가 두 메서드를 구분할 수 없습니다.
+
+```java
+// 오류 발생: 반환 타입만 다른 경우 오버로딩 불가능
+public int add(int a, int b) {
+    return a + b;
+}
+
+public double add(int a, int b) {  // 반환 타입이 다르지만 매개변수가 같음
+    return a + b;
+}
+```
+
+**왜 반환 타입만 다른 경우 오버로딩이 불가능한가?**
+
+- 메서드 호출 시, 컴파일러는 **매개변수의 타입과 개수**로 어떤 메서드를 호출할지 결정합니다.
+- 반환 타입은 **호출된 후에** 결정되기 때문에, 반환 타입만으로는 메서드를 구분할 수 없습니다. 따라서 **매개변수가 같고 반환 타입만 다른 경우**, 컴파일러가 어떤 메서드를 호출해야 할지 판단할 수 없기 때문에 **오류**가 발생합니다.
+
+### 2) **매개변수의 타입, 개수, 순서**를 기준으로 오버로딩
+
+오버로딩은 **매개변수의 타입**, **개수**, 또는 **순서**가 다를 때에만 가능합니다. 즉, 매개변수 자체가 다르면 같은 이름의 메서드라도 서로 다른 메서드로 인식됩니다.
+
+```java
+// 정상적인 오버로딩
+public void print(String a) {
+    System.out.println(a);
+}
+
+public void print(int a) {
+    System.out.println(a);
+}
+```
+
+- **매개변수의 타입**이 다르기 때문에 **print** 메서드를 오버로딩할 수 있습니다.
+
+### 3) **가변 인자** 사용 시 주의사항
+
+가변 인자(Varargs)는 메서드의 마지막 파라미터로 사용될 수 있습니다. 하지만 가변 인자와 다른 매개변수를 함께 사용하는 경우, **매개변수의 혼동**을 피하기 위해 주의해야 합니다.
+
+```java
+public void print(String... texts) {
+    for (String text : texts) {
+        System.out.println(text);
+    }
+}
+
+// 가변 인자와 일반 매개변수를 혼합한 메서드
+public void print(String header, String... texts) {
+    for (String text : texts) {
+        System.out.println(header + text);
+    }
+}
+```
+
+가변 인자를 사용할 때는 **가변 인자가 배열처럼 취급**된다는 점에 유의하고, **매개변수의 순서**에 따라 메서드가 올바르게 호출되도록 주의해야 합니다.
+
+<br>
+
+## 5. 오버로딩과 오버라이딩의 차이점
+
+### 1) **오버로딩 (Overloading)**
+
+- **같은 클래스 내에서** **같은 이름**의 메서드를 **매개변수의 타입, 개수, 순서**에 따라 여러 개 정의하는 것.
+- **컴파일 시간**에 결정됩니다.
+- 메서드의 **동작이 유사**하지만, 서로 다른 데이터를 처리할 때 유용합니다.
+
+```java
+// 오버로딩 예시
+public int add(int a, int b) {
+    return a + b;
+}
+
+public double add(double a, double b) {
+    return a + b;
+}
+```
+
+### 2) **오버라이딩 (Overriding)**
+
+- **상속 관계**에서 **부모 클래스의 메서드**를 **자식 클래스에서 재정의**하는 것.
+- **런타임 시간**에 결정됩니다.
+- 부모 클래스의 메서드를 자식 클래스에서 **다르게 동작**시키고 싶을 때 사용합니다.
+
+```java
+// 오버라이딩 예시
+class Parent {
+    public void greet() {
+        System.out.println("부모 클래스에서 인사합니다.");
+    }
+}
+
+class Child extends Parent {
+    @Override
+    public void greet() {
+        System.out.println("자식 클래스에서 인사합니다.");
+    }
+}
+```
+
+### 오버로딩과 오버라이딩의 차이 요약
+
+|  구분  |  오버로딩 (Overloading)  |  오버라이딩 (Overriding)  |
+|:--------|:----------------------:|:-------------------------:|
+| **목적**  | 같은 이름의 메서드 여러 개 정의 | 상속받은 메서드를 재정의 |
+| **동작 시점** | 컴파일 시간에 결정 | 런타임 시간에 결정 |
+| **적용 대상** | 같은 클래스 | 상속 관계의 클래스 |
+| **매개변수** | 타입, 개수, 순서가 다름 | 부모와 동일 |
