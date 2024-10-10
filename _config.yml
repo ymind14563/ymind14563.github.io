@@ -59,3 +59,8 @@ plugins:
 
 future: true
 
+
+kramdown:
+  syntax_highlighter_opts:
+    guess_lang: false
+

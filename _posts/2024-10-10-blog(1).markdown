@@ -1,0 +1,201 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 배열(Array)"  
+date: 2024-10-10
+categories: Java  
+---
+
+# Java의 배열(Array)
+
+<hr>  
+<br>
+
+- **배열(Array)**은 **같은 데이터 타입**의 여러 값을 저장할 수 있는 **고정 크기**의 자료 구조입니다. 
+- 배열의 크기는 선언 시 정해지며, 한 번 선언한 크기는 **변경할 수 없습니다**. 
+- 배열의 **인덱스**를 통해 각 원소에 접근합니다.
+
+<br>
+
+## 1. 배열 선언 및 생성
+
+배열 선언에는 두 가지 방법이 있습니다. 일반적으로 첫 번째 방법이 사용됩니다.
+
+```java
+// 배열 선언하는 방법
+int[] arr1;   // 추천하는 방식
+int arr2[];   // 가능하지만 덜 사용되는 방식
+```
+
+배열을 선언하면 메모리 공간에 **참조값**이 할당됩니다. 배열에 값을 저장하면서 초기화할 수도 있습니다.
+
+```java
+// 배열 선언과 초기화
+int[] intArray = {16, 22, 34, 41, 59};  // 값 목록을 사용해 배열을 선언과 동시에 초기화
+System.out.println(intArray[0]);        // 출력: 16
+System.out.println(intArray);           // 참조값 출력: [I@15db9742
+```
+
+배열을 직접 출력하면 **참조값(메모리 주소)**이 출력됩니다. 배열의 각 인덱스는 실제 값을 가리킵니다.
+
+<br>
+
+## 2. 배열 초기화 및 값 변경
+
+배열은 선언 시 **크기를 고정**해야 하며, 값이 없을 때는 해당 자료형의 **기본값**으로 초기화됩니다. 배열의 원소를 변경할 수도 있습니다.
+
+```java
+// 배열 선언 후 값 저장
+double[] doubleArray = new double[3];
+System.out.println(doubleArray[0]);  // 0.0 출력 (double의 기본값)
+
+// 값 저장 및 변경
+doubleArray[0] = 0.2;
+doubleArray[1] = 2.4;
+doubleArray[2] = 1.8;
+System.out.println(doubleArray[0]);  // 출력: 0.2
+```
+
+<br>
+
+## 3. 배열의 길이와 반복문 활용
+
+배열의 길이는 **`.length` 필드**를 통해 확인할 수 있으며, 이는 반복문에서 자주 사용됩니다.
+
+```java
+int sum = 0;
+for (int i = 0; i < intArray.length; i++) {
+    sum += intArray[i];
+}
+System.out.println("배열의 합: " + sum);  // 배열의 합 계산
+```
+
+배열의 길이는 **읽기 전용**이므로 직접 변경할 수 없습니다.
+
+```java
+System.out.println("배열의 길이: " + doubleArray.length);  // 출력: 3
+// doubleArray.length = 5;  // 컴파일 에러 발생
+```
+
+<br>
+
+## 4. 배열의 참조값과 배열 인덱스
+
+배열은 **힙 메모리**에 저장되며, 배열 변수는 그 배열의 **참조값(메모리 주소)**을 가집니다. 배열의 각 인덱스는 배열 내의 **실제 값**을 가리킵니다.
+
+```java
+int[] intArray = {16, 22, 34, 41, 59};
+System.out.println(intArray);    // 참조값 출력
+System.out.println(intArray[0]); // 첫 번째 값인 16 출력
+```
+
+배열 변수를 출력하면 메모리 참조 값이 출력되며, 배열의 **실제 값**은 **인덱스를 사용**해 접근할 수 있습니다.
+
+<br>
+
+## 5. 다차원 배열
+
+**다차원 배열**은 배열 안에 또 다른 배열이 있는 구조로, 2차원, 3차원 배열을 생성할 수 있습니다.
+
+```java
+// 2차원 배열 선언 및 초기화
+int[][] matrix = { {1, 2, 3}, {4, 5, 6} };
+for (int i = 0; i < matrix.length; i++) {
+    for (int j = 0; j < matrix[i].length; j++) {
+        System.out.print(matrix[i][j] + " ");
+    }
+    System.out.println();
+}
+```
+
+<br>
+
+## 6. 배열 복사
+
+배열은 **크기가 고정**되어 있으므로, 더 많은 공간이 필요할 때는 새로운 배열을 생성한 후 기존 배열을 복사해야 합니다. **배열 복사**에는 두 가지 방법이 있습니다.
+
+### 1) 반복문을 이용한 배열 복사
+
+```java
+int[] originalArray = {1, 2, 3};
+int[] newArray = new int[5];
+
+for (int i = 0; i < originalArray.length; i++) {
+    newArray[i] = originalArray[i];
+}
+System.out.println(Arrays.toString(newArray));  // 복사된 배열 출력: [1, 2, 3, 0, 0]
+```
+
+### 2) `System.arraycopy()`를 이용한 배열 복사
+
+`System.arraycopy()` 메서드를 이용해 배열을 복사할 수 있습니다.
+
+```java
+System.arraycopy(originalArray, 0, newArray, 0, originalArray.length);
+System.out.println(Arrays.toString(newArray));  // 복사된 배열 출력: [1, 2, 3, 0, 0]
+```
+
+<br>
+
+## 7. Arrays 클래스 메서드
+
+Java의 **Arrays 클래스**는 배열을 다루기 위한 다양한 유틸리티 메서드를 제공합니다.
+
+### 1) 배열 복사 메서드
+
+#### `Arrays.copyOf()`
+```java
+int[] intArray = { 16, 22, 34, 41, 59 };
+int[] copiedArray = Arrays.copyOf(intArray, 3);
+System.out.println(Arrays.toString(copiedArray));  // 출력: [16, 22, 34]
+```
+
+#### `Arrays.copyOfRange()`
+```java
+int[] intArray = { 16, 22, 34, 41, 59 };
+int[] rangeArray = Arrays.copyOfRange(intArray, 1, 4);
+System.out.println(Arrays.toString(rangeArray));  // 출력: [22, 34, 41]
+```
+
+### 2) 배열 정렬 메서드
+
+```java
+int[] unsortedArray = {5, 8, 3, 1, 6};
+Arrays.sort(unsortedArray);
+System.out.println(Arrays.toString(unsortedArray));  // 출력: [1, 3, 5, 6, 8]
+```
+
+### 3) 배열 값 비교 메서드
+
+```java
+int[] array1 = {1, 2, 3};
+int[] array2 = {1, 2, 3};
+int[] array3 = {4, 5, 6};
+
+System.out.println(Arrays.equals(array1, array2));  // 출력: true
+System.out.println(Arrays.equals(array1, array3));  // 출력: false
+```
+
+### 4) 다차원 배열 비교 (`Arrays.deepEquals()`)
+
+**다차원 배열**의 값이 동일한지 확인할 때 `Arrays.deepEquals()`를 사용합니다.
+
+```java
+int[][] deepArray1 = { {1, 2}, {3, 4} };
+int[][] deepArray2 = { {1, 2}, {3, 4} };
+int[][] deepArray3 = { {1, 2}, {3, 5} };
+
+System.out.println(Arrays.deepEquals(deepArray1, deepArray2));  // 출력: true
+System.out.println(Arrays.deepEquals(deepArray1, deepArray3));  // 출력: false
+```
+
+### 5) 이진 탐색 (`Arrays.binarySearch()`)
+
+- 배열에서 특정 값을 **이진 검색**을 통해 찾습니다. 
+- 배열에서의 **인덱스 값** 을 반환합니다. 
+- **배열은 정렬된 상태여야 합니다**.
+
+```java
+int[] sortedArray = {10, 20, 30, 40, 50};
+int idx = Arrays.binarySearch(sortedArray, 30);
+System.out.println("Index of 30: " + idx);  // 출력: Index of 30: 2
+```
