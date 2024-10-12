@@ -1,0 +1,244 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 ArrayList"  
+date: 2024-10-12
+categories: Java  
+---
+
+# Java의 ArrayList
+
+<hr>  
+<br>
+
+- **ArrayList**는 크기가 고정된 배열과는 달리 필요에 따라 **동적으로 크기가 증가**하거나 **감소**할 수 있습니다.  
+- ArrayList는 **표준 배열보다 많은 조작**이 필요할 때 유용하며, 특히 **동적 배열**을 구현하는 데 자주 사용됩니다.
+
+<br>
+
+## 1. ArrayList 선언과 생성
+
+ArrayList는 다양한 방식으로 선언할 수 있습니다.  
+- **제네릭**을 사용하여 특정 타입의 요소만 저장하도록 제한할 수 있습니다.
+- **제네릭**을 사용하지 않으면 **모든 타입의 객체**를 저장할 수 있지만, **타입 안정성**이 보장되지 않습니다.
+
+```java
+// 1. List<E> list = new ArrayList<E>();
+List<Integer> numbers = new ArrayList<Integer>();
+
+// 2. List<E> list = new ArrayList<>();
+List<Integer> numbers2 = new ArrayList<>();
+
+// 3. List list = new ArrayList();
+List list = new ArrayList();  // 모든 타입의 객체 저장 가능 (타입 안정성 보장 안됨)
+```
+
+<br>
+
+## 2. ArrayList 요소 추가
+
+ArrayList의 요소는 `add()` 메서드를 사용하여 추가할 수 있습니다.
+
+```java
+numbers.add(10);
+numbers.add(20);
+numbers.add(30);
+numbers.add(40);
+numbers.add(50);
+```
+
+<br>
+
+## 3. ArrayList 요소 접근
+
+ArrayList의 요소는 인덱스를 사용하여 접근할 수 있으며, `get()` 메서드를 사용하여 특정 위치의 요소를 가져올 수 있습니다.
+
+```java
+System.out.println("첫번째 요소: " + numbers.get(0));
+System.out.println("세번째 요소: " + numbers.get(2));
+```
+
+<br>
+
+## 4. ArrayList 요소 수정
+
+`set()` 메서드를 사용하여 **특정 인덱스의 값**을 수정할 수 있습니다.
+
+```java
+numbers.set(1, 77); // 두 번째 요소 수정
+System.out.println("수정된 리스트: " + numbers);
+```
+
+출력
+```
+수정된 리스트: [10, 77, 30, 40, 50]
+```
+
+<br>
+
+## 5. ArrayList 요소 삽입
+
+`add()` 메서드는 기존 요소들 사이에 새로운 값을 삽입할 수도 있습니다. 이 경우, **인덱스가 조정**됩니다.
+
+```java
+numbers.add(1, 7);  // 두 번째 인덱스에 값 삽입
+System.out.println("삽입 후 리스트: " + numbers);
+```
+
+출력
+```
+삽입 후 리스트: [10, 7, 77, 30, 40, 50]
+```
+
+<br>
+
+## 6. ArrayList 요소 삭제
+
+- `remove()` 메서드를 사용하여 **특정 인덱스의 요소를 삭제**할 수 있습니다. 
+- 삭제 후에는 **남은 요소들이 인덱스가 하나씩 당겨집니다.**
+
+```java
+numbers.remove(2);  // 세 번째 요소 삭제
+System.out.println("삭제 후 리스트: " + numbers);
+```
+
+출력
+```
+삭제 후 리스트: [10, 7, 30, 40, 50]
+```
+
+### 추가 삭제 후
+
+```java
+numbers.remove(2);  // 다시 세 번째 요소 삭제
+System.out.println("다시 삭제 후 리스트: " + numbers);
+```
+
+출력
+```
+다시 삭제 후 리스트: [10, 7, 40, 50]
+```
+
+<br>
+
+## 7. ArrayList의 원소가 사용자 정의 클래스인 경우
+
+ArrayList는 기본 데이터 타입뿐만 아니라 **사용자 정의 클래스**의 객체도 저장할 수 있습니다.
+
+### 1) Student 클래스 정의
+
+```java
+class Student {
+    private String name;
+    private int age;
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+
+    @Override
+    public String toString() {
+        return "{" + "name: '" + name + "', age: " + age + "}";
+    }
+}
+```
+
+<br>
+
+### 2) ArrayList에 Student 객체 추가
+
+다음은 **5명의 학생 정보**를 **ArrayList**에 추가하는 예시입니다.
+
+```java
+List<Student> students = new ArrayList<>();
+students.add(new Student("John", 30));
+students.add(new Student("Jennie", 31));
+students.add(new Student("Rose", 32));
+students.add(new Student("Lily", 30));
+students.add(new Student("Say", 31));
+```
+
+<br>
+
+### 3) ArrayList에서 Student 객체 가져오기
+
+**첫 번째 학생 객체**를 가져와 정보를 출력합니다.
+
+```java
+Student student1 = students.get(0);  // 첫 번째 학생 가져오기
+System.out.println("학생 정보: " + student1);
+System.out.println(student1.getName() + " 학생의 나이는 " + student1.getAge() + "세 입니다.");
+```
+
+출력
+```
+학생 정보: {name: 'John', age: 30}
+John 학생의 나이는 30세 입니다.
+```
+
+<br>
+
+### 4) 전체 학생 리스트 출력
+
+**for-each문**을 사용하여 ArrayList에 저장된 **모든 학생 객체**를 출력합니다.
+
+```java
+System.out.println("=== 학생 명단 ===");
+for (Student s : students) {
+    System.out.println(s);
+}
+System.out.println("===============");
+```
+
+출력
+```
+=== 학생 명단 ===
+{name: 'John', age: 30}
+{name: 'Jennie', age: 31}
+{name: 'Rose', age: 32}
+{name: 'Lily', age: 30}
+{name: 'Say', age: 31}
+===============
+```
+
+<br>
+
+### 5) 요소 삭제
+
+```java
+students.remove(2);  // 세 번째 학생 삭제
+System.out.println("학생 삭제 후: " + students);
+```
+
+출력
+```
+학생 삭제 후: [{name: 'John', age: 30}, {name: 'Jennie', age: 31}, {name: 'Lily', age: 30}, {name: 'Say', age: 31}]
+```
+
+<br>
+
+## 8. ArrayList 주요 메서드
+
+- **add()**: 요소 추가
+- **get()**: 특정 인덱스의 요소 가져오기
+- **set()**: 특정 인덱스의 요소 수정
+- **remove()**: 특정 인덱스의 요소 삭제
+- **addAll()**: 다른 리스트의 모든 요소를 추가
+- **size()**: 리스트 크기 확인
+- **contains()**: 특정 요소가 리스트에 포함되어 있는지 확인
+- **clear()**: 모든 요소 삭제
+- **indexOf()**: 특정 요소의 인덱스 반환
+
+<br>
+
+## 9. ArrayList와 표준 배열의 차이점
+
+| 특징             | ArrayList                                           | 배열           |
+|------------------|-----------------------------------------------------|----------------|
+| 크기             | 동적 (요소 추가/삭제 시 크기 조정)                   | 고정           |
+| 요소 접근 방식   | `get(index)`를 통해 인덱스 접근                     | `array[index]` |
+| 사용 편의성      | 동적 할당, 다양한 메서드 지원                        | 제한적         |
+| 성능             | 배열보다 느릴 수 있음                                | 빠름           |

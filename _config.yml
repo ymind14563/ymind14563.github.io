@@ -59,7 +59,8 @@ plugins:
 
 future: true
 
-
+# Liquid 템플릿 엔진이 코드 내의 중괄호 `{{` 를 변수로 인식하여 발생하는 문제 해결
+# Liquid 템플릿 엔진이 코드 블록을 해석하지 않도록 설정
 kramdown:
   syntax_highlighter_opts:
     guess_lang: false
