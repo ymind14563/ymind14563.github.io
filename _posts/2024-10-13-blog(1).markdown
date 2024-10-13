@@ -146,7 +146,7 @@ try {
 }
 ```
 
-출력 결과 (문자 입력 시):
+출력 결과 (문자 입력 시)
 ```
 정수를 입력하지 않았습니다. >> null
 ```
@@ -187,18 +187,41 @@ try {
 ```
 
 출력 결과
-- 입력이 "0"일 경우:
+- 입력이 "0"일 경우
   ```
   0으로 나눌 수 없습니다. >> / by zero
   ```
-- 입력이 "abc"일 경우:
+- 입력이 "abc"일 경우
   ```
   숫자 형식이 잘못되었습니다. >> For input string: "abc"
   ```
 
 <br>
 
-## 5. 예외 처리의 장점
+## 5. NumberFormatException 과 InputMismatchException 차이점
+
+- NumberFormatException 은 문자열을 숫자로 변환하는 과정에서 형식이 맞지 않으면 발생하는 예외입니다.
+- `"a"`를 `Integer.parseInt()`로 숫자로 변환하려고 시도할 때 발생합니다.
+  
+  ```java
+  String input = "a";
+  int number = Integer.parseInt(input);  // NumberFormatException 발생
+  ```
+
+- InputMismatchException 은 `Scanner`로 입력을 받을 때, 예상한 타입과 다른 입력이 들어오면 발생합니다. 
+- `nextInt()`로 숫자를 기대하는데 문자열 `"a"`가 입력되면 발생합니다.
+  
+  ```java
+  Scanner sc = new Scanner(System.in);
+  int number = sc.nextInt();  // InputMismatchException 발생
+  ```
+
+- `NumberFormatException`은 문자열 변환 오류에 대한 예외이며, 
+- `InputMismatchException`은 Scanner로 잘못된 타입의 입력을 처리할 때 발생합니다.
+
+<br>
+
+## 6. 예외 처리의 장점
 
 - 예외가 발생하더라도, 처리함으로써 프로그램이 종료되지 않고 안정적으로 실행됩니다.
 - 예외를 처리하는 과정에서 오류의 원인을 파악할 수 있으며, 정보를 활용하여 디버깅할 수 있습니다.
