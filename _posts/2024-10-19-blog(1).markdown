@@ -1,0 +1,226 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 클래스와 객체"  
+date: 2024-10-19
+categories: Java
+
+---
+
+# Java의 클래스와 객체
+
+<hr>  
+<br>
+
+## 1. 클래스란 무엇인가?
+
+- Java에서 클래스는 객체 지향 프로그래밍의 기본 요소로, 객체를 생성하기 위한 설계도입니다. 
+- 클래스는 객체가 가질 속성(필드)과 동작(메서드)을 정의하며, 
+- 클래스를 바탕으로 만든 인스턴스를 **객체**라고 합니다.
+
+```java
+public class Student {
+    // 필드 (객체의 속성)
+    public String name;  
+    public int grade;    
+
+    // 생성자 (객체를 초기화하는 역할)
+    public Student(String name, int grade) {
+        this.name = name;
+        this.grade = grade;
+    }
+
+    // 메서드 (객체의 동작 정의)
+    public void goToSchool() {
+        System.out.println(this.name + "가 학교에 갑니다.");
+    }
+
+    public void study(String subject) {
+        System.out.println(this.name + "가 " + subject + " 과목을 공부합니다.");
+    }
+
+    public int getGrade() {
+        return this.grade;
+    }
+
+    public String getTestResult(int score) {
+        return this.name + " 학생의 점수: " + score;
+    }
+}
+```
+
+### 1) 클래스의 구성 요소
+
+(1) 필드: 객체가 가지는 데이터나 속성을 정의합니다.  
+- `Student` 클래스에서 `name`과 `grade`는 각각 학생의 이름과 학년을 나타냅니다.
+
+(2) 생성자: 객체가 생성될 때 호출되며, 객체의 초기 상태를 설정합니다.  
+- `Student` 클래스에서 생성자는 학생의 이름과 학년을 인자로 받아 초기화합니다.
+
+(3) 메서드: 객체의 동작을 정의하며, 메서드를 통해 객체는 다양한 작업을 수행할 수 있습니다.  
+- `goToSchool`, `study` 메서드는 학생이 학교에 가거나 공부하는 동작을 수행합니다.
+
+<br>
+
+## 2. 객체 생성 및 사용
+
+- Java에서 객체는 클래스를 바탕으로 생성되며, 클래스의 설계에 따라 동작합니다.
+- 객체를 생성하기 위해 `new` 키워드를 사용하며, 이를 통해 생성된 객체는 클래스에 정의된 모든 필드와 메서드를 사용할 수 있습니다.
+
+```java
+// 객체 생성
+Student s1 = new Student("김새싹", 1);
+
+// 메서드 호출
+s1.goToSchool();  // 출력: 김새싹가 학교에 갑니다.
+s1.study("Java 프로그래밍");  // 출력: 김새싹가 Java 프로그래밍 과목을 공부합니다.
+```
+
+### 1) 객체 생성 과정
+
+(1) 클래스 선언  
+- 먼저 클래스가 선언되어야 객체를 생성할 수 있습니다.
+
+(2) new 키워드 사용  
+- `new` 키워드를 사용해 객체를 생성합니다.
+
+(3) 생성자 호출  
+- 생성자가 호출되며 객체가 초기화됩니다.
+
+(4) 메서드 사용  
+- 생성된 객체는 클래스에 정의된 메서드를 호출하여 동작을 수행합니다.
+
+<br>
+
+## 3. 접근 제한자
+
+- Java에서는 클래스, 메서드, 필드에 접근 제한자를 사용하여 접근 권한을 설정합니다. 
+- 외부에서 불필요하게 내부 데이터에 접근하는 것을 막아 정보 은닉을 실현할 수 있습니다.
+
+### 1) 주요 접근 제한자
+
+(1) public: 모든 클래스에서 접근할 수 있습니다.  
+(2) default: 같은 패키지 내에서만 접근할 수 있습니다. (접근 제한자를 명시하지 않으면 기본값으로 설정)  
+(3) private: 해당 클래스 내에서만 접근할 수 있습니다.  
+
+### 2) 접근 제한자 예시
+
+```java
+public class A {
+    public int field1;  // public: 모든 곳에서 접근 가능
+    int field2;         // default: 같은 패키지 내에서만 접근 가능
+    private int field3; // private: 클래스 내부에서만 접근 가능
+
+    public A() {
+        field1 = 1;
+        field2 = 2;
+        field3 = 3;
+    }
+
+    public void method1() {}  // public 메서드
+    void method2() {}         // default 메서드
+    private void method3() {} // private 메서드
+}
+```
+
+```java
+public class B {
+    public void method() {
+        A a = new A();
+        a.field1 = 10;  // public 필드 접근 가능
+        a.field2 = 20;  // default 필드 접근 가능 (같은 패키지 내이므로)
+        // a.field3 = 30;  // private 필드 접근 불가
+    }
+}
+```
+
+위 예시에서는 각 필드와 메서드가 접근 제한자에 따라 어떻게 접근 가능한지 보여줍니다.
+
+<br>
+
+## 4. 정보 은닉과 Getter/Setter
+
+- 정보 은닉은 객체의 필드를 외부에서 직접 접근하지 못하도록 하는 것을 말합니다.
+- 필드를 `private`으로 선언하고, getter와 setter 메서드를 통해 간접적으로 접근하도록 설계합니다.
+
+### 1) Getter와 Setter 예시
+
+```java
+public class Person {
+    private int age;
+    private String name;
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    // getter 메서드: age 값을 반환
+    public int getAge() {
+        return age;
+    }
+
+    // setter 메서드: age 값을 설정
+    public void setAge(int age) {
+        if (age < 0) {
+            this.age = 0;  // 나이가 음수일 경우 0으로 설정
+        } else {
+            this.age = age;
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+```
+
+```java
+public class PersonEx {
+    public static void main(String[] args) {
+        Person p1 = new Person("Minion");
+        p1.setAge(4);
+        System.out.println(p1.getName() + "의 나이: " + p1.getAge());  // Minion의 나이: 4
+
+        Person p2 = new Person("Pooh");
+        p2.setAge(-10);  // 나이가 음수이므로 0으로 설정
+        System.out.println(p2.getName() + "의 나이: " + p2.getAge());  // Pooh의 나이: 0
+    }
+}
+```
+
+- `Person` 클래스의 `age` 필드는 `private`로 선언되어 외부에서 직접 접근할 수 없습니다.
+- 대신 `setAge` 메서드를 통해 나이를 설정하고, `getAge` 메서드를 통해 나이를 조회할 수 있습니다.
+
+<br>
+
+## 5. 메서드 구성 요소
+
+- Java에서 메서드는 인자와 반환값에 따라 동작이 달라질 수 있습니다. 
+- 메서드는 객체의 동작을 정의하며, 객체는 특정 작업을 수행합니다.
+
+### 1) 메서드의 종류
+
+```java
+// 1) 인자 없음, 반환값 없음 (void 메서드)
+public void goToSchool() {
+    System.out.println(this.name + "가 학교에 갑니다.");
+}
+
+// 2) 인자 있음, 반환값 없음 (void 메서드)
+public void study(String subject) {
+    System.out.println(this.name + "가 " + subject + " 과목을 공부합니다.");
+}
+
+// 3) 인자 없음, 반환값 있음 (int 반환)
+public int getGrade() {
+    return this.grade;
+}
+
+// 4) 인자 있음, 반환값 있음 (String 반환)
+public String getTestResult(int score) {
+    return this.name + " 학생의 점수: " + score;
+}
+```
+
+- void: 반환값이 없는 메서드를 의미하며, 메서드가 동작을 수행하고 종료됩니다.
+- int: 메서드가 `int` 타입의 값을 반환합니다.
+- String: 메서드가 `String` 타입의 값을 반환합니다.
