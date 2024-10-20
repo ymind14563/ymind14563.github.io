@@ -1,0 +1,154 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 final"  
+date: 2024-10-21  
+categories: Java  
+---
+
+# Java의 final
+
+<hr>  
+<br>
+
+## 1. final이란?
+
+- **final** 키워드는 **변경할 수 없는 값** 또는 **상수**를 정의할 때 사용됩니다.
+- 변수에 `final` 키워드를 붙이면 그 값은 **단 한 번만 할당**될 수 있으며, 그 이후에는 변경할 수 없습니다.
+
+### 1) final의 특징
+
+(1) **값 변경 불가**  
+   - `final`로 선언된 변수는 초기화된 후에는 값을 변경할 수 없습니다. 상수 값을 정의할 때 자주 사용됩니다.
+
+(2) **클래스와 메서드에도 사용 가능**  
+   - `final` 키워드는 클래스나 메서드에도 사용할 수 있습니다. 클래스에 `final`을 선언하면 **상속이 불가능**하며, 메서드에 `final`을 선언하면 **오버라이딩이 불가능**합니다.
+
+(3) **상수 선언 시 사용**  
+   - `final`과 `static`을 함께 사용하여 **상수**를 선언합니다. 이 경우 상수는 프로그램 전체에서 공유되며 변경할 수 없습니다.
+
+<br>
+
+### 2) final의 활용 예시
+
+```java
+package _05_class._final;
+
+// 상수 정의를 위한 클래스
+public class Const {
+    // 정수형 상수 선언 (final + static)
+    public static final int MAX_VALUE = 1000;
+
+    // 문자열 상수 선언 (final + static)
+    public static final String GREETING = "Hello, World!";
+}
+```
+
+ - `MAX_VALUE`와 `GREETING` 상수를 선언했습니다.
+ - 이 상수들은 **변경 불가**하며 프로그램 전체에서 사용됩니다.
+
+```java
+package _05_class._final;
+
+public class ConstEx {
+    public static void main(String[] args) {
+        // 상수 값 읽기
+        System.out.println(Const.GREETING);  // 출력: Hello, World!
+        System.out.println(Const.MAX_VALUE);  // 출력: 1000
+
+        // 상수 값 변경 시도 (컴파일 에러 발생)
+        // Const.MAX_VALUE = 2000;
+        // Const.GREETING = "Hi";
+    }
+}
+```
+
+`ConstEx` 클래스는 `Const` 클래스의 상수를 출력합니다. 상수는 값을 변경할 수 없으며, 변경하려고 시도할 경우 컴파일 에러가 발생합니다.
+
+<br>
+
+## 3. final 키워드와 클래스
+
+**final** 키워드는 클래스에 적용될 수도 있습니다. 클래스에 `final`이 붙으면 그 클래스를 **상속할 수 없습니다**. 즉, 그 클래스는 **확장 불가능**한 고정된 클래스로 사용됩니다.
+
+### 1) final 필드 사용 예시
+
+```java
+package _05_class._final;
+
+public class Student {
+    // final 필드
+    final String campus = "영등포";  // 필드 선언 시 초기화
+    final String sid;  // 생성자에서 초기화
+
+    // 인스턴스 필드
+    String name;
+
+    public Student(String sid, String name) {
+        this.sid = sid;
+        this.name = name;
+    }
+}
+```
+
+ `Student` 클래스에서 **final 필드**를 사용하는 방법입니다. `campus` 필드는 선언과 동시에 초기화되며, 한 번 값이 설정되면 더 이상 변경할 수 없습니다. `sid` 필드는 생성자를 통해 초기화되며 역시 이후에 값이 변경될 수 없습니다.
+
+```java
+package _05_class._final;
+
+public class StudentEx {
+    public static void main(String[] args) {
+        Student std1 = new Student("s001", "김새싹");
+
+        // final 필드는 변경 불가능
+        System.out.println(std1.campus);  // 출력: 영등포
+        System.out.println(std1.sid);  // 출력: s001
+        System.out.println(std1.name);  // 출력: 김새싹
+
+        // 값 변경 시도 (컴파일 에러 발생)
+        // std1.campus = "마포";
+        // std1.sid = "s0002";
+
+        // 인스턴스 필드는 변경 가능
+        std1.name = "홍길동";
+        System.out.println(std1.name);  // 출력: 홍길동
+    }
+}
+```
+
+- `final` 필드가 어떻게 **읽기 전용**으로 사용되는지 보여주는 예시입니다.
+- `campus`와 `sid`는 한 번 값이 설정된 후에는 변경할 수 없습니다. 반면, `name`은 일반적인 인스턴스 필드로서 값이 변경될 수 있습니다.
+
+<br>
+
+## 4. static과 final의 결합
+
+**static**과 **final**을 함께 사용하면 **상수**를 정의할 수 있습니다. 상수는 프로그램 전체에서 공유되며, 값은 절대 변경되지 않습니다.
+
+```java
+public class Config {
+    public static final double TAX_RATE = 0.1;  // 세율 상수
+}
+```
+
+`TAX_RATE`는 프로그램 전체에서 **공유되며** 변경할 수 없는 상수 값입니다.
+
+<br>
+
+### 참고) **static vs final** 비교
+
+| **특징**           | **static**                                                    | **final**                                                      |
+|--------------------|--------------------------------------------------------------|----------------------------------------------------------------|
+| **공유**           | 클래스의 모든 인스턴스가 **공유**하는 멤버                     | 한 번 초기화된 후 **변경 불가**한 값                            |
+| **초기화 시점**    | 클래스가 메모리에 로드될 때 한 번 초기화                        | 선언 시 또는 생성자에서 한 번만 초기화 가능                     |
+| **변경 가능 여부** | 객체나 클래스에 의해 언제든지 변경 가능                        | 한 번 할당되면 값을 변경할 수 없음                              |
+| **적용 대상**      | 필드, 메서드, 블록                                            | 필드, 메서드, 클래스                                             |
+| **접근 방식**      | 객체 생성 없이 **클래스 이름**으로 접근 가능                    | 객체 생성 후 접근 가능하며, 값 변경 불가                          |
+| **상속 관련**      | 상속과 무관                                                  | `final` 메서드는 오버라이딩 불가, `final` 클래스는 상속 불가     |
+
+---
+
+<br>
+
+(참고)
+### static, final, static final의 차이
+[https://gobae.tistory.com/3](https://gobae.tistory.com/3)
