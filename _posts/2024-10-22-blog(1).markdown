@@ -1,0 +1,209 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 상속(Inheritance)"  
+date: 2024-10-21 
+categories: Java 
+---
+
+## 1. 상속(Inheritance)이란?
+
+상속(Inheritance)은 객체 지향 프로그래밍에서 기존 클래스로부터 필드와 메서드를 물려받아 새로운 클래스를 정의하는 방식입니다. 이를 통해 코드의 재사용성을 극대화할 수 있으며, 자식 클래스는 부모 클래스의 기능을 그대로 사용하거나 필요한 부분만 수정하여 기능을 확장할 수 있습니다. 상속을 활용하면 코드 중복을 줄이고, 유지보수가 쉬운 구조를 만들 수 있습니다.
+
+### 상속의 주요 개념
+
+- 부모 클래스 (Super Class): 공통된 속성과 메서드를 정의하는 클래스.
+- 자식 클래스 (Sub Class): 부모 클래스로부터 상속받아 기능을 재사용하거나 확장하는 클래스.
+
+<br>
+
+## 2. 상속을 활용한 예시
+
+`Animal` 클래스를 부모로, `Dog` 클래스가 이를 상속받아 기능을 확장해보겠습니다. 
+
+```java
+// 부모 클래스
+public class Animal {
+    void makeSound() {
+        System.out.println("동물이 운다!");
+    }
+}
+```
+
+```java
+// 자식 클래스
+public class Dog extends Animal {
+    // 부모 메서드를 오버라이딩
+    @Override
+    void makeSound() {
+        super.makeSound();  // 부모 메서드 호출
+        System.out.println("멍멍!");
+    }
+
+    // 자식 클래스만의 메서드
+    void fetch() {
+        System.out.println("공 가져와!");
+    }
+}
+```
+
+```java
+public class DogEx {
+    public static void main(String[] args) {
+        Dog myDog = new Dog();  // 자식 클래스 인스턴스 생성
+        myDog.makeSound();  // 오버라이딩된 메서드 호출
+        myDog.fetch();  // 자식 클래스의 추가 메서드 호출
+    }
+}
+```
+
+- `Animal` 클래스는 `makeSound()` 메서드를 통해 동물의 기본적인 울음소리를 정의합니다.
+- `Dog` 클래스는 `Animal` 클래스를 상속받아 `makeSound()` 메서드를 오버라이딩하고, "멍멍!"이라는 추가적인 행동을 정의합니다. 또한, `fetch()`라는 자식 클래스만의 기능도 추가됩니다.
+- 실행 결과, 자식 클래스에서 `makeSound()` 메서드를 호출하면 부모 메서드의 동작에 자식 클래스의 새로운 동작이 더해집니다.
+
+<br>
+
+## 3. 오버라이딩과 부모 메서드 호출
+
+상속을 통해 자식 클래스는 부모 클래스의 메서드를 오버라이딩하여 새로운 동작을 정의할 수 있습니다. 이때 super 키워드를 사용하면 부모 클래스의 메서드를 명시적으로 호출할 수 있습니다. 이렇게 하면 부모 메서드를 그대로 유지하면서 자식 클래스에서만 필요한 동작을 추가할 수 있습니다.
+
+```java
+@Override
+void makeSound() {
+    super.makeSound();  // 부모 클래스의 동작 호출
+    System.out.println("멍멍!");  // 추가 동작
+}
+```
+
+부모의 기능을 재사용하면서도 자식 클래스에 맞는 동작을 쉽게 추가할 수 있는 방법입니다. 예를 들어, 부모 클래스의 기능을 일부 확장하거나 수정하고 싶을 때 유용하게 사용됩니다.
+
+<br>
+
+## 4. 상속에서의 필드 접근 방식
+
+상속을 사용할 때, 부모 클래스의 필드 접근 수준에 따라 자식 클래스가 그 필드에 어떻게 접근할 수 있는지가 달라집니다. public 필드는 자식 클래스에서 직접 접근할 수 있지만, private 필드는 자식 클래스에서 직접 접근할 수 없으며, `getter/setter` 메서드를 통해 접근해야 합니다.
+
+### 1) public 필드 사용
+
+```java
+// 부모 클래스의 필드가 public일 때
+public class Person {
+    public String name;
+    public int age;
+}
+```
+
+```java
+public class Student extends Person {
+    public void printDetails() {
+        System.out.println("이름: " + name);  // 부모 필드에 직접 접근 가능
+        System.out.println("나이: " + age);   // 부모 필드에 직접 접근 가능
+    }
+}
+```
+
+### 2) private 필드 사용
+
+```java
+// 부모 클래스의 필드가 private일 때
+public class Person {
+    private String name;
+    private int age;
+
+    // getter / setter 메서드
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+```java
+public class Student extends Person {
+    public void setDetails(String name, int age) {
+        setName(name);  // 부모 클래스의 setter 사용
+        setAge(age);    // 부모 클래스의 setter 사용
+    }
+
+    public void printDetails() {
+        System.out.println("이름: " + getName());  // getter를 통해 접근
+        System.out.println("나이: " + getAge());
+    }
+}
+```
+
+``` java
+public class Main {
+    public static void main(String[] args) {
+        Student student = new Student();
+        student.setDetails("홍길동", 20);  // 부모 클래스의 필드 초기화
+        student.printDetails();  // 부모 클래스의 필드 값 출력
+    }
+}
+```
+
+#### 출력
+```
+이름: 홍길동
+나이: 20
+```
+
+
+#### 필드 접근
+- public 필드는 자식 클래스에서 직접 접근 가능.
+- private 필드는 직접 접근이 불가능하며, 부모 클래스의 getter/setter 메서드를 통해 접근해야 함.
+
+<br>
+
+## 5. 생성자와 상속
+
+상속 관계에서 자식 클래스는 부모 클래스의 생성자를 통해 부모 필드를 초기화할 수 있습니다. 자식 클래스가 인스턴스화될 때 부모 클래스의 생성자가 먼저 호출되며, 자식 클래스에서 부모 필드가 초기화됩니다.
+
+```java
+// 부모 클래스
+public class Person {
+    private String name;
+    private int age;
+
+    // 부모 클래스의 생성자
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+}
+```
+
+```java
+// 부모 클래스의 생성자 호출
+public class Student extends Person {
+    private String campus;
+
+    public Student(String name, int age) {
+        super(name, age);  // 부모 클래스의 생성자를 호출하여 name과 age를 초기화
+        this.campus = "영등포";
+    }
+}
+```
+f
+부모 클래스의 생성자를 호출하면, 자식 클래스에서 부모 클래스의 필드를 초기화할 수 있으며, 추가적인 자식 클래스만의 필드를 별도로 초기화할 수도 있습니다.
+
+<br>
+
+## 6. 상속에서 주의할 점
+
+- private 필드 접근: 부모 클래스의 private 필드는 자식 클래스에서 직접 접근할 수 없으므로, getter/setter를 사용해야 합니다.
+- 다중 상속 금지: Java에서는 다중 상속을 허용하지 않으므로, 한 클래스는 하나의 부모 클래스만 상속받을 수 있습니다.g
+- 오버라이딩 규칙: 자식 클래스에서 부모 메서드를 오버라이딩할 때는 반드시 부모 메서드의 시그니처(이름, 매개변수 타입, 반환형)를 동일하게 맞춰야 합니다.
