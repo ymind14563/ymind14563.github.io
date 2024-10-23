@@ -1,0 +1,201 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java 인터페이스(interface)"  
+date: 2024-10-23 
+categories: Java
+---
+
+## 1. 인터페이스란?
+
+- 인터페이스(interface)는 객체 지향 프로그래밍에서 클래스가 구현해야 할 메서드의 틀을 정의하는 역할을 합니다.
+- 인터페이스는 메서드의 선언부만 제공하며, 그 메서드를 구현하는 것은 해당 인터페이스를 구현하는 클래스의 책임입니다. 
+- 일관된 동작을 보장하고, 클래스 간의 호환성을 높일 수 있습니다.
+
+### 인터페이스의 특징
+
+- 인터페이스는 추상 메서드만 가질 수 있으며, 구체적인 구현은 없습니다.
+- 다중 상속이 가능합니다. 한 클래스는 여러 인터페이스를 구현할 수 있습니다.
+- 인터페이스는 상수 필드를 가질 수 있으며, 이 상수들은 자동으로 `public static final`로 선언되므로, 상수 필드를 여러 클래스에서 공유하고 변경되지 않는 값으로 사용할 수 있습니다. 예를 들어, 여러 클래스에서 공통으로 사용할 값이 있다면 인터페이스 상수로 정의해 일관성을 유지할 수 있습니다.
+- 인터페이스의 모든 메서드는 자동으로 `public`이며, 메서드의 구현은 생략됩니다.
+
+<br>
+
+## 2. 인터페이스 선언과 구현
+
+먼저, `RemoteControl`이라는 인터페이스와 이를 구현하는 `Television` 및 `Audio` 클래스 만들어보겠습니다.
+
+```java
+// 인터페이스 선언
+public interface RemoteControl {
+    // 추상 메서드 선언
+    void turnOn();
+    void turnOff();
+    void setVolume(int volume);
+
+    // 상수 필드 선언
+    int MAX_VOLUME = 10;
+    int MIN_VOLUME = 0;
+}
+```
+
+- `RemoteControl` 인터페이스는 `turnOn()`, `turnOff()`, `setVolume()`이라는 추상 메서드를 정의합니다. 이 메서드들은 구현되지 않았으며, 이를 구현하는 클래스가 구체적인 동작을 정의해야 합니다.
+- 상수 필드인 `MAX_VOLUME`과 `MIN_VOLUME`은 인터페이스에 정의되어, 이를 구현하는 모든 클래스에서 공통적으로 사용할 수 있는 값을 제공합니다. 
+- 상수 필드를 사용함으로써 `public static final` 특성을 갖기 때문에 여러 클래스에서 일관된 값을 사용하고, 변경되지 않는 값을 보장할 수 있습니다.
+
+<br>
+
+## 3. 인터페이스 구현하기
+
+`RemoteControl` 인터페이스를 `Television`과 `Audio` 클래스에서 구현하여, 각각의 구체적인 동작을 정의해보겠습니다.
+
+```java
+// Television 클래스
+public class Television implements RemoteControl {
+    private int volume;
+
+    @Override
+    public void turnOn() {
+        System.out.println("TV 를 켭니다.");
+    }
+
+    @Override
+    public void turnOff() {
+        System.out.println("TV 를 끕니다.");
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        if (volume > MAX_VOLUME) {
+            this.volume = MAX_VOLUME;
+        } else if (volume < MIN_VOLUME) {
+            this.volume = MIN_VOLUME;
+        } else {
+            this.volume = volume;
+        }
+        System.out.println("현재 TV 볼륨: " + this.volume);
+    }
+}
+```
+
+```java
+// Audio 클래스
+public class Audio implements RemoteControl {
+    private int volume;
+
+    @Override
+    public void turnOn() {
+        System.out.println("Audio 를 켭니다.");
+    }
+
+    @Override
+    public void turnOff() {
+        System.out.println("Audio 를 끕니다.");
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        if (volume > MAX_VOLUME) {
+            this.volume = MAX_VOLUME;
+        } else if (volume < MIN_VOLUME) {
+            this.volume = MIN_VOLUME;
+        } else {
+            this.volume = volume;
+        }
+        System.out.println("현재 Audio 볼륨: " + this.volume);
+    }
+}
+```
+
+- `Television`과 `Audio` 클래스는 `RemoteControl` 인터페이스를 구현하여, 각각 `turnOn()`, `turnOff()`, `setVolume()` 메서드를 구체적으로 정의했습니다.
+- `setVolume()` 메서드는 볼륨이 최대 또는 최소 값을 벗어나지 않도록 조정하며, 상수인 `MAX_VOLUME`과 `MIN_VOLUME`을 사용해 볼륨 값을 일관성 있게 관리합니다.
+
+<br>
+
+## 4. 인터페이스 활용
+
+`RemoteControl` 인터페이스를 구현한 `Television`과 `Audio` 클래스를 사용해 인터페이스가 어떻게 작동하는지 보겠습니다.
+
+```java
+public class RemoteControlEx {
+    public static void main(String[] args) {
+        // 인터페이스 타입 변수 선언
+        RemoteControl rc;
+
+        // Television 객체 대입
+        rc = new Television();
+        rc.turnOn();
+        rc.setVolume(5);
+        rc.turnOff();
+
+        // Audio 객체 대입
+        rc = new Audio();
+        rc.turnOn();
+        rc.setVolume(15);
+        rc.turnOff();
+    }
+}
+```
+
+- `RemoteControl` 인터페이스는 변수의 타입으로 사용할 수 있습니다. 인터페이스도 참조형 타입이기 때문에, 이를 통해 다양한 구현체(예: `Television`, `Audio`)를 동일한 방식으로 처리할 수 있습니다.
+- `rc` 변수는 `RemoteControl` 타입이므로, 다형성을 이용해 `Television`과 `Audio` 객체를 모두 참조할 수 있습니다. 
+- 각각의 객체가 어떤 구체적인 클래스인지에 상관없이 동일한 메서드(`turnOn()`, `turnOff()`, `setVolume()`)를 호출할 수 있습니다.
+
+<br>
+
+## 5. 다중 상속과 인터페이스
+
+자바에서는 클래스 간의 다중 상속은 불가능하지만, 인터페이스는 다중 상속을 지원합니다. 이를 통해 여러 기능을 하나의 클래스에서 구현할 수 있으며, 다양한 인터페이스를 결합해 유연한 설계를 할 수 있습니다.
+
+```java
+interface Move {
+    void moveForward();
+    void moveBackward();
+}
+
+interface Power {
+    void powerOn();
+    void powerOff();
+}
+
+interface Car extends Move, Power {
+    void changeGear(int gear);
+}
+
+class Suv implements Car {
+    @Override
+    public void changeGear(int gear) { System.out.println("기어 변경: " + gear); }
+    @Override
+    public void moveForward() { System.out.println("전진"); }
+    @Override
+    public void moveBackward() { System.out.println("후진"); }
+    @Override
+    public void powerOn() { System.out.println("시동 ON"); }
+    @Override
+    public void powerOff() { System.out.println("시동 OFF"); }
+}
+```
+
+- `Car` 인터페이스는 `Move`와 `Power` 인터페이스를 상속받습니다. 이를 통해 하나의 인터페이스가 여러 인터페이스를 통합할 수 있으며, `Suv` 클래스는 `Car` 인터페이스를 구현하여 다양한 동작을 정의할 수 있습니다.
+- 다중 상속을 통해 여러 인터페이스의 추상 메서드를 한 클래스에서 구현할 수 있으며, 유연한 설계가 가능합니다. 특히, 여러 기능을 하나의 객체에서 제공할 수 있어 확장성이 뛰어난 구조를 설계할 수 있습니다.
+
+<br>
+
+## 6. 인터페이스와 추상 클래스의 차이
+
+### 1) 공통점
+- 둘 다 추상 메서드를 포함하여 구현을 강제할 수 있습니다.
+- 자식 클래스는 부모 클래스의 메서드를 반드시 구현해야 합니다.
+
+### 2) 차이점
+
+#### (1) 목적
+   - 인터페이스: 동작을 보장하는 데 목적이 있습니다. 인터페이스는 어떻게 동작할지 정의하고, 이를 구현하는 클래스들이 동일한 동작을 보장합니다.
+   - 추상 클래스: 기본적인 특성(속성)을 정의하면서 확장성을 제공하는 데 목적이 있습니다. 일부 구현을 제공하면서 상속받은 클래스들이 추가적인 기능을 확장할 수 있도록 설계됩니다.
+
+#### (2) 구현 상속 여부
+   - 인터페이스는 구현 상속을 제공하지 않으며, 오직 메서드 선언만 포함합니다. 구체적인 구현은 인터페이스를 구현하는 클래스에서 해야 합니다.
+   - 추상 클래스는 일부 메서드의 구현을 포함할 수 있어, 상속받는 클래스에서 그 기능을 확장할 수 있습니다.
+
+#### (3) 상속 관계
+   - 추상 클래스는 단일 상속만 가능합니다. 한 클래스는 하나의 부모 클래스만 상속받을 수 있습니다.
+   - 인터페이스는 다중 상속이 가능하여, 한 클래스가 여러 인터페이스를 구현할 수 있습니다.
