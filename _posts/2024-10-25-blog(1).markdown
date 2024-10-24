@@ -1,0 +1,179 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java의 Wrapper 클래스"  
+date: 2024-10-25  
+categories: Java
+---
+
+## 1. Wrapper 클래스란?
+
+Wrapper 클래스는 자바에서 기본 데이터 타입(Primitive Type)을 객체로 포장할 수 있는 클래스입니다. 자바는 기본적으로 `int`, `char`, `boolean`과 같은 기본 타입과 `Integer`, `Character`, `Boolean`과 같은 참조 타입(객체)을 구분합니다. Wrapper 클래스는 이 두 타입을 상호 변환할 수 있도록 돕는 클래스들입니다.
+
+자바에서 기본 타입은 성능 최적화를 위해 사용되지만, 객체로 다뤄야 할 경우에는 Wrapper 클래스를 사용해야 합니다. 예를 들어, 컬렉션(Collection) 같은 자료 구조에서는 객체만을 저장할 수 있기 때문에 기본 타입을 Wrapper 객체로 변환하여 사용합니다.
+
+<br>
+
+### 1) Wrapper 클래스의 특징
+
+- 기본 타입을 객체로 변환하여 다룰 수 있습니다.
+- `java.lang` 패키지에 포함되어 자동으로 불러와지며, 별도의 `import`가 필요 없습니다.
+- Boxing과 Unboxing을 통해 기본 타입과 객체 간의 변환이 자동으로 이루어집니다.
+- 컬렉션(Collection)이나 제네릭(Generic)과 같은 자바의 객체 중심 구조에서 필수적으로 사용됩니다.
+
+<br>
+
+## 2. 왜 Wrapper 클래스를 사용할까?
+
+- 기본 타입과 Wrapper 클래스의 차이점은 바로 객체로 다룰 수 있느냐의 여부입니다. 
+- Wrapper 클래스를 사용하면 기본 타입을 객체로 만들어서 컬렉션에 저장하거나, 메서드의 인자로 넘길 때 더 유연하게 처리할 수 있습니다.
+
+<br>
+
+### 1) 컬렉션에서의 사용
+
+자바의 List, Set, Map과 같은 컬렉션 클래스는 객체만을 다룰 수 있습니다. 예를 들어, `int` 같은 기본 타입은 저장할 수 없고, 대신 Integer 같은 `Wrapper 클래스`를 사용해야 합니다.
+
+```java
+List<Integer> list = new ArrayList<>();
+list.add(10);  // 기본 타입 int가 아닌 Integer 객체가 리스트에 저장됨
+```
+
+위 코드에서 `int` 값 `10`은 자동 Boxing되어 Integer 객체로 변환되어 리스트에 저장됩니다.
+
+<br>
+
+### 2) 메서드의 인자나 반환값에서 사용
+
+기본 타입을 객체로 다뤄야 할 때가 많습니다. 예를 들어, 메서드의 인자로 기본 타입을 넘기거나, 반환값으로 객체를 사용할 때 Wrapper 클래스를 사용할 수 있습니다.
+
+```java
+public void printNumber(Integer num) {
+    System.out.println("Number: " + num);
+}
+
+public static void main(String[] args) {
+    Integer number = 5;  // int -> Integer 자동 Boxing
+    printNumber(number);  // Integer 객체를 메서드 인자로 넘김
+}
+```
+
+<br>
+
+## 3. Boxing과 Unboxing
+
+### 1) Boxing: 기본 타입을 객체로 변환
+
+- Boxing은 기본 타입의 값을 Wrapper 객체로 변환하는 과정입니다. 
+- 자바에서는 기본 타입이 Wrapper 객체에 할당될 때 자동으로 Boxing이 발생합니다.
+
+```java
+Integer obj1 = 200;  // 기본 타입 int -> Integer 객체로 변환 (자동 Boxing)
+Double obj2 = 3.141592;  // 기본 타입 double -> Double 객체로 변환
+Character obj3 = 'A';  // 기본 타입 char -> Character 객체로 변환
+
+System.out.println("Integer: " + obj1);  // 출력: 200
+System.out.println("Double: " + obj2);  // 출력: 3.141592
+System.out.println("Character: " + obj3);  // 출력: A
+```
+
+<br>
+
+### 2) Unboxing: 객체에서 기본 타입 값 추출
+
+- Unboxing은 Wrapper 객체에서 기본 타입의 값을 추출하는 과정입니다. 
+- 기본 타입 변수에 Wrapper 객체가 할당될 때 자동으로 Unboxing이 이루어집니다.
+
+```java
+int value1 = obj1;  // Integer -> int (자동 Unboxing)
+double value2 = obj2;  // Double -> double (자동 Unboxing)
+char value3 = obj3;  // Character -> char (자동 Unboxing)
+
+System.out.printf("int: %d, double: %f, char: %c %n", value1, value2, value3);
+```
+
+<br>
+
+### 3) Boxing과 Unboxing이 함께 사용되는 경우
+
+Wrapper 객체와 기본 타입 간의 연산도 가능합니다. 이 경우 자동 Unboxing이 먼저 발생하고, 연산 후에 다시 Boxing이 일어날 수 있습니다.
+
+```java
+int result1 = obj1 + 100;  // obj1(Integer) + 100(int) -> 자동 Unboxing 후 연산
+double result2 = obj2 + 1.5;  // Double + double -> Unboxing
+char result3 = (char) (obj3 + 1);  // Character + int -> Unboxing 후 연산
+
+System.out.println("result1: " + result1);  // 출력: 300
+System.out.println("result2: " + result2);  // 출력: 4.641592
+System.out.println("result3: " + result3);  // 출력: B
+```
+- `obj1`이 Integer 객체이지만, `100`과 연산하기 전에 자동으로 Unboxing되어 `int` 값으로 변환된 후 연산이 이루어집니다.
+
+<br>
+
+## 4. Wrapper 클래스의 값 비교
+
+Wrapper 객체 간의 값 비교는 주의가 필요합니다. 특히 -128 ~ 127 범위의 값과 그 이상의 값에서 비교 결과가 다를 수 있습니다.
+
+### (참고) `-128 ~ 127 범위 값인 이유`
+
+- -128 ~ 127 범위에서 값 비교 이유는 자바의 내부 최적화 때문입니다. 
+
+- **자바는 오토박싱(Autoboxing) 시, 성능을 최적화하기 위해 이 범위 내의 값을 캐싱합니다. 이 범위의 Integer 객체는 미리 생성되고 재사용되므로, 같은 값을 가진 Integer 객체는 같은 메모리 주소를 참조하게 됩니다.**
+
+- 자바는 메모리 사용을 효율적으로 하기 위해 -128 ~ 127 범위 내의 Integer 값들을 캐싱해 둡니다. 이 범위 내의 값들은 자주 사용되는 숫자이기 때문에 자바가 이 범위를 미리 정하고 캐싱한 것입니다.
+
+- 이 범위의 값들은 새로 객체를 생성하지 않고 기존에 캐싱된 객체를 재사용하기 때문에, **같은 값의 객체들이 같은 메모리 주소를 참조하게 됩니다. `그래서 == 비교를 할 때도 같은 객체로 인식`합니다.**
+
+<br>
+
+### 1) -128 ~ 127 범위에서의 값 비교
+
+자바에서는 -128에서 127 사이의 값을 캐싱하여 같은 값을 가지는 객체는 동일한 참조를 사용합니다. 이 경우 `==` 연산자로 비교해도 true가 나옵니다.
+
+```java
+Integer obj1 = 10;
+Integer obj2 = 10;
+
+System.out.printf("%d == %d : %b %n", obj1, obj2, obj1 == obj2);  // true
+System.out.printf("%d equals %d : %b %n", obj1, obj2, obj1.equals(obj2));  // true
+```
+
+### 2) -128을 넘는 값에서의 비교
+
+127을 넘는 값의 경우, 새로운 객체가 생성되므로 `==` 연산자로 비교할 때 false가 나옵니다. 이때는 `equals()` 메서드로 값을 비교해야 합니다.
+
+```java
+Integer obj3 = 1000;
+Integer obj4 = 1000;
+
+System.out.printf("%d == %d : %b %n", obj3, obj4, obj3 == obj4);  // false
+System.out.printf("%d equals %d : %b %n", obj3, obj4, obj3.equals(obj4));  // true
+```
+
+- 여기에서는 `obj3`과 `obj4`가 값은 같지만, 참조가 다르므로 `==` 연산자는 false를 반환합니다. (범위를 벗어났기 때문)
+- 반면 `equals()` 메서드는 값을 비교하므로 true가 반환됩니다.
+
+<br>
+
+### 3) Boolean과 Character의 비교
+
+```java
+Boolean bool1 = true;
+Boolean bool2 = true;
+System.out.printf("%b == %b : %b %n", bool1, bool2, bool1 == bool2);  // true
+
+Character char1 = 'A';
+Character char2 = 'A';
+System.out.printf("%c == %c : %b %n", char1, char2, char1 == char2);  // true
+```
+- `true`, `false` 값은 항상 동일한 객체로 취급됩니다.
+- 이와 같이 Boolean 값들은 `==` 연산자로 비교해도 true가 반환되지만, Character의 경우 캐싱 범위를 벗어난 경우에는 `equals()` 메서드를 사용하여 값을 비교해야 합니다.
+
+```java
+Character char3 = '\u0101';
+
+
+Character char4 = '\u0101';
+System.out.printf("%c == %c : %b %n", char3, char4, char3 == char4);  // false
+System.out.printf("%c equals %c : %b %n", char3, char4, char3.equals(char4));  // true
+```
