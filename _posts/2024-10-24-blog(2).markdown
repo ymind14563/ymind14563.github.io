@@ -1,6 +1,6 @@
 ---
 layout: post  
-title: "[SeSACx코딩온] 상태 값 ENUM과 상태 별도 테이블"  
+title: "상태 값 ENUM과 상태 별도 테이블"  
 date: 2024-10-24  
 categories: PROJECT
 ---
