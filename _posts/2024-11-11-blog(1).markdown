@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "실시간 통신 기술과 STOMP와 WebSocket을 활용한 단체 채팅방 구축 사례"
+title: "실시간 통신 기술 비교와 단체 채팅방 구축"
 date: 2024-11-11
 categories: PROJECT
 ---
