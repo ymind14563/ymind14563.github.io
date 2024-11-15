@@ -5,7 +5,7 @@ date: 2024-11-15
 categories: PROJECT
 ---
 
-## `PaginationResponseDTO`에서 `null 값` 처리
+## PaginationResponseDTO에서 null 값 처리
 
 ### 1. 문제 상황
 
