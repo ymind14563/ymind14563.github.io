@@ -1,0 +1,33 @@
+---
+layout: post
+title: "@SendTo와 SimpMessagingTemplate의 차이"
+date: 2024-11-15
+categories: PROJECT
+---
+
+## `@SendTo`와 `SimpMessagingTemplate`의 차이점
+<br>
+
+
+### 1. 자동 메시지 전송 (`@SendTo`)
+![image](https://github.com/user-attachments/assets/27fac0a8-e27b-40e1-857c-c80cdaf57561)
+
+   - `@SendTo`는 메서드가 반환한 메시지를 자동으로 지정된 WebSocket 구독경로로 전송. 
+   - 장점: 간단하고 직관적이며, 특별한 설정 없이 빠르게 메시지를 전송.
+   - `@MessageMapping` 메서드에서 메시지를 처리하고 그 결과를 자동으로 전송.
+   - 프로젝트에서는 일반 메세지 처리. (MessageType: CHAT)
+
+<br>
+
+### 2. 세밀한 제어 (`SimpMessagingTemplate`)
+![image](https://github.com/user-attachments/assets/b579bd04-4c83-4497-842a-ddc24c0264e6)
+
+   - `SimpMessagingTemplate`은 메시지를 특정 목적지로 보내는 데 있어 더 많은 제어를 제공
+   - `convertAndSend()` 메서드를 사용해 메시지를 보낼 채널을 지정하고, 세부적인 설정이 가능.
+   - 장점: 복잡한 메시지 처리 로직을 구현할 수 있음.
+   - 특정 사용자에게만 메시지를 전송하거나 조건에 맞는 클라이언트만 대상으로 메시지를 보낼 수 있음.
+   - <b>프로젝트에서는 특정 사용자인 모임의 참가자가 채팅에 입장하거나 퇴장하는 경우 시스템 메세지를 보내도록 구현.(MessageType: JOIN, LEAVE) </b>
+
+## 결론
+- `@SendTo`는 간단하고 자동화된 메시지 전송에 적합.
+- `SimpMessagingTemplate`은 세밀한 제어가 필요한 경우 유용하며, 더 복잡한 메시징 로직을 처리할 수 있음.
