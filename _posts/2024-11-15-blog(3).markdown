@@ -1,0 +1,47 @@
+---
+layout: post  
+title: "프록시 객체 직렬화 문제"  
+date: 2024-11-15
+categories: PROJECT  
+---
+
+## 프록시 객체 직렬화 문제
+
+### 1. 문제 상황
+- ![에러메세지](https://github.com/user-attachments/assets/0357de46-6006-4a9a-83ea-571229897bea)
+
+- `ChatRoomDTO`에서 Hibernate의 Lazy Loading된 필드를 JSON으로 직렬화하는 과정에서 `InvalidDefinitionException` 오류가 발생했습니다.
+- Jackson이 `org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor`와 같은 프록시 객체를 직렬화할 수 없기 때문에 발생한 문제입니다.
+- 특히, `meetingCategory`와 같은 필드가 Hibernate 프록시 객체로 설정되어 있어 이 필드를 직렬화하려고 할 때 문제가 생겼습니다.
+
+- ![기존코드1](https://github.com/user-attachments/assets/1e980424-529c-43d0-9750-084253d808d4)
+- ![기존코드2](https://github.com/user-attachments/assets/ff969376-6d65-45ac-bcc4-284b1b644af7)
+
+<br>
+
+### 2. 직렬화 문제 해결 방안
+
+프록시 객체의 직렬화 문제를 해결하기 위한 몇 가지 방법이 있습니다.
+
+#### 1) `@JsonIgnoreProperties` 어노테이션 사용
+- Jackson이 프록시 객체의 특정 필드를 무시하도록 설정하여 직렬화 오류를 방지합니다.
+- `@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})`를 추가하여 불필요한 프록시 속성을 무시하도록 할 수 있습니다.
+
+#### 2) `Hibernate5Module`을 Jackson에 등록
+- `Hibernate5Module`을 Jackson `ObjectMapper`에 등록하면 Hibernate의 Lazy Loading된 프록시 객체를 직렬화할 수 있습니다.
+- 이를 통해 프록시 객체로 인해 발생하는 직렬화 오류를 해결할 수 있습니다.
+
+#### 3) `SerializationFeature.FAIL_ON_EMPTY_BEANS` 비활성화
+- Jackson의 설정에서 빈 객체를 직렬화할 때 오류가 발생하지 않도록 `SerializationFeature.FAIL_ON_EMPTY_BEANS`를 `false`로 설정합니다.
+- 그러나 이 방법은 객체의 특정 필드를 무시하는 것은 아니므로 다른 해결 방법에 비해 범용적이지 않을 수 있습니다.
+
+<br>
+
+### 3. 최종 해결 방안
+
+위와 같은 해결 방법을 고려했으나, 이 경우에는 DTO에서 객체 자체를 받을 필요가 없었기 때문에 **해당 필드를 `String` 타입으로 변환**하는 방법을 선택했습니다.  
+
+- ![수정코드1](https://github.com/user-attachments/assets/0f3e09dc-3547-49d9-9b6f-62f107ea56c0)
+- ![수정코드2](https://github.com/user-attachments/assets/872466fe-aaa3-47ba-ba0b-bc34db4a5076)
+
+이렇게 함으로써 프록시 객체로 인한 직렬화 오류를 간단하게 근본적으로 회피하면서도 필요한 정보만을 클라이언트에 전달할 수 있었습니다.
