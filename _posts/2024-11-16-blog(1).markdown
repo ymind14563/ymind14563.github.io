@@ -1,0 +1,76 @@
+---
+layout: post  
+title: "Lombok과 JPA에서 boolean 필드 Getter/Setter 충돌 문제"  
+date: 2024-11-16
+categories: PROJECT  
+---
+
+## Lombok과 JPA에서 boolean 필드 Getter/Setter 충돌 문제 해결하기
+
+### 1. 문제 상황
+
+`boolean` 타입 필드를 JPA와 Lombok으로 처리하는 엔티티를 설계할 때, Getter/Setter 메서드에서 충돌 문제가 발생할 수 있습니다.
+
+#### 주요 원인
+- `boolean` 필드에 대해 `isXxx()` 형태의 Getter를 생성.
+- `getXxx()` 형태의 Getter를 요구.
+- 이러한 불일치로 인해 `NoSuchMethodError`와 같은 오류가 발생
+
+---
+
+### 2. 문제의 원인
+
+`boolean` 필드가 `isBlacklist`와 같이 **`is` 접두사로 시작**하면, Lombok은 다음과 같은 메서드를 자동 생성
+- Getter: `isBlacklist()`
+- Setter: `setBlacklist(boolean)`
+
+그러나 Getter를 호출할 때 **`getIsBlacklist()`**를 사용하면 이 불일치로 인해 직렬화 오류나 JPA에서 엔티티를 로드할 때 문제가 발생합니다.
+
+---
+
+### 3. 문제 해결 방법
+
+#### 1) Lombok의 `@Accessors(chain = true)` 사용
+`@Accessors(chain = true)`를 사용하여 체이닝 스타일로 메서드를 생성합니다.
+
+```java
+@Getter
+@Setter
+@Accessors(chain = true)
+public class User {
+    private boolean isBlacklist = false;
+}
+```
+
+
+#### 2) Getter/Setter 메서드를 수동으로 작성
+직접 Getter와 Setter를 작성하여 충돌을 방지합니다.
+
+```java
+public class User {
+    private boolean isBlacklist = false;
+
+    public boolean getIsBlacklist() {
+        return isBlacklist;
+    }
+
+    public void setIsBlacklist(boolean isBlacklist) {
+        this.isBlacklist = isBlacklist;
+    }
+}
+```
+
+
+#### 3) Lombok 기본 생성 메서드 활용 (적용한 해결방식)
+Lombok의 자동 생성 방식을 유지하며, 코드에서 `isBlacklist()`와 `setBlacklist(boolean)`을 일관되게 사용합니다.
+
+![image](https://github.com/user-attachments/assets/5a99e2da-6242-40aa-809c-5be40d89d400)
+
+
+---
+
+### 4. 최종 해결 방안
+
+- 외부 라이브러리나 JPA가 `getIsXxx` 메서드를 요구한다면, **Getter/Setter 수동 작성**이 가장 적합.
+- 코드 체이닝 스타일을 선호한다면, **`@Accessors(chain = true)`**를 적용.
+- 호출 코드에서 Lombok 방식만 사용하는 경우, **자동 생성 메서드**를 그대로 사용.
