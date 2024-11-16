@@ -45,3 +45,8 @@ categories: PROJECT
 - ![수정코드2](https://github.com/user-attachments/assets/872466fe-aaa3-47ba-ba0b-bc34db4a5076)
 
 이렇게 함으로써 프록시 객체로 인한 직렬화 오류를 간단하게 근본적으로 회피하면서도 필요한 정보만을 클라이언트에 전달할 수 있었습니다.
+
+Reference
+- [https://velog.io/@maketheworldwise/Jackson-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B0%94%EC%9D%B8%EB%94%A9-%EC%97%90%EB%9F%AC-InvalidDefinitionException-No-serializer-found-for-class](https://velog.io/@maketheworldwise/Jackson-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B0%94%EC%9D%B8%EB%94%A9-%EC%97%90%EB%9F%AC-InvalidDefinitionException-No-serializer-found-for-class)
+- [https://flowarc.tistory.com/entry/Java-%EA%B0%9D%EC%B2%B4-%EC%A7%81%EB%A0%AC%ED%99%94Serialization-%EC%99%80-%EC%97%AD%EC%A7%81%EB%A0%AC%ED%99%94Deserialization](https://flowarc.tistory.com/entry/Java-%EA%B0%9D%EC%B2%B4-%EC%A7%81%EB%A0%AC%ED%99%94Serialization-%EC%99%80-%EC%97%AD%EC%A7%81%EB%A0%AC%ED%99%94Deserialization)
+- [https://m.blog.naver.com/ka28/221938124123](https://m.blog.naver.com/ka28/221938124123)
