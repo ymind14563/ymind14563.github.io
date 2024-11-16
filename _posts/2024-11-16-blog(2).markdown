@@ -1,0 +1,103 @@
+---
+layout: post  
+title: "Hibernate Lazy Loading 문제와 해결 방법"  
+date: 2024-11-16  
+categories: PROJECT  
+---
+
+## DTO, @Query, 그리고 EAGER
+
+### 1. 문제 상황
+
+`ChatNotificationService`의 `unreadNotification` 메서드에서 Hibernate의 Lazy Loading 필드에 접근하려 할 때, 트랜잭션 범위가 종료되어 **`LazyInitializationException`** 오류가 발생했습니다.
+
+#### 주요 원인
+- `User`와 `ChatRoom` 엔티티가 **`fetch = FetchType.LAZY`**로 설정.
+- WebSocket 환경에서는 세션이 짧아, Hibernate가 지연 로딩된 데이터를 로드하려 할 때 트랜잭션 범위가 종료됩니다.
+
+<br>
+
+### 2. Lazy Loading 문제 발생 흐름
+
+
+![image](https://github.com/user-attachments/assets/8e65632e-c1d0-43e3-8c0c-dc42b8d55a7e)
+
+- Lazy 로딩된 필드에 접근 시 LazyInitializationException 발생
+
+- if (!chatRoomStatusRepository.isUserInChatRoom(chatroomId, userId)) { 에서
+- 트랜잭션 범위 밖에서 데이터 로드 시도 → 오류 발생
+
+
+---
+
+### 3. Lazy Loading 문제 해결 방법
+
+#### 1) DTO를 활용한 문제 해결 (적용한 해결방식)
+- 필요한 데이터를 DTO에 담아 반환합니다.
+- 그리고 JPQL로 DTO에 필요한 데이터를 명시적으로 조회합니다.
+
+![image](https://github.com/user-attachments/assets/b0032a86-b049-4863-b2e3-926db604df71)
+
+
+
+![image](https://github.com/user-attachments/assets/1785671d-c301-4553-9c3c-bff5c87c101d)
+
+**장점**:  
+- Lazy 필드 접근을 완전히 차단.  
+- 클라이언트에 필요한 데이터만 반환하여 성능 최적화.  
+**단점**:  
+- DTO를 따로 설계해야 하며, 데이터 구조 변경 시 추가 작업 필요.
+
+<br>
+
+#### 2) JPQL로 Lazy 데이터 미리 로드
+`JOIN FETCH`를 활용하여 JPQL에서 Lazy 필드를 명시적으로 로드합니다.
+
+**장점**:  
+- 엔티티 구조를 유지하면서 데이터 로드.  
+- 복잡한 관계 데이터 처리에 적합.  
+**단점**:  
+- JPQL을 매번 작성해야 하며, 코드 가독성이 떨어질 수 있음.
+
+<br>
+
+#### 3) FetchType.EAGER로 설정 변경
+Lazy 대신 EAGER를 설정하면 연관 데이터를 즉시 로드합니다.
+
+```java
+@Entity
+public class ChatRoom {
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<User> users;
+}
+```
+
+**장점**:  
+- Lazy Loading 문제를 완전히 제거.  
+- 코드 간결.  
+**단점**:  
+- 모든 요청에서 데이터를 항상 로드하므로, 성능 저하 가능성이 있음.  
+- 연관 데이터가 많을 경우 과도한 쿼리가 실행, 성능 저하 가능성.
+
+<br>
+
+### 4. 방법 3가지 정리
+
+#### DTO 방식
+- **장점**: Lazy 필드 문제를 완전히 회피하며, 클라이언트에 필요한 데이터만 반환.  
+- **적합한 경우**: 데이터 구조가 단순하고, 클라이언트에서 필요한 데이터가 명확한 경우.
+
+#### JPQL 방식
+- **장점**: 엔티티 구조를 유지하며, 필요한 데이터만 명시적으로 로드.  
+- **적합한 경우**: 복잡한 관계 데이터가 필요한 경우.
+
+#### FetchType.EAGER 방식
+- **장점**: Lazy Loading 문제를 코드 변경 없이 쉽게 제거.  
+- **적합한 경우**: 데이터 양이 적고, 연관 필드를 항상 사용해야 하는 경우.
+
+<br>
+
+### 5. 최종 해결 방안
+
+이번 문제에서는 **DTO를 활용한 방식**을 선택했습니다.  
+필요한 데이터를 JPQL로 명시적으로 로드해 DTO에 담아 반환함으로써, Lazy Loading 문제를 회피하면서도 성능 최적화를 동시에 달성했습니다.
