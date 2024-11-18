@@ -1,0 +1,229 @@
+---
+layout: post  
+title: "Docker와 AWS를 이용한 배포(.properties 해결법)"  
+date: 2024-11-18
+categories: Docker
+---
+
+# Docker와 AWS를 이용한 배포 과정
+
+<hr>  
+<br>
+
+Docker 이미지를 생성하고 Docker Hub를 통해 AWS에서 배포한 후 발생한 문제와 해결 방안까지 단계별로 설명합니다.
+
+<br>
+
+## 1. Docker 이미지 생성
+
+### **1) Dockerfile 작성**
+
+프로젝트 루트 디렉토리에 다음과 같은 Dockerfile을 생성함.
+
+```dockerfile
+# Gradle 빌드 이미지
+FROM gradle:8.10.2-jdk17 AS build
+WORKDIR /app
+COPY . .
+RUN gradle build -x test --no-daemon
+
+# 경량화된 JDK 이미지
+FROM openjdk:17-jdk-slim
+COPY --from=build /app/build/libs/*.jar app.jar
+CMD ["java", "-jar", "app.jar"]
+```
+
+Gradle 빌드 이미지 사용 후 경량화된 JDK로 전환.  
+application.properties는 빌드에서 제외. 
+
+<br>
+
+### **2) .dockerignore 작성**
+
+빌드 과정에서 제외할 파일과 디렉토리를 지정함.
+
+```plaintext
+build
+.gradle
+.git
+application.properties
+```
+
+<br>
+
+### **3) Docker 이미지 빌드**
+
+Docker Desktop을 실행한 후 터미널에서 다음 명령어를 입력함.
+
+```bash
+docker build -t kinderpia_back-image .
+```
+
+이미지가 성공적으로 빌드되면 8080 포트에서 실행 테스트를 진행함.
+
+```bash
+docker run -p 8080:8080 kinderpia_back-image
+```
+
+application.properties가 제외되었으므로 데이터베이스 연결 오류 발생은 정상임.
+
+<br>
+
+## 2. Docker Hub에 이미지 Push
+
+### **1) Docker 로그인**
+
+```bash
+docker login
+```
+
+### **2) 이미지 태그 변경**
+
+Docker Hub에 업로드하기 위해 이미지 태그를 설정함.
+
+```bash
+docker tag kinderpia_back-image ymind14563/kinderpia_back-image
+```
+
+### **3) Docker Hub에 Push**
+
+```bash
+docker push ymind14563/kinderpia_back-image
+```
+
+Docker Hub 레파지토리가 자동으로 생성되며 이미지를 업로드함.
+
+<br>
+
+## 3. AWS에서 Docker 실행
+
+### **1) Docker 설치**
+
+AWS EC2에서 Docker를 설치함.
+
+```bash
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+현재 사용자에게 Docker 권한을 추가해 sudo 없이 Docker 명령어를 실행할 수 있도록 설정함.
+
+```bash
+sudo usermod -aG docker ubuntu
+```
+
+### **2) Docker Hub에서 이미지 Pull**
+
+```bash
+docker login
+docker pull ymind14563/kinderpia_back-image
+```
+
+<br>
+
+## 4. application.properties 설정
+
+Spring Boot가 데이터베이스에 연결할 수 있도록 application.properties를 설정함.
+
+### **방법 1 환경변수로 전달**
+
+Spring Boot의 application.properties에 다음과 같은 환경 변수를 사용해야 함.
+
+```properties
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+```
+
+Docker 실행 시 환경변수를 전달함.
+
+```bash
+docker run -p 8080:8080 \
+  -e DB_URL="jdbc:mysql://your-database-host:port/dbname" \
+  -e DB_USERNAME="your-username" \
+  -e DB_PASSWORD="your-password" \
+  ymind14563/kinderpia_back-image
+```
+
+### **방법 2 직접 파일로 전달**
+
+1. scp 명령어로 업로드해 application.properties 파일을 EC2로 전송함.
+
+```bash
+scp -i "your-key.pem" /path/to/application.properties ubuntu@your-ec2-ip:/home/ubuntu/application.properties
+```
+
+2. Docker 실행 시 파일 경로를 마운트함.
+
+```bash
+docker run -p 8080:8080 \
+  -v /home/ubuntu/application.properties:/config/application.properties \
+  ymind14563/kinderpia_back-image
+```
+
+<br>
+
+## 5. JDBC 연결 문제 해결
+
+**문제** JDBC 연결 오류 발생.
+**원인** Spring Boot에서 application.properties의 위치를 인식하지 못함.
+
+### **해결 방법**
+
+1. Spring Boot가 application.properties를 명시적으로 인식하도록 경로를 설정함.
+
+```bash
+docker run -p 8080:8080 \
+    -v /home/ubuntu/application.properties:/app/config/application.properties \
+    ymind14563/kinderpia_back-image \
+    java -jar app.jar --spring.config.location=file:/app/config/application.properties
+```
+
+2. 기본 디렉토리 경로로 설정하여 문제 해결.
+
+```bash
+docker run -p 8080:8080 \
+    -v /home/ubuntu/application.properties:/config/application.properties \
+    ymind14563/kinderpia_back-image
+```
+
+두 방법 모두 정상적으로 동작 확인함.
+
+<br>
+
+## 6. Docker 관리
+
+### **1) 백그라운드에서 실행**
+
+```bash
+docker run -d -p 8080:8080 -v /home/ubuntu/application.properties:/config/application.properties ymind14563/kinderpia_back-image
+```
+
+### **2) 실행 중인 컨테이너 확인**
+
+```bash
+docker ps
+```
+
+### **3) 컨테이너 중지**
+
+```bash
+docker stop <CONTAINER_ID>
+```
+
+### **4) 컨테이너 로그 확인**
+
+```bash
+docker logs <CONTAINER_ID>
+# 실시간 로그 보기
+docker logs -f <CONTAINER_ID>
+```
