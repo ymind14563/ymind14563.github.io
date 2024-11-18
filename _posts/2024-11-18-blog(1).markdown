@@ -1,6 +1,6 @@
 ---
 layout: post  
-title: "[SeSACx코딩온] Nginx 와 CSP(Content Security Policy) 오류"  
+title: "Nginx 와 CSP(Content Security Policy) 오류"  
 date: 2024-11-18   
 categories: PROJECT
 ---
