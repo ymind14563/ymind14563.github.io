@@ -134,7 +134,7 @@ docker pull ymind14563/kinderpia_back-image
 
 Spring Boot가 데이터베이스에 연결할 수 있도록 application.properties를 설정함.
 
-### **방법 1 환경변수로 전달**
+### **방법 1) 환경변수로 전달**
 
 Spring Boot의 application.properties에 다음과 같은 환경 변수를 사용해야 함.
 
@@ -154,7 +154,7 @@ docker run -p 8080:8080 \
   ymind14563/kinderpia_back-image
 ```
 
-### **방법 2 직접 파일로 전달**
+### **방법 2) 직접 파일로 전달**
 
 1. scp 명령어로 업로드해 application.properties 파일을 EC2로 전송함.
 
