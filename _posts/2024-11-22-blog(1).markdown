@@ -1,0 +1,213 @@
+---
+layout: post  
+title: "[SeSACx코딩온] Java ArrayList vs. LinkedList"  
+date: 2024-11-22  
+categories: Java
+---
+
+# Java ArrayList vs. LinkedList
+
+<hr>  
+<br>
+
+Java의 `ArrayList`와 `LinkedList`는 `List` 인터페이스를 구현한 두 가지 대표적인 컬렉션입니다.
+
+<br>
+
+
+## 1. ArrayList의 동작과 특징
+
+- `ArrayList`는 내부적으로 배열을 사용하여 데이터를 저장합니다. 크기가 동적으로 변경되며, 인덱스를 통해 빠르게 데이터에 접근할 수 있습니다. 
+- 하지만, 중간이나 앞부분에 요소를 추가하거나 삭제하면 나머지 데이터를 재배열해야 하므로 성능이 저하될 수 있습니다.
+
+### ArrayList 예제
+
+```java
+package _08_collection._list;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ArrayListEx {
+    public static void main(String[] args) {
+        // ArrayList 생성
+        List<String> list = new ArrayList<>();
+
+        // 요소 추가
+        list.add("Apple");
+        list.add("Banana");
+        list.add("Kiwi");
+        System.out.println("초기 리스트: " + list); 
+        // 출력: 초기 리스트: [Apple, Banana, Kiwi]
+
+
+        // 리스트 크기 확인
+        System.out.printf("리스트 크기: %d%n", list.size()); 
+          // 출력: 리스트 크기: 3
+
+
+        // 특정 요소 가져오기
+        System.out.println("두 번째 요소: " + list.get(1)); 
+          // 출력: 두 번째 요소: Banana
+
+
+        // 특정 요소 삭제 (삭제 후 당겨짐)
+        list.remove(1);
+        System.out.println("Banana 삭제 후 리스트: " + list); 
+          // 출력: Banana 삭제 후 리스트: [Apple, Kiwi]
+
+
+        // 또 다른 요소 삭제
+        list.remove(1);
+        System.out.println("다시 삭제 후 리스트: " + list); 
+          // 출력: 다시 삭제 후 리스트: [Apple]
+
+
+        // 전체 리스트 순회
+        for (String item : list) {
+            System.out.println("현재 요소: " + item); 
+              // 출력: 현재 요소: Apple
+        }
+
+
+        // 리스트 초기화
+        list.clear();
+        System.out.println("리스트 비우기 후: " + list); 
+          // 출력: 리스트 비우기 후: []
+
+
+    }
+}
+```
+
+- `add()`: 요소 추가.
+- `remove()`: 특정 인덱스의 요소를 삭제하면, 나머지 요소가 당겨짐.
+- `clear()`: 리스트를 비움.
+
+<br>
+
+## 2. LinkedList
+
+- `LinkedList`는 노드 기반 구조로 데이터를 저장하며, 각 노드는 이전/다음 노드와 연결됩니다. 
+- 중간이나 앞부분에 데이터를 추가하거나 삭제할 때 효율적입니다. 
+- 하지만, 데이터 조회는 순차적으로 탐색해야 하므로 속도가 느립니다.
+
+### LinkedList 예제
+
+```java
+package _08_collection._list;
+
+import java.util.LinkedList;
+
+public class LinkedListEx {
+    public static void main(String[] args) {
+        // LinkedList 생성
+        LinkedList<String> list = new LinkedList<>();
+
+        // 요소 추가
+        list.add("Apple");
+        list.add("Banana");
+        list.add("Kiwi");
+        System.out.println("초기 리스트: " + list); 
+          // 출력: 초기 리스트: [Apple, Banana, Kiwi]
+
+
+        // 첫 번째와 마지막 요소 추가
+        list.addFirst("Grape");
+        list.addLast("Cherry");
+        System.out.println("Grape, Cherry 추가 후: " + list); 
+          // 출력: Grape, Cherry 추가 후: [Grape, Apple, Banana, Kiwi, Cherry]
+
+
+        // 특정 위치 요소 삭제
+        list.remove(2);
+        System.out.println("Banana 삭제 후 리스트: " + list); 
+          // 출력: Banana 삭제 후 리스트: [Grape, Apple, Kiwi, Cherry]
+
+
+        // 첫 번째와 마지막 요소 삭제
+        list.removeFirst();
+        list.removeLast();
+        System.out.println("첫 번째와 마지막 요소 삭제 후 리스트: " + list); 
+          // 출력: 첫 번째와 마지막 요소 삭제 후 리스트: [Apple, Kiwi]
+
+
+        // 리스트 순회
+        for (String item : list) {
+            System.out.println("현재 요소: " + item); 
+              // 출력: 현재 요소: Apple, Kiwi
+        }
+
+
+        // 리스트 초기화
+        list.clear();
+        System.out.println("리스트 초기화 후: " + list); 
+          // 출력: 리스트 초기화 후: []
+    }
+}
+```
+
+- `addFirst()`/`addLast()`: LinkedList 전용 메서드로 첫 번째와 마지막 위치에 데이터를 추가.
+- `removeFirst()`/`removeLast()`: LinkedList 전용 메서드로 첫 번째와 마지막 요소를 삭제.
+
+<br>
+
+## 3. ArrayList와 LinkedList 비교
+
+```java
+package _08_collection._list;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+public class CompareList {
+    public static void main(String[] args) {
+        List<String> arrayList = new ArrayList<>();
+        List<String> linkedList = new LinkedList<>();
+
+        long startTime, endTime;
+
+        // ArrayList 성능 테스트
+        startTime = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            arrayList.add(0, String.valueOf(i));
+        }
+        endTime = System.nanoTime();
+        System.out.println("ArrayList 소요 시간: " + (endTime - startTime) + " ns"); 
+          // 출력: ArrayList 소요 시간 - 약 30,000,000 ns
+
+        // LinkedList 성능 테스트
+        startTime = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            linkedList.add(0, String.valueOf(i));
+        }
+        endTime = System.nanoTime();
+        System.out.println("LinkedList 소요 시간: " + (endTime - startTime) + " ns"); 
+          // 출력: LinkedList 소요 시간 - 약 2,000,000 ns
+    }
+}
+```
+
+- ArrayList는 데이터를 0번 인덱스에 추가할 때 기존 데이터를 모두 뒤로 밀어야 하므로 느립니다.
+- LinkedList는 노드 참조만 변경하면 되므로 빠릅니다.
+
+<br>
+
+## 4. ArrayList와 LinkedList의 사용 사례
+
+| **상황**                   | **ArrayList**                        | **LinkedList**                       |
+|---------------------------|--------------------------------------|--------------------------------------|
+| **조회가 많은 경우**         | 빠름 (인덱스 직접 접근)               | 느림 (순차 탐색)                     |
+| **삽입/삭제가 많은 경우**     | 느림 (재배열 필요)                   | 빠름 (노드 참조 변경)                |
+| **리스트 크기**             | 작은 데이터에 적합                    | 데이터 크기가 큰 경우 유리            |
+| **첫 번째/마지막 요소 작업** | 일반적인 성능                         | addFirst/removeFirst로 효율적         |
+
+<br>
+
+## 정리
+
+- **ArrayList**는 조회 성능이 우수하며, 데이터 추가/삭제가 리스트 끝에서 이루어질 때 적합합니다.
+    - ex) 동영상 재생 목록 - 새 동영상은 끝에 추가되고, 조회가 빈번.
+- **LinkedList**는 중간/시작에서의 삽입/삭제가 빈번할 때 효율적입니다.
+    - ex) 대기열 시스템(FIFO) - 고객센터 전화 대기나 작업 큐에서 맨 앞에서 제거, 뒤에서 추가가 자주 발생.
