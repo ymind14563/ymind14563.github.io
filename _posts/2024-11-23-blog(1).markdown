@@ -1,0 +1,185 @@
+---
+layout: post  
+title: "[SeSACx코딩온] HashSet과 HashMap"  
+date: 2024-11-23  
+categories: Java
+---
+
+Java의 `HashSet`과 `HashMap`은 컬렉션 프레임워크에서 자주 사용하는 데이터 구조입니다.  
+- `HashSet`은 중복을 허용하지 않는 **집합(Set)** 구조이며, 
+- `HashMap`은 키-값 쌍으로 데이터를 저장하는 **맵(Map)** 구조입니다.  
+
+
+<br>
+
+## 1. HashSet의 동작과 특징
+
+- **HashSet**은 중복을 허용하지 않으며, 데이터의 순서를 보장하지 않습니다.
+- 내부적으로 **해시 테이블(Hash Table)**을 사용해 데이터를 저장하며, 빠른 데이터 검색이 가능합니다.
+
+### 주요 동작 예제
+
+```java
+package _08_collection._set;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+public class HashSetEx {
+    public static void main(String[] args) {
+        // HashSet 생성
+        Set<String> set = new HashSet<>();
+
+        // 데이터 추가
+        set.add("apple");
+        set.add("banana");
+        set.add("kiwi");
+        set.add("orange");
+        set.add("banana"); // 중복 추가, 저장되지 않음
+        System.out.println("set = " + set); 
+          // 출력: set = [apple, orange, kiwi, banana] (순서는 보장되지 않음)
+
+        // 저장된 데이터 개수
+        System.out.printf("총 %d 종류의 과일이 있다. %n%n", set.size()); 
+          // 출력: 총 4 종류의 과일이 있다.
+
+        // 데이터 순회 - for-each
+        for (String fruit : set) {
+            System.out.println("과일: " + fruit);
+        }
+
+        // 데이터 순회 - Iterator
+        Iterator<String> it = set.iterator();
+        while (it.hasNext()) {
+            System.out.println("Iterator 과일: " + it.next());
+        }
+    }
+}
+```
+
+- **중복 허용 X**: 동일한 데이터는 한 번만 저장됩니다.
+- **데이터 순서 X**: 데이터의 저장 순서는 보장되지 않습니다.
+- **Iterator**: `Iterator`를 사용해 데이터를 순회할 수 있습니다.
+
+<br>
+
+### HashSet과 사용자 정의 클래스
+HashSet은 **사용자 정의 클래스**에서도 중복을 제거할 수 있습니다. 이때 `hashCode()`와 `equals()` 메서드를 오버라이드해야 합니다.
+
+```java
+package _08_collection._set;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class HashSetWithCustomClass {
+    public static void main(String[] args) {
+        // 사용자 정의 클래스 Course
+        class Course {
+            private int id;
+            private String title;
+
+            public Course(int id, String title) {
+                this.id = id;
+                this.title = title;
+            }
+
+            @Override
+            public int hashCode() {
+                return title.hashCode() + id;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (o instanceof Course target) {
+                    return target.id == id && target.title.equals(title);
+                }
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "Course{id=" + id + ", title='" + title + "'}";
+            }
+        }
+
+        // HashSet 생성 및 데이터 추가
+        Set<Course> courses = new HashSet<>();
+        courses.add(new Course(101, "Java"));
+        courses.add(new Course(102, "JavaScript"));
+        courses.add(new Course(102, "JavaScript")); // 중복, 저장되지 않음
+
+        System.out.println("courses = " + courses); 
+          // 출력: courses = [Course{id=101, title='Java'}, Course{id=102, title='JavaScript'}]
+
+        System.out.printf("총 %d 종류의 과정이 있다. %n", courses.size()); 
+          // 출력: 총 2 종류의 과정이 있다.
+    }
+}
+```
+
+<br>
+
+## 2. HashMap의 동작과 특징
+
+- **HashMap**은 키-값(Key-Value) 쌍으로 데이터를 저장합니다.
+- **중복 키를 허용하지 않으며**, 각 키는 고유해야 합니다.
+- 데이터를 저장하거나 검색할 때 **해시 테이블**을 사용해 높은 성능을 제공합니다.
+
+### 주요 동작 예제
+
+```java
+package _08_collection._map;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class HashMapEx {
+    public static void main(String[] args) {
+        // HashMap 생성
+        Map<Integer, String> map = new HashMap<>();
+
+        // 데이터 추가
+        map.put(1001, "홍길동");
+        map.put(1002, "김민지");
+        map.put(1003, "강해린");
+        map.put(1004, "성춘향");
+        System.out.println("map = " + map); 
+          // 출력: map = {1001=홍길동, 1002=김민지, 1003=강해린, 1004=성춘향}
+
+        // 데이터 개수
+        System.out.printf("총 %d 명의 학생이 있습니다. %n%n", map.size()); 
+          // 출력: 총 4 명의 학생이 있습니다.
+
+        // 특정 키로 값 얻기
+        int key = 1003;
+        String value = map.get(key);
+        System.out.printf("%d 번 학생은 %s 입니다. %n", key, value); 
+          // 출력: 1003 번 학생은 강해린 입니다.
+
+        // 특정 키로 데이터 삭제
+        String removedValue = map.remove(1002);
+        System.out.printf("%s 학생이 삭제되었습니다. %n", removedValue); 
+          // 출력: 김민지 학생이 삭제되었습니다.
+
+        System.out.printf("총 %d 명의 학생이 있습니다. %n%n", map.size()); 
+          // 출력: 총 3 명의 학생이 있습니다.
+    }
+}
+```
+
+- **중복 키 X**: 동일한 키는 저장되지 않습니다.
+- **데이터 검색**: 키를 통해 빠르게 데이터를 검색할 수 있습니다.
+- **삭제**: `remove()` 메서드를 사용해 특정 키와 연결된 데이터를 삭제할 수 있습니다.
+
+<br>
+
+## 3. HashSet과 HashMap 비교
+
+| 특징                    | **HashSet**                                   | **HashMap**                                      |
+|-------------------------|-----------------------------------------------|------------------------------------------------|
+| **저장 구조**            | 단일 값 저장                                   | 키-값 쌍(Key-Value)으로 데이터 저장              |
+| **중복 허용 여부**       | 중복 데이터 허용 X                             | 키 중복 허용 X (값은 중복 허용 O)               |
+| **데이터 순서**          | 저장 순서 보장 X                               | 저장 순서 보장 X                                |
+| **사용 목적**            | 중복 없는 데이터 저장                          | 키를 기반으로 빠르게 값 검색                    |
