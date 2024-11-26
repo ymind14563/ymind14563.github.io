@@ -1,0 +1,188 @@
+---
+layout: post  
+title: "[SeSACx코딩온] 빌더 패턴 (Builder Pattern)"  
+date: 2024-11-26  
+categories: Java
+---
+
+## 1. 빌더 패턴(Builder Pattern)이란?
+
+**빌더 패턴**은 복잡한 객체를 **안전하고 명확하게 생성**하기 위한 디자인 패턴입니다.  
+필수 값과 선택 값을 구분하며, 메서드 체이닝 방식으로 객체 생성 과정을 간결하게 표현할 수 있습니다.
+
+### 빌더 패턴의 특징
+- **필수 값 지정**: 반드시 필요한 값만 설정할 수 있도록 강제
+- **선택 값 유연성**: 선택적으로 설정 가능하며, 설정하지 않으면 기본값이 유지
+- **불변성 보장**: 생성된 객체는 필드 값이 변경되지 않도록 설계
+- **가독성 향상**: 메서드 체이닝으로 설정 과정을 직관적으로 표현
+
+<br>
+
+## 2. 필수 값과 선택 값의 구분
+
+### 1) 구분 기준
+- **필수 값**: 빌더 클래스의 **생성자에서 초기화가 강제된 필드**. 빌더 객체를 생성할 때 반드시 값을 제공해야 합니다.
+- **선택 값**: 빌더 클래스의 **setter 메서드**를 통해 설정되는 필드. 설정하지 않으면 기본값(예: 0, `null`)이 유지됩니다.
+
+### 2) 코드에서의 구분
+
+```java
+public class Computer {
+    private final String cpu;  // 필수 값
+    private final int ram;     // 선택 값
+    private final int storage; // 선택 값
+    private final String gpu;  // 선택 값
+
+    private Computer(ComputerBuilder builder) {
+        this.cpu = builder.cpu;         // 필수 값 초기화
+        this.ram = builder.ram;         // 선택 값 초기화
+        this.storage = builder.storage; // 선택 값 초기화
+        this.gpu = builder.gpu;         // 선택 값 초기화
+    }
+
+    public static class ComputerBuilder {
+        private final String cpu; // 필수 값
+        private int ram;          // 선택 값
+        private int storage;      // 선택 값
+        private String gpu;       // 선택 값
+
+        // 필수 값 설정 (생성자)
+        public ComputerBuilder(String cpu) {
+            this.cpu = cpu; // 필수 값 초기화
+        }
+
+        // 선택 값 설정 (setter 메서드)
+        public ComputerBuilder setRam(int ram) {
+            this.ram = ram;
+            return this;
+        }
+
+        public ComputerBuilder setStorage(int storage) {
+            this.storage = storage;
+            return this;
+        }
+
+        public ComputerBuilder setGpu(String gpu) {
+            this.gpu = gpu;
+            return this;
+        }
+
+        public Computer build() {
+            return new Computer(this);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Computer{" +
+                "cpu='" + cpu + '\'' +
+                ", ram=" + ram + "GB" +
+                ", storage=" + storage + "GB" +
+                ", gpu='" + gpu + '\'' +
+                '}';
+    }
+}
+```
+
+### 3) 동작 방식
+- 필수 값(`cpu`)은 **빌더 생성자**에서 설정되며 누락이 불가능합니다.
+- 선택 값(`ram`, `storage`, `gpu`)은 **setter 메서드**로 설정되며, 설정하지 않으면 기본값이 유지됩니다.
+
+<br>
+
+## 3. 빌더 패턴 사용
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 기본 컴퓨터
+        Computer basicComputer = new Computer.ComputerBuilder("Intel i5")
+                .setRam(8)
+                .setStorage(256)
+                .build();
+        System.out.println("basicComputer = " + basicComputer);
+
+        // 게이밍 컴퓨터
+        Computer gamingComputer = new Computer.ComputerBuilder("AMD Ryzen 7")
+                .setRam(32)
+                .setStorage(1000)
+                .setGpu("NVIDIA RTX 3080")
+                .build();
+        System.out.println("gamingComputer = " + gamingComputer);
+
+        // 코딩용 컴퓨터
+        Computer codingComputer = new Computer.ComputerBuilder("Intel i9")
+                .setRam(64)
+                .setStorage(512)
+                .build();
+        System.out.println("codingComputer = " + codingComputer);
+    }
+}
+```
+
+### 결과
+```
+basicComputer = Computer{cpu='Intel i5', ram=8GB, storage=256GB, gpu='null'}
+gamingComputer = Computer{cpu='AMD Ryzen 7', ram=32GB, storage=1000GB, gpu='NVIDIA RTX 3080'}
+codingComputer = Computer{cpu='Intel i9', ram=64GB, storage=512GB, gpu='null'}
+```
+
+<br>
+
+## 4. Setter 방식과 비교
+
+### 1) Setter 방식의 문제점
+
+Setter를 사용하면 각 필드를 개별적으로 설정해야 하므로 코드의 일관성이 떨어지고, 필수 값 누락 위험이 있습니다.
+
+### 2) Setter 방식 코드
+
+```java
+public class Computer {
+    private String cpu;
+    private int ram;
+    private int storage;
+    private String gpu;
+
+    public void setCpu(String cpu) { this.cpu = cpu; }
+    public void setRam(int ram) { this.ram = ram; }
+    public void setStorage(int storage) { this.storage = storage; }
+    public void setGpu(String gpu) { this.gpu = gpu; }
+
+    @Override
+    public String toString() {
+        return "Computer{" +
+                "cpu='" + cpu + '\'' +
+                ", ram=" + ram + "GB" +
+                ", storage=" + storage + "GB" +
+                ", gpu='" + gpu + '\'' +
+                '}';
+    }
+}
+```
+
+### 3) Setter 사용 예시
+```java
+public class Main {
+    public static void main(String[] args) {
+        Computer computer = new Computer();
+        computer.setCpu("Intel i5");
+        computer.setRam(8);
+        computer.setStorage(256);
+        computer.setGpu("NVIDIA RTX 3060");
+
+        System.out.println("computer = " + computer);
+    }
+}
+```
+
+<br>
+
+## 5. Setter와 Builder의 비교
+
+| **특징**              | **Setter 방식**                             | **Builder 패턴**                       |
+|-----------------------|---------------------------------------------|----------------------------------------|
+| **필수 값 처리**       | 필수 값 누락 가능                           | 필수 값 설정을 강제                     |
+| **객체의 불변성**      | 생성 후 필드 수정 가능                       | 생성 후 필드 수정 불가                  |
+| **가독성**            | 설정 코드가 분산됨                          | 메서드 체이닝으로 명확하게 표현          |
+| **유연성**            | 설정 순서와 상관없이 필드를 수정할 수 있음     | 필요한 값만 선택적으로 설정 가능         |
