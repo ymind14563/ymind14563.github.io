@@ -16,14 +16,14 @@ categories: SpringBoot
 ### 1) 의존성 추가  
 Thymeleaf를 사용하려면 프로젝트에 `spring-boot-starter-thymeleaf` 의존성을 추가해야 합니다.
 
-**`build.gradle` 예제:**
+**`build.gradle`**
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 ```
 
-**`pom.xml` 예제 (Maven)**
+**`pom.xml`(Maven)**
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
