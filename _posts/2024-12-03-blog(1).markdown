@@ -1,0 +1,11 @@
+---
+layout: post  
+title: "'pip'은(는) 내부 또는 외부 명령, 실행할 수 있는 프로그램, 또는 배치 파일이 아닙니다."
+date: 2024-12-03
+categories: 환경변수
+---
+
+![image](https://github.com/user-attachments/assets/77561871-3a97-4a83-8ff9-5a785ddb30ee)
+
+## pip 환경변수 추가로 해결
+[https://blog.naver.com/jaeyoon_95/222228697034](https://blog.naver.com/jaeyoon_95/222228697034)

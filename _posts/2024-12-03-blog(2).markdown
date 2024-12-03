@@ -1,0 +1,53 @@
+---
+layout: post  
+title: "Jupyter Notebook 설치 문제와 해결 방법"
+date: 2024-12-03
+categories: Jupyter Notebook
+---
+
+## 1. Jupyter Notebook 설치
+
+```bash
+pip install jupyter
+```
+
+
+
+## 2. 마주친 문제
+
+![image](https://github.com/user-attachments/assets/1ad53300-07c0-4199-b6e3-3a2e8fd6986d)
+
+### 1) 문제
+
+rpds-py 패키지가 Rust 컴파일러(Cargo 포함)를 필요로 하지만, 현재 시스템에 Rust가 설치되어 있지 않아서 발생한 문제입니다.
+
+### 2) 원인
+
+- 설치한 Python은 최신버전인 3.13.0
+- Jupyter Notebook 최신 버전은 7.x
+- Jupyter Notebook의 7.0 버전부터 Rust 컴파일러를 필요로 하는 의존성이 도입
+
+파이썬과 주피터 노트북을 설치하는 데 Rust가 필수는 아닙니다.
+하지만 최신 Jupyter 버전에서 Rust를 사용하는 의존성이 추가된 경우가 있어 Rust가 설치되지 않은 환경에서 충돌이 발생할 수 있습니다.
+
+### 3) 해결 방법 - (1) 선택
+
+#### (1) 특정 버전의 notebook과 의존성을 지정하여 Rust 없이 설치 (선택)
+
+```
+pip install "notebook<6.5" "jsonschema<4.18"
+```
+
+#### (2) Rust 의존성 제거
+
+```
+pip install notebook<7.0 --no-build-isolation
+```
+
+## 3. 실행
+
+```bash
+jupyter notebook
+```
+
+![image](https://github.com/user-attachments/assets/9e9ea3fa-b2c4-4e40-b7e8-5580588297ca)

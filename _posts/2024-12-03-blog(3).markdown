@@ -1,0 +1,44 @@
+---
+layout: post  
+title: "이미 push한 file 삭제하는 방법(.ipynb_checkpoints)"
+date: 2024-12-03
+categories: Git
+---
+
+Jupyter Notebook를 사용하면서 GitHub에 push 했는데 `.ipynb_checkpoints` 도 같이 push됨을 확인하였습니다.
+
+### 1. **`.ipynb_checkpoints`의 목적**
+- Jupyter Notebook이 **자동 저장** 기능을 사용할 때 생성하는 디렉터리로, 작업 중 데이터 손실을 방지하기 위한 **임시 파일**을 저장합니다.
+- 주로 수정된 상태의 체크포인트를 저장하며, 최종 결과물이 아니므로 GitHub에 푸시할 필요가 없습니다.
+
+<br>
+
+### 2. **이미 푸시한 `.ipynb_checkpoints` 삭제하는 법**
+
+#### (1) `.gitignore` 설정
+
+루트 디렉터리에 `.gitignore` 파일을 생성하여 다음 내용을 추가합니다.
+
+```
+*/.ipynb_checkpoints/
+```
+
+#### (2) Git에서 추적 중인 `.ipynb_checkpoints` 제거
+
+이미 푸시된 `.ipynb_checkpoints`를 Git에서 제거하려면 아래 명령을 실행합니다.
+
+```bash
+git rm -r --cached */.ipynb_checkpoints
+```
+
+#### (3) 변경 사항 커밋
+
+```bash
+git commit -m "Remove .ipynb_checkpoints from repository"
+```
+
+#### (4) 변경 사항 푸시
+
+```bash
+git push origin main
+```
