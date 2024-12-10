@@ -1,0 +1,178 @@
+---
+layout: post  
+title: "[SeSACx코딩온] DTO와 VO"  
+date: 2024-12-10  
+categories: SpringBoot
+---
+
+## 1. DTO와 VO란?
+
+### 1) DTO(Data Transfer Object)
+- **DTO**는 데이터를 전송하기 위한 객체로, 주로 **클라이언트와 서버 간의 데이터 교환**을 목적으로 사용됩니다.  
+- 주로 **Getter와 Setter**만 가지며, 비즈니스 로직을 포함하지 않습니다.  
+- 불변성을 보장하지 않아 데이터를 자유롭게 수정할 수 있습니다.  
+- 데이터베이스에서 가져온 데이터를 가공하여 클라이언트로 전달하거나, 클라이언트에서 받은 데이터를 처리하기 위해 사용됩니다.
+
+### 2) VO(Value Object)
+- **VO**는 값 자체를 표현하는 객체로, 주로 **불변성**이 중요한 곳에서 사용됩니다.  
+- **final 클래스와 final 필드**를 사용하여 값을 변경할 수 없게 만듭니다.  
+- 비즈니스 로직을 포함할 수 있으며, 주로 도메인 모델에서 활용됩니다.  
+- **equals()**와 **hashCode()** 메서드를 재정의하여 값의 동등성을 비교합니다.
+
+<br>
+
+## 2. DTO와 VO의 차이점
+
+| **특징**             | **DTO**                                           | **VO**                                           |
+|----------------------|---------------------------------------------------|-------------------------------------------------|
+| **주요 목적**          | 데이터 전송                                         | 값을 표현 및 동등성 비교                           |
+| **불변성**            | 보장하지 않음 (Setter 사용 가능)                       | 보장 (final 필드와 클래스)                        |
+| **비즈니스 로직 포함 여부** | 포함하지 않음                                        | 포함 가능                                          |
+| **equals(), hashCode()** | 재정의하지 않아도 됨                                 | 반드시 재정의                                      |
+| **사용 예**           | 클라이언트-서버 간 데이터 전송                        | 두 점 사이의 거리 계산, 좌표 같은 불변 데이터 표현   |
+
+<br>
+
+## 3. DTO 구현 예시
+
+### 1) UserDTO 클래스
+
+`UserDTO`는 사용자 정보를 서버와 클라이언트 간에 전송하기 위한 객체입니다.  
+Lombok 라이브러리를 활용하여 간결하게 작성할 수 있습니다.
+
+```java
+import lombok.*;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+public class UserDTO {
+    private Long id;
+    private String username;
+    private String email;
+    private int age;
+}
+```
+
+- **`@AllArgsConstructor`**: 모든 필드를 포함한 생성자를 자동 생성.
+- **`@NoArgsConstructor`**: 기본 생성자를 자동 생성.
+- **`@Getter`, `@Setter`**: 각 필드의 Getter와 Setter를 생성.
+- **`@ToString`**: 객체를 문자열로 표현하는 메서드를 생성.
+
+### 2) DTO 사용 예시
+
+```java
+public class UserExample {
+    public static void main(String[] args) {
+        // DTO 객체 생성 및 데이터 설정
+        UserDTO u1 = new UserDTO();
+        u1.setId(1L);
+        u1.setUsername("John Doe");
+        u1.setEmail("johndoe@example.com");
+        u1.setAge(30);
+
+        System.out.println("u1 = " + u1);
+
+        // 모든 필드를 포함하는 생성자 사용
+        UserDTO u2 = new UserDTO(2L, "Jane Smith", "janesmith@example.com", 25);
+        System.out.println("u2 = " + u2);
+
+        // Getter로 데이터 접근
+        System.out.println("Username: " + u2.getUsername());
+        System.out.println("Email: " + u2.getEmail());
+
+        // Setter로 데이터 수정
+        u2.setAge(26);
+        System.out.println("Updated u2 = " + u2);
+    }
+}
+```
+
+<br>
+
+## 4. VO 구현 예시
+
+### 1) Point 클래스
+
+`Point` 클래스는 2D 좌표를 표현하는 VO 객체입니다.  
+좌표 값은 불변하며, 두 점 사이의 거리 계산 같은 비즈니스 로직을 포함할 수 있습니다.
+
+```java
+import java.util.Objects;
+
+public final class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() { return x; }
+    public int getY() { return y; }
+
+    public double distanceTo(Point other) {
+        int dx = this.x - other.x;
+        int dy = this.y - other.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Point{" + "x=" + x + ", y=" + y + '}';
+    }
+}
+```
+
+### 2) VO 사용 예시
+
+```java
+public class PointExample {
+    public static void main(String[] args) {
+        Point p1 = new Point(0, 0);
+        Point p2 = new Point(3, 4);
+
+        System.out.println("p1 = " + p1);
+        System.out.println("p2 = " + p2);
+
+        // 두 점 사이의 거리 계산
+        System.out.println("두 점 사이의 거리: " + p1.distanceTo(p2));
+
+        // 객체 동등성 비교
+        Point p3 = new Point(3, 4);
+        System.out.println("p2와 p3는 같은가? " + p2.equals(p3));
+
+        // 해시코드 비교
+        System.out.println("p2의 hashCode: " + p2.hashCode());
+        System.out.println("p3의 hashCode: " + p3.hashCode());
+    }
+}
+```
+
+<br>
+
+## 5. DTO와 VO의 활용
+
+### 1) DTO  
+- 클라이언트에서 서버로 데이터를 전송할 때 사용됩니다.  
+- 예: 사용자 로그인 요청, 상품 주문 정보 전송 등.
+
+### 2) VO  
+- 값 자체의 불변성을 보장하며, 동일한 값은 같은 객체로 판단합니다.  
+- 예: 좌표(Point), 금액(Money), 날짜(Date) 등.
