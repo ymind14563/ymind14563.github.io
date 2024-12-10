@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] DTO와 VO"  
 date: 2024-12-10  
-categories: SpringBoot
+categories: Spring Boot
 ---
 
 ## 1. DTO와 VO란?

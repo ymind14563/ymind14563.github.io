@@ -1,0 +1,142 @@
+---
+layout: post  
+title: "VO와 상수/열거형의 선택 기준"  
+date: 2024-12-10  
+categories: Spring Boot
+---
+
+### 1. **상수 필드나 열거형의 한계**
+- **상수 필드:** 단순한 값(변하지 않는 데이터)을 표현하기에 적합.
+  ```java
+  public class Constants {
+      public static final String ROLE_ADMIN = "ADMIN";
+      public static final String ROLE_USER = "USER";
+  }
+  ```
+  - 이런 상수는 값 자체를 표현하지만, **값 간의 연산이나 동작을 정의할 수 없음**.
+  - 불변성은 보장되지만, 상수 값이 가지는 의미나 동작을 캡슐화하기 어렵다.
+
+
+- **열거형(Enum):** 고정된 값 집합을 표현할 때 적합.
+  ```java
+  public enum Role {
+      ADMIN, USER, GUEST;
+  }
+  ```
+  - 열거형은 제한된 값 집합을 표현할 수는 있지만, **복잡한 연산이나 추가 데이터 처리에는 한계**가 있음.
+  - 동작을 포함할 수 있으나, 주로 값을 열거하기 위한 용도에 사용.
+
+<br>
+
+### 2. **VO를 사용하는 이유**
+VO는 **데이터와 그 데이터를 다루는 로직을 함께 묶어서 표현**하기 때문에 다음과 같은 장점이 있습니다:
+
+#### 1) **데이터의 캡슐화**
+- 단순한 값 외에도, 값 간의 관계나 연산 로직을 포함할 수 있음.
+- 상수나 열거형은 정적인 값만 제공하지만, VO는 값을 다루는 비즈니스 로직을 추가할 수 있음.
+
+**예:** 금액(Money) 표현
+```java
+public final class Money {
+    private final BigDecimal amount;
+
+    public Money(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("금액은 0 이상이어야 합니다.");
+        }
+        this.amount = amount;
+    }
+
+    public Money add(Money other) {
+        return new Money(this.amount.add(other.amount));
+    }
+
+    public Money subtract(Money other) {
+        return new Money(this.amount.subtract(other.amount));
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Money money = (Money) o;
+        return amount.equals(money.amount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(amount);
+    }
+}
+```
+- `Money` VO는 금액을 표현하면서 동시에 금액을 더하거나 뺄 수 있는 **로직을 캡슐화**.
+- 상수나 열거형으로는 금액의 연산이나 유효성 검사를 포함할 수 없음.
+
+
+#### 2) **불변성 보장**
+- VO는 불변 객체로 설계되기 때문에 값 변경에 대한 걱정 없이 사용 가능.
+- 상수 필드나 열거형은 단순히 값을 읽는 용도로 사용되지만, VO는 상태를 포함하지 않고도 **복잡한 데이터 표현**이 가능.
+
+
+#### 3) **의미 있는 표현**
+- VO는 단순히 값을 나열하는 것이 아니라, 값 자체가 가지는 의미를 명확히 드러냄.
+- 예를 들어, 좌표(Point)나 거리(Distance)를 표현하는 VO는 그 데이터의 목적을 명확히 드러냄.
+
+**예:** 좌표(Point) 표현
+```java
+public final class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double distanceTo(Point other) {
+        int dx = this.x - other.x;
+        int dy = this.y - other.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    @Override
+    public String toString() {
+        return "Point{" + "x=" + x + ", y=" + y + '}';
+    }
+}
+```
+- 상수 필드나 열거형으로는 두 좌표 간 거리 계산 같은 동작을 포함할 수 없음.
+
+
+#### 4) **값의 동등성 보장**
+- VO는 `equals()`와 `hashCode()`를 재정의하여 값의 동등성을 비교할 수 있음.
+- 상수 필드는 참조를 비교하지만, VO는 값 자체를 비교.
+
+**예:** 두 VO 객체의 값 비교
+```java
+Point p1 = new Point(3, 4);
+Point p2 = new Point(3, 4);
+
+System.out.println(p1.equals(p2)); // true, 값이 동일하므로 동등
+```
+
+<br>
+
+### 3. VO와 상수/열거형의 선택 기준
+| **특성**                | **VO**                                       | **상수 필드/열거형**                             |
+|------------------------|-------------------------------------------|-------------------------------------------|
+| **복잡한 데이터 표현**    | 가능 (값 간 연산, 검증 로직 포함 가능)               | 불가능 (정적 값만 표현 가능)                     |
+| **값의 불변성 보장**      | 보장                                       | 보장                                       |
+| **값 간의 관계 정의**      | 가능                                       | 불가능                                       |
+| **동작 포함**            | 가능 (메서드 추가 가능)                          | 제한적 (주로 정적 값만 정의)                     |
+| **사용 예**              | 금액, 좌표, 거리, 주소와 같은 복잡한 데이터 처리        | 사용자 권한(ADMIN, USER), 고정된 코드 값 등.       |
+
+<br>
+
+### 4. 결론
+- VO는 **값을 표현하면서 관련된 로직까지 포함할 수 있는 객체**로, 단순히 불변성만 제공하는 상수나 열거형보다 **더 유연하고 의미 있는 데이터 표현**이 가능합니다.
+- **상수 필드/열거형**은 단순한 정적 값이나 고정된 집합(예: 역할, 상태)에서 적합하며, **VO는 비즈니스 로직이나 값 간 관계가 필요한 경우**에 사용됩니다.

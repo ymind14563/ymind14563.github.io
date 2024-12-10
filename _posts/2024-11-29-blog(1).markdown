@@ -2,7 +2,7 @@
 layout: post  
 title: "[SeSACx코딩온] Spring Boot와 Thymeleaf"
 date: 2024-11-29
-categories: SpringBoot  
+categories: Spring Boot  
 ---
 
 ## Thymeleaf란?
