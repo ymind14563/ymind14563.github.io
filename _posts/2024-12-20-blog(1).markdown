@@ -2,7 +2,7 @@
 layout: post
 title: "결측치와 이상치"
 date: 2024-12-20
-categories: Data analysis
+categories: "Data Analysis"
 ---
 
 ### 1. 결측치 (Missing Value)
