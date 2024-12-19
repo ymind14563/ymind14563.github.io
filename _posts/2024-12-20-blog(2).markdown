@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "히스토그램과 박스 플롯"
+title: "Histogram과 Boxplot"
 date: 2024-12-20
 categories: Data analysis
 ---
