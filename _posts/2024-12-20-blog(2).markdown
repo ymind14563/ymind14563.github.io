@@ -2,7 +2,8 @@
 layout: post
 title: "Histogram과 Boxplot"
 date: 2024-12-20
-categories: "Data Analysis"
+categories: 
+    - "Data Analysis"
 ---
 
 ### 1. 히스토그램 (Histogram)
