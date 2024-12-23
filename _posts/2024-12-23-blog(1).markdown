@@ -1,0 +1,202 @@
+---
+layout: post
+title: "MyBatis 동작 과정"
+date: 2024-12-23
+categories: MyBatis
+---
+
+## MyBatis란?
+
+MyBatis는 Java의 데이터 매핑 프레임워크로, SQL 쿼리와 자바 객체를 매핑하여 데이터베이스와 애플리케이션 간 데이터를 쉽게 다룰 수 있도록 도와줍니다. Spring Boot와 MyBatis를 함께 사용하면 SQL 중심의 데이터베이스 작업을 간단하고 직관적으로 처리할 수 있습니다.
+
+<br>
+
+## 1. MyBatis 동작 원리
+
+MyBatis는 다음과 같은 과정을 거쳐 데이터를 처리합니다.
+
+#### (1) XML Mapper 파일에서 SQL 쿼리를 정의합니다.
+#### (2) 자바의 Mapper 인터페이스와 XML Mapper를 연결합니다.
+#### (3) 서비스 계층에서 Mapper 인터페이스를 호출합니다.
+#### (4) SQL 실행 결과를 DTO나 도메인 객체로 반환합니다.
+
+<br>
+
+## 2. 프로젝트 구조
+
+```
+src/
+├── main/
+│   ├── java/sesac/spring_boot_mybatis/
+│   │   ├── controller/         // 요청을 처리하는 컨트롤러
+│   │   ├── domain/             // 데이터베이스 테이블과 매핑되는 도메인 객체
+│   │   ├── dto/                // 데이터 전송 객체
+│   │   ├── mapper/             // MyBatis 매퍼 인터페이스
+│   │   ├── service/            // 비즈니스 로직 처리
+│   │   └── SpringBootMybatisApplication.java
+│   ├── resources/
+│       ├── application.properties  // 설정 파일
+│       ├── mybatis-mapper/         // XML Mapper 파일 저장 디렉토리
+│       ├── templates/              // HTML 템플릿 파일
+│       └── static/                 // 정적 파일
+```
+
+<br>
+
+## 3. `application.properties` 설정
+
+Spring Boot에서 MyBatis를 사용하려면 `application.properties` 파일에 MyBatis와 데이터베이스 설정을 추가해야 합니다.
+
+```
+# 데이터베이스 설정
+spring.datasource.url=jdbc:mysql://localhost:3306/mybatis_db
+spring.datasource.username=root
+spring.datasource.password=password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# MyBatis 설정
+mybatis.mapper-locations=classpath:mybatis-mapper/*.xml
+mybatis.configuration.map-underscore-to-camel-case=true
+```
+
+- **`spring.datasource.url`**: 데이터베이스 URL을 지정합니다.
+- **`mybatis.mapper-locations`**: XML Mapper 파일의 위치를 설정합니다.
+- **`map-underscore-to-camel-case`**: 언더스코어 표기법을 카멜 표기법으로 매핑합니다.
+
+<br>
+
+## 4. XML Mapper 작성
+
+XML Mapper는 SQL 쿼리를 정의하는 파일입니다. 아래는 `UserMapper.xml` 파일의 구조입니다.
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sesac.spring_boot_mybatis.mapper.UserMapper">
+
+    <!-- 사용자 목록 조회 -->
+    <select id="findAll" resultType="sesac.spring_boot_mybatis.domain.User">
+        SELECT id, name, email
+        FROM user
+    </select>
+
+    <!-- 사용자 삽입 -->
+    <insert id="insertUser" parameterType="sesac.spring_boot_mybatis.dto.UserDTO">
+        INSERT INTO user (name, email)
+        VALUES (#{name}, #{email})
+    </insert>
+
+</mapper>
+```
+
+- **`namespace`**: Mapper 인터페이스와 연결됩니다.
+- **SQL 태그**: `select`, `insert`, `update`, `delete` 등의 작업을 정의합니다.
+- **`#{}`**: 파라미터를 바인딩할 때 사용합니다.
+
+<br>
+
+## 5. Mapper 인터페이스 작성
+
+Mapper 인터페이스는 XML Mapper와 연결되는 자바 인터페이스입니다.
+
+```java
+package sesac.spring_boot_mybatis.mapper;
+
+import org.apache.ibatis.annotations.Mapper;
+import sesac.spring_boot_mybatis.domain.User;
+import sesac.spring_boot_mybatis.dto.UserDTO;
+
+import java.util.List;
+
+@Mapper
+public interface UserMapper {
+    List<User> findAll();
+    void insertUser(UserDTO userDTO);
+}
+```
+
+- **`@Mapper`**: MyBatis가 이 인터페이스를 Mapper로 인식하도록 합니다.
+- 메서드 이름은 XML Mapper의 `id`와 동일해야 합니다.
+
+<br>
+
+## 6. 서비스 계층 작성
+
+서비스 계층은 비즈니스 로직을 처리하며, Mapper 인터페이스를 호출합니다.
+
+```java
+package sesac.spring_boot_mybatis.service;
+
+import org.springframework.stereotype.Service;
+import sesac.spring_boot_mybatis.domain.User;
+import sesac.spring_boot_mybatis.dto.UserDTO;
+import sesac.spring_boot_mybatis.mapper.UserMapper;
+
+import java.util.List;
+
+@Service
+public class UserService {
+    private final UserMapper userMapper;
+
+    public UserService(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
+    public List<User> getAllUsers() {
+        return userMapper.findAll();
+    }
+
+    public void addUser(UserDTO userDTO) {
+        userMapper.insertUser(userDTO);
+    }
+}
+```
+
+<br>
+
+## 7. 컨트롤러 작성
+
+컨트롤러는 클라이언트 요청을 처리하고 서비스 계층을 호출합니다.
+
+```java
+package sesac.spring_boot_mybatis.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import sesac.spring_boot_mybatis.dto.UserDTO;
+import sesac.spring_boot_mybatis.service.UserService;
+
+@Controller
+public class UserController {
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/users")
+    public String getUserList(Model model) {
+        model.addAttribute("users", userService.getAllUsers());
+        return "userList";
+    }
+
+    @PostMapping("/users")
+    public String createUser(UserDTO userDTO) {
+        userService.addUser(userDTO);
+        return "redirect:/users";
+    }
+}
+```
+
+<br>
+
+## 8. 동작 과정 요약
+
+#### (1) 클라이언트가 `/users`로 요청을 보냅니다.
+#### (2) `UserController`가 요청을 처리하고, `UserService`를 호출하여 데이터를 조회합니다.
+#### (3) `UserService`는 `UserMapper`를 통해 SQL을 실행합니다.
+#### (4) XML Mapper가 SQL을 실행하여 결과를 반환합니다.
+#### (5) 결과 데이터는 뷰 템플릿(`userList.html`)에 전달됩니다.
