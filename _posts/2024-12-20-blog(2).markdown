@@ -66,6 +66,10 @@ plt.show()
 ### 2. 박스 플롯 (Boxplot)
 ![boxplot_image](https://github.com/user-attachments/assets/3fa672fb-9b74-4d31-81fa-e2c9f63533ca)
 
+![boxplot_detail_image](https://github.com/user-attachments/assets/caa0224e-e616-4952-8db0-c48343ed5fa7)
+
+
+
 #### 1) 정의  
 - 데이터의 요약 통계량(중앙값, 사분위수 등)을 시각화하며 분포와 이상치를 효과적으로 보여주는 그래프  
 - 박스는 1사분위수(Q1)와 3사분위수(Q3) 사이를 나타내고, 중앙선은 중앙값(Median)을 의미  
@@ -114,3 +118,5 @@ plt.show()
 - [박스플롯(Boxplot)](https://newsjel.ly/archives/newsjelly-report/14177)
 
 - [히스토그램(Histogram)과 박스플롯(Boxplot)](https://www.storytellingwithdata.com/blog/what-is-a-boxplot)
+
+- [박스 플롯](https://buillee.tistory.com/198)
