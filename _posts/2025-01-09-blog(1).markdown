@@ -1,0 +1,175 @@
+---
+layout: post
+title: "Nginx를 활용한 Load Balancing 설정" 
+date: 2025-01-09
+categories:
+    - "AWS"
+    - "Nginx"
+    - "Load Balancing"
+---
+
+
+## 1. 로드 밸런싱을 위한 환경 구성
+
+- EC2 인스턴스를 2개 이상 생성
+- 동일한 백엔드 애플리케이션(Java 등)을 EC2 인스턴스에 배포하고, 포트 `8080`에서 실행되도록 설정
+- Nginx에서 각 인스턴스를 로드 밸런싱 대상으로 정의하기 위해 EC2의 프라이빗 IP 또는 퍼블릭 IP를 확인
+- 클라이언트 애플리케이션(React 등 정적 파일)은 Nginx 서버의 `/` 경로에서 처리하도록 배포
+
+## 2. Nginx 로드 밸런싱 설정
+
+### 1) 설정 파일 구성
+
+- Nginx 설정 파일에 `upstream` 블록을 추가하여 백엔드 서버를 정의합니다.
+- 기본 라운드 로빈 방식(요청이 들어오면 나열된 서버로 순차적으로 전달)을 사용하여 요청을 서버에 분배합니다.
+
+```nginx
+http {
+    # 백엔드 서버 정의
+    upstream backend_servers {
+        server 192.168.1.101:8080 max_fails=3 fail_timeout=30s;  # EC2-1 (인스턴스 IP)
+        server 192.168.1.102:8080 max_fails=3 fail_timeout=30s;  # EC2-2 (인스턴스 IP)
+    }
+
+    server {
+        listen 80;
+        server_name ec2-0-00-000-00.ap-northeast-2.compute.amazonaws.com;
+
+        # 클라이언트 애플리케이션
+        location / {
+            proxy_pass http://localhost:3000;  # React 정적 파일
+            try_files $uri $uri/ /index.html;
+        }
+
+        # API 요청 로드 밸런싱
+        location /api {
+            proxy_pass http://backend_servers;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
+```
+
+### 2) 주요 설정
+
+- **`upstream`** 블록: 로드 밸런싱 대상 서버를 정의합니다. 각 서버는 포트 `8080`에서 실행됩니다.
+    - `max_fails`와 `fail_timeout`로 간주되는 기준을 정의합니다.
+- **`proxy_pass`**: `/api` 경로 요청을 정의한 `backend_servers`로 전달합니다.
+
+<br>
+
+
+## 3. 로드 밸런싱 방식
+
+### 1) **라운드 로빈 (Round Robin)** (기본값): 요청을 순차적으로 서버에 분배
+### 2)  **Least Connectionsions**: 현재 연결 수가 가장 적은 서버로 요청을 전달
+
+   ```nginx
+   upstream backend_servers {
+       least_conn;
+       server 192.168.1.101:8080;
+       server 192.168.1.102:8080;
+   }
+   ```
+### 3) **IP Hash**: 동일한 클라이언트 IP가 항상 같은 서버에 연결되도록 설정
+
+   ```nginx
+   upstream backend_servers {
+       ip_hash;
+       server 192.168.1.101:8080;
+       server 192.168.1.102:8080;
+   }
+   ```
+
+<br>
+
+## 4. 로드 밸런싱 적용 후 점검
+
+### 1)Nginx 설정 파일 테스트
+
+   ```bash
+   sudo nginx -t
+   ```
+
+### 2)Nginx 재시작
+
+   ```bash
+   sudo systemctl restart nginx
+   ```
+
+### 3) 로드 밸런싱 확인
+   - 각 EC2 서버의 애플리케이션 로그를 확인하여 요청이 분산되는지 확인
+   - 요청 IP 및 경로를 비교해 로드 밸런싱 상태를 점검
+
+<br>
+
+## (참고) AWS 퍼블릭 도메인과 IP의 차이
+
+- AWS 퍼블릭 도메인(예: `ec2-3-38-150-41.ap-northeast-2.compute.amazonaws.com`)과 퍼블릭 IP(예: `3.38.150.41`)는 동일한 EC2 인스턴스를 가리킵니다.
+- 업스트림 구성에서는 **퍼블릭 IP 또는 프라이빗 IP**를 사용하는 것이 일반적입니다.
+
+### 왜 `upstream` 에서 `ec2-` 도메인을 사용하면 안될까?
+
+#### 1) 순환 참조 문제 발생 가능
+Nginx는 server_name에 설정된 도메인을 통해 로드 밸런서를 클라이언트와 연결합니다.
+업스트림에 ec2- 도메인을 넣으면, 로드 밸런서가 해당 도메인으로 요청을 보내면서 다시 자기 자신으로 요청을 돌리는 순환 참조(Loopback) 문제가 발생할 수 있습니다.
+
+#### 2) 업스트림은 실제 백엔드 서버의 위치를 정의해야 함
+로드 밸런서의 역할은 클라이언트 요청을 백엔드 서버로 전달하는 것입니다.
+따라서 업스트림은 백엔드 서버의 **실제 주소(퍼블릭 IP 또는 프라이빗 IP)**로 설정해야 합니다.
+
+```nginx
+upstream backend_servers {
+    server 3.38.150.101:8080;
+    server 3.38.150.102:8080;
+}
+```
+
+<br>
+
+## (추가) Nginx Plus
+
+### 1) 헬스 체크
+- 각 서버의 상태를 주기적으로 확인하여 비정상 서버로 요청이 전달되지 않도록 설정합니다.
+   ```nginx
+   upstream backend_servers {
+       server 192.168.1.101:8080;
+       server 192.168.1.102:8080;
+       health_check interval=5s fails=3 passes=2;
+   }
+   ```
+### 2) 동적 서버 추가/제거
+- 애플리케이션 스케일링 시 실시간으로 서버를 추가하거나 제거할 수 있습니다.
+
+### 3) 로드 밸런싱 모니터링
+- 각 서버의 요청 처리량, 상태 등을 실시간으로 확인할 수 있습니다.
+
+### 4) Session Persistence
+- 사용자가 동일한 서버에 연결되도록 유지합니다.
+
+### 5) 최소 응답 시간 로드 밸런싱 (Least Time)
+- 응답 시간이 가장 짧은 서버로 요청을 분배합니다.
+   ```nginx
+   upstream backend_servers {
+       least_time header;  # 헤더 응답 시간이 가장 짧은 서버로 요청 분배
+       server 192.168.1.101:8080;
+       server 192.168.1.102:8080;
+   }
+   ```
+#### 옵션 설명
+- `least_time header`
+   - 서버의 헤더 응답 시간이 가장 짧은 서버로 요청을 보냄
+- `least_time last_byte`
+   - 최종 바이트가 전달되는 데 걸리는 시간이 가장 짧은 서버로 요청을 보냄
+
+<br>
+
+
+
+### Reference
+- [https://velog.io/@cks8483/2-be-week-Load-Balancing](https://velog.io/@cks8483/2-be-week-Load-Balancing)
+- [https://habitus92.tistory.com/22](https://habitus92.tistory.com/22)
+- [https://www.smileshark.kr/post/what-is-a-load-balancer-a-comprehensive-guide-to-aws-load-balancer](https://www.smileshark.kr/post/what-is-a-load-balancer-a-comprehensive-guide-to-aws-load-balancer)
