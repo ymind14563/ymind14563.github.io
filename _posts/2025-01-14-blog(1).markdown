@@ -8,7 +8,7 @@ categories:
 ---
 
 ## 1. 문제 상황
-- 처음 `ipynb` 에서 직접 작성하였습니다.
+- 처음 `ipynb` 에서 작성하였습니다.
 
 ![ipynb 에서 정상작동](https://github.com/user-attachments/assets/b5645efb-e343-40b2-bac3-e85bf49af31f)
 
