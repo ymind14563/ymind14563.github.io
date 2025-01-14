@@ -1,0 +1,53 @@
+---
+layout: post
+title: "ipynb에서 디렉토리화에서 발생한 스케일 문제 (plot)"
+date: 2025-01-14
+categories:
+    - "plot"
+    - "Python"
+---
+
+## 1. 문제 상황
+- 처음 `ipynb` 에서 직접 작성하였습니다.
+
+![ipynb 에서 정상작동](https://github.com/user-attachments/assets/b5645efb-e343-40b2-bac3-e85bf49af31f)
+
+![ipynb 에서 정상작동(2)](https://github.com/user-attachments/assets/9fb62d28-4839-4ed6-90f3-883e77b96335)
+
+
+
+
+- 문제) 정상 작동을 확인 후에 디렉토리화하는 과정에서 `스케일이 꼬이거나 빈 이미지를 저장`하는 문제가 발생했습니다.
+
+![문제 상황](https://github.com/user-attachments/assets/a6739be3-2080-42c1-b17f-29079c87955b)
+
+
+<br>
+
+## 2. 수정 사항
+
+### 1) **`visualizations.py`**에서 열고, 그리고, 저장, 닫기까지 처리
+
+- 각 시각화 함수 내부에서 `plt.show()`를 제거하고
+- `plt.figure()` → 그래프 그리기 → `plt.savefig(save_path)` → `plt.close()` 순으로 수정
+
+![변경코드(visual)](https://github.com/user-attachments/assets/4abe4723-cdb8-497c-95d0-c920e96d4c34)
+
+- 이처럼 각 함수가 직접 Figure 생성부터 저장 후 닫기까지 한 번에 처리하도록 합니다.
+
+### 2) **`main.py`**에서는 경로 전달 후 호출만
+
+- `plot_event_distribution(df)`에 인자로 저장 경로(`save_path`)만 넘겨주도록 변경
+- 기존에 있던 `plt.savefig()` 호출은 제거
+
+![변경코드(mainl)](https://github.com/user-attachments/assets/0ce15394-7955-4f3c-b7d1-c0c820d8115c)
+
+<br>
+
+## 3. 결과
+
+- **headless 환경**에서도 GUI 창이 뜨지 않고, 이미지만 정상적으로 생성되었습니다.
+
+- Figure를 생성·종료 처리(`plt.figure()` / `plt.close()`)를 확실히 하여 **축 범위 겹침** 문제 해소하였습니다.
+
+- **중복된 저장 로직**을 `main.py`에서 제거하고, 시각화 함수마다 자체적으로 처리하여 코드 가독성도 개선되었습니다.
