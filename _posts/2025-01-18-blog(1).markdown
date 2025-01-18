@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "랜덤 추천 결과 분석 및 회귀 평가 계산"
-date: 2025-01-19
+title: "랜덤 추천 결과의 회귀 평가 계산"
+date: 2025-01-18
 categories:
     - "Machine Learning"
     - "Data Analysis"
@@ -77,9 +77,6 @@ mape = np.mean(np.abs((actual - predicted) / actual.replace(0, np.nan))) * 100
 
 
 ```plaintext
--------------------------
------결과 데이터 가공-----
--------------------------
    rate_random  movie  rate                 title  year
 0         8.93      1   9.2          The Shawshank  1994
 1         8.75      3   8.7              Godfather  1972
