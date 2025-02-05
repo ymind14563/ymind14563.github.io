@@ -1,0 +1,157 @@
+---
+layout: post
+title: "혼동 행렬과 정확도, 정밀도, 재현율, F1 점수 분석"
+date: 2025-02-05
+categories:
+    - "Recommendation"
+    - "Machine Learning"
+    - "Metrics"
+---
+
+## 1. 혼동 행렬
+
+- 혼동 행렬은 실제값과 예측값의 일치 여부를 시각적으로 표현한 행렬입니다.
+
+- 2x2 혼동 행렬의 구조는
+  - True Positive (TP): 실제 양성이고 예측도 양성인 경우
+  - False Positive (FP): 실제 음성이지만 예측은 양성인 경우
+  - True Negative (TN): 실제 음성이고 예측도 음성인 경우
+  - False Negative (FN): 실제 양성이지만 예측은 음성인 경우
+
+```plaintext
+Confusion Matrix
+[[TN FP]
+ [FN TP]]
+```
+
+- 다중 클래스 행렬(3x3 이상)은 클래스별로 확장되며, 각 셀은 특정 클래스 간의 관계를 나타냅니다. 예를 들어, 3개의 클래스(0, 1, 2)가 있다면 다음과 같은 형태가 될 수 있습니다.
+
+```plaintext
+Confusion Matrix
+[[5 2 1]
+ [0 7 3]
+ [2 1 6]]
+```
+
+- 각 숫자는 클래스 간의 예측 분포를 나타냅니다.
+  - 첫 번째 행: 실제 클래스가 0일 때 예측 결과 분포
+  - 두 번째 행: 실제 클래스가 1일 때 예측 결과 분포
+  - 세 번째 행: 실제 클래스가 2일 때 예측 결과 분포
+- 행은 실제 클래스, 열은 예측된 클래스를 나타냅니다. 데이터가 불균형한 경우 혼동 행렬은 모델의 성능을 시각적으로 분석하는 데 유용합니다.
+
+### 1) 정확도 (Accuracy)
+
+```plaintext
+Accuracy = (TP + TN) / (TP + TN + FP + FN)
+```
+
+- 전체 데이터 중 올바르게 예측된 비율을 나타냅니다.
+- 모든 클래스에 대해 고르게 잘 예측했는지를 확인할 때 유용합니다.
+
+
+- 데이터가 불균형할 경우, 높은 정확도 값이 모델 성능을 정확히 반영하지 못할 수 있습니다.
+
+```python
+accuracy = accuracy_score(y_true, y_pred)
+```
+
+### 2) 정밀도 (Precision)
+
+```plaintext
+Precision = TP / (TP + FP)
+```
+
+- 양성으로 예측한 데이터 중 실제로 양성인 비율을 나타냅니다.
+- 잘못된 양성 예측을 줄이는 데 중점을 둡니다.
+
+
+- 높은 정밀도는 양성으로 예측된 값 중 참인 비율이 높다는 것을 의미하며, 잘못된 긍정 결과(False Positives)를 최소화합니다. 예를 들어, 스팸 필터에서 정밀도가 높으면 실제로 스팸이 아닌 이메일을 스팸으로 잘못 분류하는 일이 적습니다.
+
+```python
+precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
+```
+
+### 3) 재현율 (Recall)
+
+```plaintext
+Recall = TP / (TP + FN)
+```
+
+- 실제 양성 데이터 중 모델이 올바르게 예측한 비율을 나타냅니다.
+- 잘못된 음성 예측을 줄이는 데 중점을 둡니다.
+
+
+- 높은 재현율은 양성 데이터를 놓치지 않고 잘 찾아내는 것을 의미합니다. 예를 들어, 질병 진단 시스템에서 재현율이 높으면 실제 환자를 놓칠 가능성이 적어집니다.
+
+```python
+recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
+```
+
+### 4) F1 점수 (F1 Score)
+
+```plaintext
+F1 Score = 2 × (Precision × Recall) / (Precision + Recall)
+```
+
+- 정밀도와 재현율의 조화 평균을 계산합니다.
+- 두 지표의 균형을 평가할 때 유용합니다.
+
+- 정밀도와 재현율이 극단적으로 불균형한 경우, F1 점수는 이들의 균형을 반영하여 모델 성능을 더 정확히 평가합니다.
+- 예를 들어, F1 점수는 불균형한 데이터에서 정밀도와 재현율 중 하나에만 치우치지 않도록 보완해줍니다.
+
+```python
+f1 = f1_score(y_true, y_pred, average='weighted', zero_division=0)
+```
+
+<br>
+
+## 2. 데이터 준비 및 분석 코드
+
+- Scikit-learn은 Python에서 머신러닝과 데이터 분석을 위한 라이브러리로, 혼동 행렬과 평가 지표 계산에 사용됩니다.
+
+```python
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+
+# 데이터 준비
+loader = MovieDataLoader("kmrd-small/movies.txt", "kmrd-small/rates.csv")
+movies, rates = loader.load()
+
+# 랜덤 추천 실행
+recommender = RandomRecommender(movies, rates)
+result = recommender.run(n=3)
+
+# 평가 지표 계산
+y_true = result['rate']
+y_pred = result['rate_random_class']
+conf_matrix = confusion_matrix(y_true, y_pred)
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
+recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
+f1 = f1_score(y_true, y_pred, average='weighted', zero_division=0)
+```
+
+## 3. 결과
+
+### 혼동 행렬 출력
+
+```plaintext
+Confusion Matrix (혼동 행렬):
+[[0 1]
+ [0 2]]
+```
+
+- 행은 실제 클래스, 열은 예측된 클래스를 나타냅니다.
+- 각 셀의 값은 해당 클래스 간의 예측 결과를 나타냅니다.
+
+### 평가 지표 결과
+```plaintext
+Accuracy (정확도): 0.67
+Precision (정밀도): 0.44
+Recall (재현율): 0.67
+F1 Score (F1 점수): 0.53
+```
+- 정확도는 전체 데이터 중 올바르게 예측된 비율.
+- 정밀도는 양성으로 예측된 것 중 실제 양성의 비율.
+- 재현율은 실제 양성 중에서 모델이 올바르게 예측한 비율.
+- F1 점수는 정밀도와 재현율의 균형.
+
